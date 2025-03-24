@@ -3,6 +3,8 @@ import { Header } from './components/Header';
 import { CompanyCard } from './components/CompanyCard';
 import { Charts } from './components/Charts';
 import { CompanyPage } from './components/CompanyPage';
+import { MarketShareTreemap } from './components/MarketShareTreemap';
+import { TrendLineChart } from './components/TrendLineChart';
 import { data, calculateGrowth, calculateEfficiency } from './data';
 import { Moon, Sun, TrendingUp, Users, Building2, Briefcase } from 'lucide-react';
 import numeral from 'numeral';
@@ -157,11 +159,11 @@ function App() {
 
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               <div className="flex items-center space-x-3">
-                <Briefcase className="text-green-500" size={24} />
+                <Briefcase className="text-emerald-500" size={24} />
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Companies</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Average Company Revenue</p>
                   <p className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {selectedYearData!.companyList.length}
+                    {numeral(marketStats.totalRevenue / selectedYearData!.companyList.length).format('0,0')}€
                   </p>
                 </div>
               </div>
@@ -169,23 +171,46 @@ function App() {
 
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               <div className="flex items-center space-x-3">
-                <Building2 className="text-orange-500" size={24} />
+                <Users className="text-amber-500" size={24} />
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Average Revenue per Company</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Average Team Size</p>
                   <p className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {numeral(marketStats.totalRevenue / selectedYearData!.companyList.length).format('0,0')}€
+                    {Math.round(marketStats.totalEmployees / selectedYearData!.companyList.length)}
                   </p>
                 </div>
               </div>
             </div>
           </div>
         </section>
-
+        
+        {/* New Market Share Treemap */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
-            Top Performing Companies ({selectedYear})
+            Market Share by Company
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <MarketShareTreemap 
+              companies={selectedYearData!.companyList} 
+              width={1000}
+              height={500}
+            />
+          </div>
+        </section>
+        
+        {/* Historical Trend Line Charts */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+            Historical Trends
+          </h2>
+          <TrendLineChart data={data} />
+        </section>
+
+        {/* Top Companies */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+            Top Companies
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {topCompanies.map(company => (
               <CompanyCard
                 key={company.name}
@@ -200,71 +225,12 @@ function App() {
           </div>
         </section>
 
+        {/* Growth and Efficiency Charts */}
         <section className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+            Growth & Efficiency
+          </h2>
           <Charts growthData={growthData} efficiencyData={efficiencyData} />
-        </section>
-
-        {/* Companies Table */}
-        <section className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">All Companies ({selectedYear})</h2>
-          </div>
-          <div className="overflow-x-auto relative">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-900 sticky top-0 z-10">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-900">
-                    Company Name
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-900">
-                    Total Income
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-900">
-                    Profit
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-900">
-                    Employees
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-900">
-                    Avg Monthly Pay
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-900">
-                    Income/Employee
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {selectedYearData!.companyList
-                  .sort((a, b) => b.totalIncome - a.totalIncome)
-                  .map((company) => (
-                    <tr 
-                      key={company.name}
-                      onClick={() => setSelectedCompany(company.name)}
-                      className="hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                        {company.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500 dark:text-gray-400">
-                        {numeral(company.totalIncome).format('0,0')}€
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500 dark:text-gray-400">
-                        {numeral(company.profit).format('0,0')}€
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500 dark:text-gray-400">
-                        {company.employeeCount}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500 dark:text-gray-400">
-                        {numeral(company.averagePay).format('0,0')}€
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500 dark:text-gray-400">
-                        {numeral(company.incomePerEmployee).format('0,0')}€
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
         </section>
       </main>
     </div>
