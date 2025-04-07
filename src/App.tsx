@@ -265,9 +265,9 @@ function Dashboard({
          {/* Revenue Trend Line Chart */}
          <section className="mb-12">
            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
-             Revenue Trends Over Years
+             Trends Over Years
            </h2>
-           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md" style={{ height: '400px' }}>
+           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md" style={{  }}>
               <TrendLineChart data={data} selectedYear={selectedYear} />
            </div>
          </section>
