@@ -1,27 +1,51 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom'; // Import hooks
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Building2, TrendingUp, Users, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Building2, TrendingUp, Users, Wallet, ArrowUpRight, ArrowDownRight, ChevronUp, ChevronDown } from 'lucide-react';
 import numeral from 'numeral';
 import { data } from '../data';
 
-interface CompanyPageProps {
-  companyName: string;
-  onClose: () => void;
+interface CompanyYearData {
+  year: string;
+  name?: string;
+  totalIncome?: number;
+  profit?: number;
+  employeeCount?: number;
+  averagePay?: number;
+  incomePerEmployee?: number;
 }
 
-export const CompanyPage = ({ companyName, onClose }: CompanyPageProps) => {
-  const companyData = data
+interface SortConfig {
+  key: keyof CompanyYearData | null;
+  direction: 'ascending' | 'descending';
+}
+
+export const CompanyPage = () => {
+  const { companyName } = useParams<{ companyName: string }>(); // Get company name from URL
+  const navigate = useNavigate(); // Hook for navigation
+
+  const companyData: CompanyYearData[] = useMemo(() => data
     .map(yearData => ({
       year: yearData.year,
       ...yearData.companyList.find(company => company.name === companyName)
     }))
     .filter(d => d.totalIncome !== undefined)
-    .sort((a, b) => Number(a.year) - Number(b.year));
+    // Calculate incomePerEmployee here if not already present
+    .map(d => ({ ...d, incomePerEmployee: d.totalIncome && d.employeeCount ? d.totalIncome / d.employeeCount : 0 }))
+    .sort((a, b) => Number(a.year) - Number(b.year)), [companyName]);
 
-  const latestData = companyData[companyData.length - 1];
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'year', direction: 'descending' });
+
+  // Function to handle navigating back
+  const handleClose = () => {
+    navigate(-1); // Go back one step in history
+  };
+
+  const latestData = companyData[companyData.length - 1] || {};
   const previousYearData = companyData[companyData.length - 2];
 
-  const calculateGrowth = (current: number, previous: number) => {
+  const calculateGrowth = (current?: number, previous?: number) => {
+    if (current === undefined || previous === undefined || previous === 0) return 0;
     return ((current - previous) / previous) * 100;
   };
 
@@ -30,6 +54,54 @@ export const CompanyPage = ({ companyName, onClose }: CompanyPageProps) => {
     profitGrowth: calculateGrowth(latestData.profit, previousYearData.profit),
     employeeGrowth: calculateGrowth(latestData.employeeCount, previousYearData.employeeCount)
   } : null;
+
+  const sortedData = useMemo(() => {
+    let sortableItems = [...companyData];
+    if (sortConfig.key !== null) {
+      sortableItems.sort((a, b) => {
+        const aValue = a[sortConfig.key!];
+        const bValue = b[sortConfig.key!];
+
+        if (aValue === undefined || bValue === undefined) return 0; // Handle potential undefined values
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [companyData, sortConfig]);
+
+  const requestSort = (key: keyof CompanyYearData) => {
+    let direction: 'ascending' | 'descending' = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (key: keyof CompanyYearData) => {
+    if (sortConfig.key !== key) {
+      return null;
+    }
+    return sortConfig.direction === 'ascending' ? 
+      <ChevronUp size={16} className="ml-1 inline-block" /> : 
+      <ChevronDown size={16} className="ml-1 inline-block" />;
+  };
+
+  // Define columns for the table
+  const columns: { key: keyof CompanyYearData; label: string }[] = [
+    { key: 'year', label: 'Year' },
+    { key: 'totalIncome', label: 'Total Income' },
+    { key: 'profit', label: 'Profit' },
+    { key: 'employeeCount', label: 'Employees' },
+    { key: 'averagePay', label: 'Avg Pay' }, // Key updated
+    { key: 'incomePerEmployee', label: 'Income/Employee' }, // Key updated
+  ];
 
   return (
     <div className="fixed inset-0 bg-gray-100 dark:bg-gray-900 overflow-y-auto transition-colors duration-200">
@@ -40,7 +112,7 @@ export const CompanyPage = ({ companyName, onClose }: CompanyPageProps) => {
             <p className="text-gray-500 dark:text-gray-400">Historical Performance Analysis</p>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose} // Use handleClose for navigation
             className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             ← Back to Overview
@@ -172,16 +244,20 @@ export const CompanyPage = ({ companyName, onClose }: CompanyPageProps) => {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Year</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Income</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Profit</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Employees</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Pay</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Income/Employee</th>
+                  {columns.map((column) => (
+                    <th 
+                      key={column.key}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => requestSort(column.key)}
+                    >
+                      {column.label}
+                      {getSortIcon(column.key)}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {companyData.reverse().map((yearData) => (
+                {sortedData.map((yearData) => (
                   <tr key={yearData.year}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{yearData.year}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{numeral(yearData.totalIncome).format('0,0')}€</td>

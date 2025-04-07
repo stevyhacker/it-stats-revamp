@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   LineChart, 
   Line, 
@@ -15,56 +15,82 @@ import numeral from 'numeral';
 interface TrendLineChartProps {
   data: YearData[];
   selectedCompanies?: string[];
+  selectedYear: string;
 }
 
-export const TrendLineChart = ({ data, selectedCompanies = [] }: TrendLineChartProps) => {
+export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: TrendLineChartProps) => {
   const [metricType, setMetricType] = useState<'revenue' | 'employees' | 'profit'>('revenue');
-  const years = data.map(d => d.year).sort();
   
-  // Get a list of all companies that appear in any year
-  const allCompanies = new Set<string>();
-  data.forEach(yearData => {
-    yearData.companyList.forEach(company => {
-      allCompanies.add(company.name);
-    });
-  });
-  
-  // If no companies are selected, use the top 5 by latest year revenue
-  const companiesForChart = selectedCompanies.length > 0 
-    ? selectedCompanies 
-    : [...allCompanies]
-        .filter(name => data[0].companyList.some(c => c.name === name))
-        .sort((a, b) => {
-          const companyA = data[0].companyList.find(c => c.name === a);
-          const companyB = data[0].companyList.find(c => c.name === b);
-          return (companyB?.totalIncome || 0) - (companyA?.totalIncome || 0);
-        })
-        .slice(0, 5);
-  
-  // Prepare data for the chart
-  const chartData = years.map(year => {
-    const yearData = data.find(d => d.year === year);
-    if (!yearData) return { year };
-    
-    const result: any = { year };
-    
-    companiesForChart.forEach(companyName => {
-      const company = yearData.companyList.find(c => c.name === companyName);
-      if (company) {
-        if (metricType === 'revenue') {
-          result[companyName] = company.totalIncome;
-        } else if (metricType === 'employees') {
-          result[companyName] = company.employeeCount;
-        } else {
-          result[companyName] = company.profit;
-        }
-      } else {
-        result[companyName] = 0;
+  // Filter data up to the selected year
+  const filteredData = useMemo(() => {
+    const numericSelectedYear = parseInt(selectedYear, 10); // Parse selectedYear to number
+    return data.filter(yearData => parseInt(yearData.year, 10) <= numericSelectedYear); // Parse yearData.year
+  }, [data, selectedYear]);
+
+  // Determine the companies to display on the chart
+  const companiesForChart = useMemo(() => {
+    if (selectedCompanies.length > 0) {
+      return selectedCompanies;
+    }
+
+    if (filteredData.length === 0) {
+      return [];
+    }
+
+    // Find the latest year's data in the filtered set
+    const latestYearData = filteredData.reduce((latest, current) => 
+      parseInt(current.year, 10) > parseInt(latest.year, 10) ? current : latest
+    );
+
+    // Sort companies from the latest year based on the selected metric
+    const sortedCompanies = [...latestYearData.companyList].sort((a, b) => {
+      let valueA = 0;
+      let valueB = 0;
+
+      if (metricType === 'revenue') {
+        valueA = a.totalIncome;
+        valueB = b.totalIncome;
+      } else if (metricType === 'employees') {
+        valueA = a.employeeCount;
+        valueB = b.employeeCount;
+      } else { // profit
+        valueA = a.profit;
+        valueB = b.profit;
       }
+      return valueB - valueA; // Descending order
     });
-    
-    return result;
-  });
+
+    // Return the names of the top 5 companies
+    return sortedCompanies.slice(0, 5).map(company => company.name);
+
+  }, [selectedCompanies, filteredData, metricType]);
+
+  // Prepare data for the chart
+  const chartData = useMemo(() => {
+    return filteredData
+      .map(yearData => { // Use filteredData here
+        const result: { year: number; [key: string]: number } = { year: parseInt(yearData.year, 10) }; // Parse yearData.year
+        
+        companiesForChart.forEach(companyName => {
+          const company = yearData.companyList.find(c => c.name === companyName);
+          if (company) {
+            if (metricType === 'revenue') {
+              result[companyName] = company.totalIncome;
+            } else if (metricType === 'employees') {
+              result[companyName] = company.employeeCount;
+            } else {
+              result[companyName] = company.profit;
+            }
+          } else {
+            result[companyName] = 0;
+          }
+        });
+        
+        return result;
+      })
+      .sort((a, b) => a.year - b.year); // Sort by year ascending
+
+  }, [filteredData, companiesForChart, metricType]);
 
   // Random color generator for lines
   const getLineColor = (index: number) => {

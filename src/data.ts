@@ -2,6 +2,263 @@ import { YearData } from './types';
 
 export const data: YearData[] = [
   {
+    "year": "2024",
+    "companyList": [
+      {
+        "name": "Domen",
+        "totalIncome": 0,
+        "profit": 3381824,
+        "employeeCount": 7,
+        "netPayCosts": 308830,
+        "averagePay": "3677",
+        "incomePerEmployee": 0
+      },
+      {
+        "name": "CoreIT",
+        "totalIncome": 7097933,
+        "profit": 1030756,
+        "employeeCount": 34,
+        "netPayCosts": 430245,
+        "averagePay": "1055",
+        "incomePerEmployee": 208763
+      },
+      {
+        "name": "Logate",
+        "totalIncome": 0,
+        "profit": 557751,
+        "employeeCount": 65,
+        "netPayCosts": 1081580,
+        "averagePay": "1387",
+        "incomePerEmployee": 0
+      },
+      {
+        "name": "Bild Studio",
+        "totalIncome": 922888,
+        "profit": 9553,
+        "employeeCount": 32,
+        "netPayCosts": 578782,
+        "averagePay": "1507",
+        "incomePerEmployee": 28840
+      },
+      {
+        "name": "Amplitudo",
+        "totalIncome": 2046747,
+        "profit": 106577,
+        "employeeCount": 71,
+        "netPayCosts": 1253206,
+        "averagePay": "1471",
+        "incomePerEmployee": 28827
+      },
+      {
+        "name": "Datum Solutions",
+        "totalIncome": 1346832,
+        "profit": 0,
+        "employeeCount": 26,
+        "netPayCosts": 776503,
+        "averagePay": "2489",
+        "incomePerEmployee": 51801
+      },
+      {
+        "name": "Poslovna Inteligencija",
+        "totalIncome": 0,
+        "profit": 469162,
+        "employeeCount": 32,
+        "netPayCosts": 788561,
+        "averagePay": "2054",
+        "incomePerEmployee": 0
+      },
+      {
+        "name": "International Bridge",
+        "totalIncome": 1622090,
+        "profit": 30328,
+        "employeeCount": 60,
+        "netPayCosts": 1039837,
+        "averagePay": "1444",
+        "incomePerEmployee": 27035
+      },
+      {
+        "name": "Fleka",
+        "totalIncome": 515444,
+        "profit": 112082,
+        "employeeCount": 16,
+        "netPayCosts": 184588,
+        "averagePay": "961",
+        "incomePerEmployee": 32215
+      },
+      {
+        "name": "Datalab",
+        "totalIncome": 1742314,
+        "profit": 441982,
+        "employeeCount": 21,
+        "netPayCosts": 300686,
+        "averagePay": "1193",
+        "incomePerEmployee": 82967
+      },
+      {
+        "name": "SynergySuite",
+        "totalIncome": 1720000,
+        "profit": 0,
+        "employeeCount": 48,
+        "netPayCosts": 1132016,
+        "averagePay": "1965",
+        "incomePerEmployee": 35833
+      },
+      {
+        "name": "Alicorn",
+        "totalIncome": 0,
+        "profit": 114360,
+        "employeeCount": 16,
+        "netPayCosts": 245176,
+        "averagePay": "1277",
+        "incomePerEmployee": 0
+      },
+      {
+        "name": "Uhura Solutions",
+        "totalIncome": 354976,
+        "profit": 19005,
+        "employeeCount": 10,
+        "netPayCosts": 252237,
+        "averagePay": "2102",
+        "incomePerEmployee": 35498
+      },
+      {
+        "name": "Winsoft",
+        "totalIncome": 266751,
+        "profit": 20726,
+        "employeeCount": 7,
+        "netPayCosts": 123758,
+        "averagePay": "1473",
+        "incomePerEmployee": 38107
+      },
+      {
+        "name": "Media Monkeys",
+        "totalIncome": 0,
+        "profit": 0,
+        "employeeCount": 1,
+        "netPayCosts": 1462,
+        "averagePay": "122",
+        "incomePerEmployee": 0
+      },
+      {
+        "name": "Codeus",
+        "totalIncome": 754635,
+        "profit": 160903,
+        "employeeCount": 23,
+        "netPayCosts": 341742,
+        "averagePay": "1238",
+        "incomePerEmployee": 32810
+      },
+      {
+        "name": "Digital Control",
+        "totalIncome": 285782,
+        "profit": 6860,
+        "employeeCount": 14,
+        "netPayCosts": 243146,
+        "averagePay": "1447",
+        "incomePerEmployee": 20413
+      },
+      {
+        "name": "Infinum",
+        "totalIncome": 0,
+        "profit": 165753,
+        "employeeCount": 19,
+        "netPayCosts": 476790,
+        "averagePay": "2091",
+        "incomePerEmployee": 0
+      },
+      {
+        "name": "First Line Software",
+        "totalIncome": 2945229,
+        "profit": 73225,
+        "employeeCount": 162,
+        "netPayCosts": 1690322,
+        "averagePay": "870",
+        "incomePerEmployee": 18180
+      },
+      {
+        "name": "BIXBIT",
+        "totalIncome": 307868,
+        "profit": 28005,
+        "employeeCount": 11,
+        "netPayCosts": 179653,
+        "averagePay": "1361",
+        "incomePerEmployee": 27988
+      },
+      {
+        "name": "GoldBear Technologies",
+        "totalIncome": 119258,
+        "profit": 15485,
+        "employeeCount": 9,
+        "netPayCosts": 118197,
+        "averagePay": "1094",
+        "incomePerEmployee": 13251
+      },
+      {
+        "name": "G5 Entertainment",
+        "totalIncome": 3414205,
+        "profit": 108418,
+        "employeeCount": 69,
+        "netPayCosts": 2134027,
+        "averagePay": "2577",
+        "incomePerEmployee": 49481
+      },
+      {
+        "name": "Tungsten Montenegro",
+        "totalIncome": 6470277,
+        "profit": 421230,
+        "employeeCount": 120,
+        "netPayCosts": 3674959,
+        "averagePay": "2552",
+        "incomePerEmployee": 53919
+      },
+      {
+        "name": "BGS Consulting",
+        "totalIncome": 2722420,
+        "profit": 804178,
+        "employeeCount": 45,
+        "netPayCosts": 1008331,
+        "averagePay": "1867",
+        "incomePerEmployee": 60498
+      },
+      {
+        "name": "Customertimes Montenegro",
+        "totalIncome": 2094540,
+        "profit": 42277,
+        "employeeCount": 96,
+        "netPayCosts": 1223926,
+        "averagePay": "1062",
+        "incomePerEmployee": 21818
+      },
+      {
+        "name": "Codepixel",
+        "totalIncome": 424310,
+        "profit": 75767,
+        "employeeCount": 15,
+        "netPayCosts": 216357,
+        "averagePay": "1202",
+        "incomePerEmployee": 28287
+      },
+      {
+        "name": "Codemine",
+        "totalIncome": 293611,
+        "profit": 199680,
+        "employeeCount": 5,
+        "netPayCosts": 61776,
+        "averagePay": "1030",
+        "incomePerEmployee": 58722
+      },
+      {
+        "name": "Belka",
+        "totalIncome": 0,
+        "profit": 19669,
+        "employeeCount": 46,
+        "netPayCosts": 1982380,
+        "averagePay": "3591",
+        "incomePerEmployee": 0
+      }
+    ]
+  },
+  {
     "year": "2023",
     "companyList": [
       {
@@ -280,7 +537,7 @@ export const data: YearData[] = [
         "profit": 129148,
         "employeeCount": 60,
         "netPayCosts": 2774544,
-        "averagePay": 3853,
+        "averagePay": "3853",
         "incomePerEmployee": 78987
       },
       {
@@ -289,7 +546,7 @@ export const data: YearData[] = [
         "profit": 320395,
         "employeeCount": 90,
         "netPayCosts": 3134025,
-        "averagePay": 2140,
+        "averagePay": "2140",
         "incomePerEmployee": 51460
       },
       {
@@ -298,7 +555,7 @@ export const data: YearData[] = [
         "profit": 29612,
         "employeeCount": 16,
         "netPayCosts": 1009139,
-        "averagePay": 3776,
+        "averagePay": "3776",
         "incomePerEmployee": 89959
       },
       {
@@ -307,7 +564,7 @@ export const data: YearData[] = [
         "profit": 29436,
         "employeeCount": 30,
         "netPayCosts": 2012842,
-        "averagePay": 4009,
+        "averagePay": "4009",
         "incomePerEmployee": 82742
       }
     ]
