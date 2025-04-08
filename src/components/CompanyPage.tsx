@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'; // Import hooks
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Building2, TrendingUp, Users, Wallet, ArrowUpRight, ArrowDownRight, ChevronUp, ChevronDown } from 'lucide-react';
@@ -25,11 +25,16 @@ export const CompanyPage = () => {
   const navigate = useNavigate(); // Hook for navigation
 
   const companyData: CompanyYearData[] = useMemo(() => data
-    .map(yearData => ({
-      year: yearData.year,
-      ...yearData.companyList.find(company => company.name === companyName)
-    }))
-    .filter(d => d.totalIncome !== undefined)
+    .map(yearData => {
+      const company = yearData.companyList.find(c => c.name === companyName);
+      return {
+        year: yearData.year,
+        ...company,
+        // Ensure averagePay is a number or undefined
+        averagePay: company?.averagePay !== undefined ? parseFloat(String(company.averagePay)) || undefined : undefined,
+      };
+    })
+    .filter(d => d.name !== undefined) // Filter out years where the company didn't exist
     // Calculate incomePerEmployee here if not already present
     .map(d => ({ ...d, incomePerEmployee: d.totalIncome && d.employeeCount ? d.totalIncome / d.employeeCount : 0 }))
     .sort((a, b) => Number(a.year) - Number(b.year)), [companyName]);
@@ -56,7 +61,7 @@ export const CompanyPage = () => {
   } : null;
 
   const sortedData = useMemo(() => {
-    let sortableItems = [...companyData];
+    const sortableItems = [...companyData];
     if (sortConfig.key !== null) {
       sortableItems.sort((a, b) => {
         const aValue = a[sortConfig.key!];
@@ -64,6 +69,23 @@ export const CompanyPage = () => {
 
         if (aValue === undefined || bValue === undefined) return 0; // Handle potential undefined values
 
+        // Handle sorting for numeric columns explicitly
+        if (['totalIncome', 'profit', 'employeeCount', 'averagePay', 'incomePerEmployee'].includes(sortConfig.key!)) {
+          const numA = parseFloat(String(aValue)) || 0; // Convert to number, default to 0 if NaN
+          const numB = parseFloat(String(bValue)) || 0; // Convert to number, default to 0 if NaN
+          return sortConfig.direction === 'ascending' ? numA - numB : numB - numA;
+        }
+        
+        // Handle sorting for string columns (like 'name' or 'year')
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          // Special handling for 'year' to sort numerically
+          if (sortConfig.key === 'year') {
+            return sortConfig.direction === 'ascending' ? Number(aValue) - Number(bValue) : Number(bValue) - Number(aValue);
+          }
+          return sortConfig.direction === 'ascending' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+        }
+
+        // Fallback (should ideally not be reached)
         if (aValue < bValue) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
         }

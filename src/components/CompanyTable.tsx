@@ -22,19 +22,26 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
 
     const list = [...selectedYearData.companyList];
     list.sort((a, b) => {
-      const aValue = a[sortColumn] ?? (typeof a[sortColumn] === 'string' ? '' : 0);
-      const bValue = b[sortColumn] ?? (typeof b[sortColumn] === 'string' ? '' : 0);
+      const aValue = a[sortColumn];
+      const bValue = b[sortColumn];
 
+      // Handle sorting for numeric columns explicitly
+      if (['totalIncome', 'profit', 'employeeCount', 'averagePay', 'incomePerEmployee'].includes(sortColumn)) {
+        const numA = parseFloat(String(aValue)) || 0; // Convert to number, default to 0 if NaN
+        const numB = parseFloat(String(bValue)) || 0; // Convert to number, default to 0 if NaN
+        return sortDirection === 'asc' ? numA - numB : numB - numA;
+      }
+      
+      // Handle sorting for string columns (like 'name')
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
       }
 
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-      }
-
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      // Fallback for any other cases (should ideally not be reached with defined types)
+      const valA = aValue ?? 0;
+      const valB = bValue ?? 0;
+      if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
     return list;
