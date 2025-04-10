@@ -6,12 +6,12 @@ export const data: YearData[] = [
     "companyList": [
       {
         "name": "Domen",
-        "totalIncome": 0,
+        "totalIncome": 9689103,
         "profit": 3381824,
         "employeeCount": 7,
         "netPayCosts": 308830,
         "averagePay": "3677",
-        "incomePerEmployee": 0
+        "incomePerEmployee": 1384158
       },
       {
         "name": "CoreIT",
@@ -24,12 +24,12 @@ export const data: YearData[] = [
       },
       {
         "name": "Logate",
-        "totalIncome": 0,
+        "totalIncome": 2874296,
         "profit": 557751,
         "employeeCount": 65,
         "netPayCosts": 1081580,
         "averagePay": "1387",
-        "incomePerEmployee": 0
+        "incomePerEmployee": 44220
       },
       {
         "name": "Bild Studio",
@@ -60,12 +60,12 @@ export const data: YearData[] = [
       },
       {
         "name": "Poslovna Inteligencija",
-        "totalIncome": 0,
+        "totalIncome": 1957923,
         "profit": 469162,
         "employeeCount": 32,
         "netPayCosts": 788561,
         "averagePay": "2054",
-        "incomePerEmployee": 0
+        "incomePerEmployee": 61185
       },
       {
         "name": "International Bridge",
@@ -105,12 +105,12 @@ export const data: YearData[] = [
       },
       {
         "name": "Alicorn",
-        "totalIncome": 0,
+        "totalIncome": 368784,
         "profit": 114360,
         "employeeCount": 16,
         "netPayCosts": 245176,
         "averagePay": "1277",
-        "incomePerEmployee": 0
+        "incomePerEmployee": 23049
       },
       {
         "name": "Uhura Solutions",
@@ -159,12 +159,12 @@ export const data: YearData[] = [
       },
       {
         "name": "Infinum",
-        "totalIncome": 0,
+        "totalIncome": 951831,
         "profit": 165753,
         "employeeCount": 19,
         "netPayCosts": 476790,
         "averagePay": "2091",
-        "incomePerEmployee": 0
+        "incomePerEmployee": 50096
       },
       {
         "name": "First Line Software",
@@ -174,6 +174,15 @@ export const data: YearData[] = [
         "netPayCosts": 1690322,
         "averagePay": "870",
         "incomePerEmployee": 18180
+      },
+      {
+        "name": "Vega IT Omega",
+        "totalIncome": 1927426,
+        "profit": 142325,
+        "employeeCount": 48,
+        "netPayCosts": 0,
+        "averagePay": "0",
+        "incomePerEmployee": 40155
       },
       {
         "name": "BIXBIT",
@@ -249,12 +258,12 @@ export const data: YearData[] = [
       },
       {
         "name": "Belka",
-        "totalIncome": 0,
+        "totalIncome": 3222442,
         "profit": 19669,
         "employeeCount": 46,
         "netPayCosts": 1982380,
         "averagePay": "3591",
-        "incomePerEmployee": 0
+        "incomePerEmployee": 70053
       }
     ]
   },
