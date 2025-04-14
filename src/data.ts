@@ -4,6 +4,7 @@ export const data: YearData[] = [
   {
     "year": "2024",
     "companyList": [
+      
       {
         "name": "Domen",
         "totalIncome": 9689103,
@@ -264,6 +265,15 @@ export const data: YearData[] = [
         "netPayCosts": 1982380,
         "averagePay": "3591",
         "incomePerEmployee": 70053
+      },
+      {
+        "name": "EPAM",
+        "totalIncome": 14786350,
+        "profit": 1449798,
+        "employeeCount": 268,
+        "netPayCosts": 8661790,
+        "averagePay": "2693",
+        "incomePerEmployee": 55151
       }
     ]
   },
