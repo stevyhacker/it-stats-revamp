@@ -274,6 +274,24 @@ export const data: YearData[] = [
         "netPayCosts": 8661790,
         "averagePay": "2693",
         "incomePerEmployee": 55151
+      },
+      {
+        "name": "Coinis",
+        "totalIncome": 10684696,
+        "profit": 3124571,
+        "employeeCount": 92,
+        "netPayCosts": 1732139,
+        "averagePay": "1569",
+        "incomePerEmployee": 116138
+      },
+      {
+        "name": "Quantox Technology",
+        "totalIncome": 293489,
+        "profit": 22018,
+        "employeeCount": 5,
+        "netPayCosts": 159178,
+        "averagePay": "2653",
+        "incomePerEmployee": 58698
       }
     ]
   },
@@ -1048,57 +1066,57 @@ export const data: YearData[] = [
       },
       {
         "name": "Media Monkeys",
-        "totalIncome": 71500,
+        "totalIncome": 238898,
         "profit": -159,
-        "employeeCount": 3,
+        "employeeCount": 5,
         "netPayCosts": 55863,
-        "averagePay": 726.97,
-        "incomePerEmployee": 23833
+        "averagePay": 931.05,
+        "incomePerEmployee": 47780
       },
       {
         "name": "Codeus",
-        "totalIncome": 380932,
-        "profit": 162891,
-        "employeeCount": 16,
-        "netPayCosts": 101944,
-        "averagePay": 530.95,
-        "incomePerEmployee": 23808
+        "totalIncome": 221152,
+        "profit": 91040,
+        "employeeCount": 13,
+        "netPayCosts": 64418,
+        "averagePay": 412.93,
+        "incomePerEmployee": 17012
       },
       {
         "name": "Digital Control",
-        "totalIncome": 66251,
-        "profit": 10076,
-        "employeeCount": 9,
-        "netPayCosts": 34906,
-        "averagePay": 323.2,
-        "incomePerEmployee": 7361
+        "totalIncome": 74101,
+        "profit": 14819,
+        "employeeCount": 6,
+        "netPayCosts": 17183,
+        "averagePay": 238.65,
+        "incomePerEmployee": 12350
       },
       {
         "name": "Ridgemax",
-        "totalIncome": 106949,
+        "totalIncome": 120105,
         "profit": 6670,
         "employeeCount": 10,
-        "netPayCosts": 64750,
-        "averagePay": 539.58,
-        "incomePerEmployee": 10695
+        "netPayCosts": 66368,
+        "averagePay": 553.06,
+        "incomePerEmployee": 12011
       },
       {
         "name": "Codepixel",
-        "totalIncome": 116695,
-        "profit": 18363,
-        "employeeCount": 8,
-        "netPayCosts": 41694,
-        "averagePay": 434.31,
-        "incomePerEmployee": 14587
+        "totalIncome": 69098,
+        "profit": 14748,
+        "employeeCount": 5,
+        "netPayCosts": 26856,
+        "averagePay": 447.6,
+        "incomePerEmployee": 13820
       },
       {
         "name": "Data Design",
-        "totalIncome": 399280,
-        "profit": 42952,
-        "employeeCount": 21,
-        "netPayCosts": 160969,
-        "averagePay": 638.76,
-        "incomePerEmployee": 19013
+        "totalIncome": 271489,
+        "profit": 20831,
+        "employeeCount": 18,
+        "netPayCosts": 86251,
+        "averagePay": 399.31,
+        "incomePerEmployee": 15083
       }
     ]
   },
