@@ -292,6 +292,42 @@ export const data: YearData[] = [
         "netPayCosts": 159178,
         "averagePay": "2653",
         "incomePerEmployee": 58698
+      },
+      {
+        "name": "Kodio",
+        "totalIncome": 2393903,
+        "profit": -3369697,
+        "employeeCount": 31,
+        "netPayCosts": 667134,
+        "averagePay": "1793",
+        "incomePerEmployee": 77223
+      },
+      {
+        "name": "Artec 3D Adriatica",
+        "totalIncome": 1548832,
+        "profit": 292945,
+        "employeeCount": 9,
+        "netPayCosts": 0,
+        "averagePay": "0",
+        "incomePerEmployee": 172092
+      },
+      {
+        "name": "Playrix",
+        "totalIncome": 4919811,
+        "profit": 341810,
+        "employeeCount": 83,
+        "netPayCosts": 2990360,
+        "averagePay": "3002",
+        "incomePerEmployee": 59275
+      },
+      {
+        "name": "Arctic 7",
+        "totalIncome": 428082,
+        "profit": 0,
+        "employeeCount": 15,
+        "netPayCosts": 270468,
+        "averagePay": "1503",
+        "incomePerEmployee": 28539
       }
     ]
   },
