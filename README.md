@@ -17,42 +17,78 @@ All data presented in this application is collected from a public source: [Tax A
 
 ## Technologies Used
 
-- React
-- TypeScript
-- Tailwind CSS
-- Recharts for data visualization
-- Lucide React for icons
+### Backend
+- [Bun](https://bun.sh/) - JavaScript Runtime & Toolkit
+- [Hono](https://hono.dev/) - Web Framework
+- [Drizzle ORM](https://orm.drizzle.team/) - TypeScript ORM
+- [Supabase](https://supabase.com/) - PostgreSQL Database Hosting
+
+### Frontend
+- [React](https://reactjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Recharts](https://recharts.org/) for data visualization
+- [Lucide React](https://lucide.dev/) for icons
+
+### Tooling
+- [pnpm](https://pnpm.io/) - Package Manager
+- [Turborepo](https://turbo.build/repo) - Monorepo Build System
 
 ## Local Development
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- npm (comes with Node.js)
+- [Bun](https://bun.sh/) (v1.0 or higher)
+- [pnpm](https://pnpm.io/) (v8 or higher recommended)
 
 ### Getting Started
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/itstats.me.git
-cd itstats.me
-```
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/stevyhacker/it-stats-revamp.git # Use your repo URL if different
+    cd it-stats-revamp
+    ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+2.  Install dependencies:
+    ```bash
+    pnpm install
+    ```
 
-3. Start the development server:
-```bash
-npm run dev
-```
+3.  Set up environment variables:
+    - Create a `.env` file in the `packages/db` directory.
+    - Add your Supabase database connection string (obtain from your Supabase project settings):
+      ```env
+      DATABASE_URL="postgresql://user:password@host:port/database"
+      ```
 
-4. Open your browser and visit `http://localhost:5173` (or the URL shown in your terminal)
+4.  Seed the database (run once):
+    ```bash
+    pnpm --filter db run seed
+    ```
 
-### Available Scripts
+5.  Start the development servers:
+    - This command starts both frontend and backend concurrently:
+      ```bash
+      pnpm dev
+      ```
+    - (Alternatively, run them separately in different terminals):
+      ```bash
+      # Backend API
+      pnpm --filter api run dev
+      # Frontend App
+      pnpm --filter web run dev
+      ```
 
-- `npm run dev` - Starts the development server
-- `npm run build` - Creates a production build
-- `npm run preview` - Previews the production build locally
-- `npm run lint` - Runs ESLint to check code quality
+6.  Open your browser and visit `http://localhost:5173` (or the port shown for the `web` app). The API server runs on `http://localhost:3000` by default.
+
+## Available Scripts
+
+Key scripts (run from the root directory):
+
+- `pnpm install`: Installs all dependencies for the monorepo.
+- `pnpm dev`: Starts development servers for both `api` and `web` apps concurrently.
+- `pnpm build`: Builds both `api` and `web` apps for production.
+- `pnpm lint`: Lints the codebase.
+- `pnpm --filter db run seed`: Seeds the database with initial data (requires `.env` setup in `packages/db`).
+- `pnpm --filter api run dev`: Starts only the backend API development server.
+- `pnpm --filter web run dev`: Starts only the frontend development server.

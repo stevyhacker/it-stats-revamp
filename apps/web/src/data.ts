@@ -1,4 +1,64 @@
-import { YearData } from './types';
+// Define interfaces if necessary (example structure)
+interface CompanyData {
+  name: string;
+  totalIncome?: number | string; // Allow string for parsing flexibility
+  profit?: number | string;
+  employeeCount?: number | string;
+  averagePay?: number | string; // Added this field
+  netPayCosts?: number | string; // Add netPayCosts
+  incomePerEmployee?: number | string; // Add missing property
+}
+
+interface YearData {
+  year: string; // Year is string in the data
+  companyList: CompanyData[]; // Match data structure
+}
+
+// PIB Mapping
+export const companyPibMap: { [key: string]: string } = {
+  "Coinis": "03014215",
+  "Domen": "02686473",
+  "CoreIT": "02775018",
+  "Logate": "02632284",
+  "Bild Studio": "02783061",
+  "Amplitudo": "02907259",
+  "Datum Solutions": "03073572",
+  "Poslovna Inteligencija": "02713098",
+  "International Bridge": "03037258",
+  "Fleka": "02731517",
+  "Datalab": "02679744",
+  "Omnitech": "03167453",
+  "SynergySuite": "03131343",
+  "Alicorn": "03122123",
+  "Codingo": "03066258",
+  "Uhura Solutions": "03274357",
+  "Winsoft": "02246244",
+  "Cikom": "02177579",
+  "Media Monkeys": "02961717",
+  "Codeus": "03091627",
+  "Digital Control": "03084434",
+  "Ridgemax": "03165663",
+  "Infinum": "03360962",
+  "Kodio": "03191451",
+  "EPAM": "03381447",
+  "First Line Software": "03413772",
+  "Vega IT Omega": "03374700",
+  "Quantox Technology": "03373398",
+  "Ooblee": "03216446",
+  "BIXBIT": "03209296",
+  "GoldBear Technologies": "03367053",
+  "G5 Entertainment": "03421198",
+  "Tungsten Montenegro": "03428184",
+  "BGS Consulting": "03110222",
+  "Artec 3D Adriatica": "03413381",
+  "Customertimes Montenegro": "03413616",
+  "Codepixel": "03200116",
+  "Codemine": "03403912",
+  "Belka": "03418545",
+  "Playrix": "03489159",
+  "FSTR": "03424804",
+  "Arctic 7": "03442586",
+};
 
 export const data: YearData[] = [
   {
@@ -728,7 +788,7 @@ export const data: YearData[] = [
       },
       {
         "name": "Fleka",
-        "totalIncome": 505678,
+        "totalIncome": 515444,
         "profit": 115370,
         "employeeCount": 16,
         "netPayCosts": 155354,
@@ -1922,29 +1982,29 @@ export const data: YearData[] = [
   }
 ];
 
-export const calculateGrowth = (data: YearData[]) => {
-  const sortedYears = [...data].sort((a, b) => parseInt(a.year) - parseInt(b.year));
-  const latestYear = sortedYears[sortedYears.length - 1];
-  const previousYear = sortedYears[sortedYears.length - 2];
+// export const calculateGrowth = (data: YearData[]) => {
+//   const sortedYears = [...data].sort((a, b) => parseInt(a.year) - parseInt(b.year));
+//   const latestYear = sortedYears[sortedYears.length - 1];
+//   const previousYear = sortedYears[sortedYears.length - 2];
 
-  return latestYear.companyList.map(company => {
-    const previousData = previousYear.companyList.find(c => c.name === company.name);
-    const growthRate = previousData 
-      ? ((company.totalIncome - previousData.totalIncome) / previousData.totalIncome) * 100
-      : 0;
+//   return latestYear.companyList.map(company => {
+//     const previousData = previousYear.companyList.find(c => c.name === company.name);
+//     const growthRate = previousData 
+//       ? ((company.totalIncome - previousData.totalIncome) / previousData.totalIncome) * 100
+//       : 0;
 
-    return {
-      name: company.name,
-      growthRate,
-      latestIncome: company.totalIncome
-    };
-  }).sort((a, b) => b.growthRate - a.growthRate);
-};
+//     return {
+//       name: company.name,
+//       growthRate,
+//       latestIncome: company.totalIncome
+//     };
+//   }).sort((a, b) => b.growthRate - a.growthRate);
+// };
 
-export const calculateEfficiency = (yearData: YearData) => {
-  return yearData.companyList.map(company => ({
-    name: company.name,
-    profitMargin: (company.profit / company.totalIncome) * 100,
-    revenuePerEmployee: company.totalIncome / company.employeeCount
-  })).sort((a, b) => b.profitMargin - a.profitMargin);
-};
+// export const calculateEfficiency = (yearData: YearData) => {
+//   return yearData.companyList.map(company => ({
+//     name: company.name,
+//     profitMargin: (company.profit / company.totalIncome) * 100,
+//     revenuePerEmployee: company.totalIncome / company.employeeCount
+//   })).sort((a, b) => b.profitMargin - a.profitMargin);
+// };

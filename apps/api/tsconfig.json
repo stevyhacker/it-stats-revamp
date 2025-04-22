@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfig.json", // Assuming a root tsconfig will be created later
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler", // Or NodeNext
+    "jsx": "react-jsx",          // Required for Hono JSX middleware
+    "jsxImportSource": "hono/jsx", // Required for Hono JSX middleware
+    "lib": ["ESNext"],
+    "types": ["bun"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "db": ["../../packages/db/src"],
+      "db/*": ["../../packages/db/src/*"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

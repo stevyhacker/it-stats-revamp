@@ -1,51 +1,21 @@
 {
-  "name": "it-stats-revamp",
+  "name": "it-stats-revamp-monorepo",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@heroicons/react": "^2.2.0",
-    "@radix-ui/react-slot": "^1.2.0",
-    "@radix-ui/react-tabs": "^1.1.8",
-    "@types/react-router-dom": "^5.3.3",
-    "caniuse-lite": "^1.0.30001713",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "d3-scale": "^4.0.2",
-    "lucide-react": "^0.503.0",
-    "numeral": "^2.0.6",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^7.5.0",
-    "react-simple-maps": "^3.0.0",
-    "recharts": "^2.15.2",
-    "tailwind-merge": "^3.2.0",
-    "tailwindcss-animate": "^1.0.7"
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "db:generate": "pnpm --filter db run generate",
+    "db:migrate": "pnpm --filter db run migrate",
+    "db:push": "pnpm --filter db run push",
+    "db:studio": "pnpm --filter db run studio"
   },
   "devDependencies": {
-    "@eslint/js": "^9.24.0",
-    "@types/d3-scale": "^4.0.9",
-    "@types/node": "^22.14.1",
-    "@types/numeral": "^2.0.5",
-    "@types/react": "^18.3.20",
-    "@types/react-dom": "^18.3.6",
-    "@types/react-simple-maps": "^3.0.6",
-    "@vitejs/plugin-react": "^4.3.4",
-    "autoprefixer": "^10.4.21",
-    "eslint": "^9.24.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^15.15.0",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.29.1",
-    "vite": "^6.2.6"
-  }
+    "@turbo/gen": "^1.13.3",
+    "eslint": "^9.25.1",
+    "prettier": "^3.2.5",
+    "turbo": "^1.13.3"
+  },
+  "packageManager": "pnpm@8.15.6"
 }

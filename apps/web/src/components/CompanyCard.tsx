@@ -1,7 +1,7 @@
-// import React from 'react'; // No longer needed with new JSX transform
 import { TrendingUp, Users, DollarSign } from 'lucide-react';
 import numeral from 'numeral';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'; // Import shadcn Card components
+import { cn } from "@/lib/utils"; // Correct import path for cn utility
 
 interface CompanyCardProps {
   name: string;
@@ -10,12 +10,13 @@ interface CompanyCardProps {
   employeeCount: number;
   averagePay?: number | string;
   onClick?: () => void;
+  className?: string;
 }
 
-export const CompanyCard = ({ name, totalIncome, profit, employeeCount, averagePay, onClick }: CompanyCardProps) => {
+export const CompanyCard = ({ name, totalIncome, profit, employeeCount, averagePay, onClick, className }: CompanyCardProps) => {
   return (
     <Card 
-      className="cursor-pointer hover:border-primary transition-colors" 
+      className={cn("cursor-pointer hover:border-primary transition-colors", className)} 
       onClick={onClick}
     >
       <CardHeader>

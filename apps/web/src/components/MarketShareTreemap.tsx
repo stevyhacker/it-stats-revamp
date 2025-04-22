@@ -161,7 +161,6 @@ export const MarketShareTreemap = ({ companies, height = 500, className = '' }: 
           dataKey="size"
           aspectRatio={4 / 3}
           stroke="#111827"
-          strokeWidth={0.5}
           fill="#3730a3"
           content={<CustomizedContent />}
         >

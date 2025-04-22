@@ -1,15 +1,9 @@
-import React, { useState, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useNavigate,
-} from "react-router-dom";
-// import { Header } from "./components/Header"; // Keep for now, might be replaced later
-import { CompanyCard } from "./components/CompanyCard";
-import { TrendLineChart } from "./components/TrendLineChart";
-import { data as rawData } from "./data";
-import { YearData, CompanyData } from "./types";
+"use client";
+
+import { useRouter } from 'next/navigation';
+import { CompanyCard } from "./CompanyCard";
+import { TrendLineChart } from "./TrendLineChart";
+import type { YearData } from "../types";
 import {
   Moon,
   Sun,
@@ -19,17 +13,13 @@ import {
   Briefcase,
 } from "lucide-react";
 import numeral from "numeral";
-import CompanyTable from "./components/CompanyTable";
-import { CompanyPage } from "./components/CompanyPage";
+import CompanyTable from "./CompanyTable";
 import { Button } from "@/components/ui/button"; 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"; 
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"; 
 
-// Cast rawData to the correct type
-const data: YearData[] = rawData as YearData[];
-
 // Main Dashboard Component
-function Dashboard({
+export function Dashboard({
   years,
   selectedYear,
   setSelectedYear,
@@ -44,7 +34,7 @@ function Dashboard({
   toggleDarkMode: () => void;
   data: YearData[];
 }) {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const selectedYearData = data.find((d) => d.year === selectedYear);
   const previousYearData = data.find(
@@ -96,11 +86,6 @@ function Dashboard({
 
   const marketStats = calculateMarketStats();
 
-  // Handle company selection for navigation
-  const handleCompanySelect = (companyName: string) => {
-    navigate(`/company/${encodeURIComponent(companyName)}`);
-  };
-
   // Sort companies by total income
   const topCompanies = selectedYearData
     ? [...selectedYearData.companyList]
@@ -108,17 +93,22 @@ function Dashboard({
         .slice(0, 6)
     : [];
 
+  const handleCompanySelect = (companyName: string) => {
+    // Navigate to the company's detail page using the simplified route
+    router.push(`/company/${encodeURIComponent(companyName)}`);
+  };
+
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-200">
+    <div className={`min-h-screen text-foreground transition-colors duration-200 ${isDark ? 'bg-neu-dark-base' : 'bg-neu-light-base'}`}>
       {/* <Header /> Maybe replace later */} 
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="relative max-w-7xl mx-auto px-4 py-8">
         {/* Dark Mode Toggle using shadcn Button */}
         <Button
           variant="outline"
           size="icon"
           onClick={toggleDarkMode}
-          className="fixed bottom-4 right-4 z-50"
+          className={`fixed bottom-8 right-8 z-50 rounded-full shadow-neu-light-convex dark:shadow-neu-dark-convex ${isDark ? 'bg-neu-dark-base' : 'bg-neu-light-base'} border-none hover:bg-opacity-80`}
           aria-label="Toggle dark mode"
         >
           {isDark ? (
@@ -128,11 +118,20 @@ function Dashboard({
           )}
         </Button>
 
-        {/* Year Tabs using shadcn Tabs */}
+        {/* Year Tabs using shadcn Tabs - Neumorphic Style */}
         <Tabs value={selectedYear} onValueChange={setSelectedYear} className="mb-8">
-          <TabsList className="overflow-x-auto h-auto p-1 md:overflow-x-visible justify-start">
+          <TabsList className={`overflow-x-auto h-auto p-1 md:overflow-x-visible justify-start rounded-lg shadow-neu-light-inset dark:shadow-neu-dark-inset ${isDark ? 'bg-neu-dark-base' : 'bg-neu-light-base'}`}>
             {years.map((year) => (
-              <TabsTrigger key={year} value={year} className="whitespace-nowrap">
+              <TabsTrigger
+                key={year}
+                value={year}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ease-in-out relative 
+                          ${isDark ? 'text-gray-300' : 'text-gray-700'} 
+                          data-[state=active]:${isDark ? 'bg-neu-dark-base text-white' : 'bg-neu-light-base text-black'} 
+                          data-[state=active]:shadow-neu-light-convex dark:data-[state=active]:shadow-neu-dark-convex 
+                          hover:bg-opacity-70 
+                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
+              >
                 {year}
               </TabsTrigger>
             ))}
@@ -144,10 +143,10 @@ function Dashboard({
           <h2 className="text-2xl font-bold mb-6">
             Market Overview ({selectedYear})
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <Card className={`p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neu-light hover:border-neu-dark transition-all duration-200 transform hover:scale-[1.02] hover:bg-neutral-50 dark:hover:bg-neutral-700`}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   Total Market Revenue
                 </CardTitle>
                 <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -167,9 +166,9 @@ function Dashboard({
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className={`p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neu-light hover:border-neu-dark transition-all duration-200 transform hover:scale-[1.02] hover:bg-neutral-50 dark:hover:bg-neutral-700`}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Employees</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -187,9 +186,9 @@ function Dashboard({
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className={`p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neu-light hover:border-neu-dark transition-all duration-200 transform hover:scale-[1.02] hover:bg-neutral-50 dark:hover:bg-neutral-700`}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Average Company Revenue</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Average Company Revenue</CardTitle>
                  <Briefcase className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -202,9 +201,9 @@ function Dashboard({
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className={`p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neu-light hover:border-neu-dark transition-all duration-200 transform hover:scale-[1.02] hover:bg-neutral-50 dark:hover:bg-neutral-700`}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Average Team Size</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Average Team Size</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -221,19 +220,17 @@ function Dashboard({
 
         {/* Top Companies */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-6">
-            Top Companies
+          <h2 className="text-2xl font-bold mb-6">
+            Top Companies by Revenue ({selectedYear})
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Revert to original responsive grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {topCompanies.map((company) => (
               <CompanyCard
                 key={company.name}
-                name={company.name}
-                totalIncome={company.totalIncome}
-                profit={company.profit}
-                employeeCount={company.employeeCount}
-                averagePay={company.averagePay}
+                {...company}
                 onClick={() => handleCompanySelect(company.name)}
+                className={`p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neu-light hover:border-neu-dark transition-all duration-200 transform hover:scale-[1.02] hover:bg-neutral-50 dark:hover:bg-neutral-700`}
               />
             ))}
           </div>
@@ -241,100 +238,27 @@ function Dashboard({
 
          {/* Revenue Trend Line Chart using shadcn Card */}
          <section className="mb-12">
-           <Card>
-             <CardHeader>
-                <CardTitle>Trends Over Years</CardTitle>
-             </CardHeader>
-             <CardContent>
-                <TrendLineChart data={data} selectedYear={selectedYear} />
-             </CardContent>
-           </Card>
+           <div
+            className={`p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neu-light hover:border-neu-dark transition-all duration-200 transform hover:scale-[1.02] hover:bg-neutral-50 dark:hover:bg-neutral-700`}
+          >
+            <h3 className="text-lg font-semibold mb-4">Trends Over Years</h3>
+            <TrendLineChart data={data} selectedYear={selectedYear} />
+          </div>
          </section>
 
-        {/* All Companies Table using shadcn Card */}
-        <section className="mb-12">
-          <Card>
-            <CardHeader>
-               <CardTitle>All Companies ({selectedYear})</CardTitle>
-            </CardHeader>
-            <CardContent>
-               {/* The CompanyTable component itself handles layout now */}
-               <CompanyTable
-                selectedYearData={selectedYearData}
-                onCompanySelect={handleCompanySelect}
-               />
-            </CardContent>
-          </Card>
+        {/* All Companies Table */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">All Companies ({selectedYear})</h2>
+          {selectedYearData && (
+             <div className={`p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-neu-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neu-light hover:border-neu-dark transition-all duration-200 transform hover:scale-[1.02] hover:bg-neutral-50 dark:hover:bg-neutral-700`}>
+                <CompanyTable
+                  selectedYearData={selectedYearData}
+                  onCompanySelect={handleCompanySelect}
+                />
+             </div>
+          )}
         </section>
       </main>
     </div>
   );
 }
-
-function App() {
-  const years = data.map((d) => d.year).sort((a, b) => b.localeCompare(a));
-  const [selectedYear, setSelectedYear] = useState(years[0]);
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    // Check system preference
-    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setIsDark(true);
-      document.documentElement.classList.add("dark");
-    }
-
-    // Listen for system preference changes
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsDark(e.matches);
-      document.documentElement.classList.toggle("dark", e.matches);
-    };
-
-    // Add listener using addEventListener for modern browsers
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener("change", handleChange);
-    } else {
-      // Fallback for older browsers
-      mediaQuery.addListener(handleChange);
-    }
-
-
-    return () => {
-       if (mediaQuery.removeEventListener) {
-            mediaQuery.removeEventListener('change', handleChange);
-        } else {
-            // Fallback for older browsers
-            mediaQuery.removeListener(handleChange);
-        }
-    }
-  }, []);
-
-  const toggleDarkMode = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle("dark");
-  };
-
-
-  return (
-    <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Dashboard
-              years={years}
-              selectedYear={selectedYear}
-              setSelectedYear={setSelectedYear}
-              isDark={isDark}
-              toggleDarkMode={toggleDarkMode}
-              data={data} 
-            />
-          }
-        />
-        <Route path="/company/:companyName" element={<CompanyPage />} />
-      </Routes>
-    </Router>
-  );
-}
-
-export default App;
