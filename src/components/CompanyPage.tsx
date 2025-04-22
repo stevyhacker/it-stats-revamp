@@ -1,9 +1,19 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react'; // Keep useState and useMemo
 import { useParams, useNavigate } from 'react-router-dom'; // Import hooks
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Building2, TrendingUp, Users, Wallet, ArrowUpRight, ArrowDownRight, ChevronUp, ChevronDown } from 'lucide-react';
+import { Building2, TrendingUp, Users, Wallet, ArrowUpRight, ArrowDownRight, ChevronUp, ChevronDown, ArrowLeft } from 'lucide-react'; // Added ArrowLeft
 import numeral from 'numeral';
 import { data } from '../data';
+import { Button } from '@/components/ui/button'; // Added Button
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'; // Added Card components
+import { 
+  Table, 
+  TableHeader, 
+  TableBody, 
+  TableRow, 
+  TableHead, 
+  TableCell 
+} from '@/components/ui/table'; // Added Table components
 
 interface CompanyYearData {
   year: string;
@@ -126,173 +136,191 @@ export const CompanyPage = () => {
   ];
 
   return (
-    <div className="fixed inset-0 bg-gray-100 dark:bg-gray-900 overflow-y-auto transition-colors duration-200">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="fixed inset-0 bg-background overflow-y-auto transition-colors duration-200"> 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"> 
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{companyName}</h1>
-            <p className="text-gray-500 dark:text-gray-400">Historical Performance Analysis</p>
+            <h1 className="text-3xl font-bold text-foreground">{companyName}</h1> 
+            <p className="text-muted-foreground">Historical Performance Analysis</p> 
           </div>
-          <button
-            onClick={handleClose} // Use handleClose for navigation
-            className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+          <Button
+            variant="ghost" 
+            onClick={handleClose} 
           >
-            ← Back to Overview
-          </button>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Overview
+          </Button>
         </div>
 
-        {/* Key Metrics */}
+        {/* Key Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Building2 className="text-blue-500 mr-3" size={24} />
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Total Income</p>
-                  <p className="text-xl font-semibold text-gray-900 dark:text-white">{numeral(latestData.totalIncome).format('0,0')}€</p>
-                </div>
-              </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+              <Building2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{numeral(latestData.totalIncome).format('0,0')}€</div>
               {growthMetrics && (
-                <div className={`flex items-center ${growthMetrics.incomeGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {growthMetrics.incomeGrowth >= 0 ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
-                  <span className="ml-1">{Math.abs(growthMetrics.incomeGrowth).toFixed(1)}%</span>
+                <div className={`mt-1 flex items-center text-xs ${growthMetrics.incomeGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}> 
+                  {growthMetrics.incomeGrowth >= 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />} 
+                  <span className="ml-1">{Math.abs(growthMetrics.incomeGrowth).toFixed(1)}% vs last year</span>
                 </div>
               )}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <TrendingUp className="text-green-500 mr-3" size={24} />
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Profit</p>
-                  <p className="text-xl font-semibold text-gray-900 dark:text-white">{numeral(latestData.profit).format('0,0')}€</p>
-                </div>
-              </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Profit</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{numeral(latestData.profit).format('0,0')}€</div>
               {growthMetrics && (
-                <div className={`flex items-center ${growthMetrics.profitGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {growthMetrics.profitGrowth >= 0 ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
-                  <span className="ml-1">{Math.abs(growthMetrics.profitGrowth).toFixed(1)}%</span>
+                <div className={`mt-1 flex items-center text-xs ${growthMetrics.profitGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}> 
+                  {growthMetrics.profitGrowth >= 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />} 
+                  <span className="ml-1">{Math.abs(growthMetrics.profitGrowth).toFixed(1)}% vs last year</span>
                 </div>
               )}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Users className="text-purple-500 mr-3" size={24} />
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Employees</p>
-                  <p className="text-xl font-semibold text-gray-900 dark:text-white">{latestData.employeeCount}</p>
-                </div>
-              </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Employees</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{latestData.employeeCount}</div>
               {growthMetrics && (
-                <div className={`flex items-center ${growthMetrics.employeeGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {growthMetrics.employeeGrowth >= 0 ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
-                  <span className="ml-1">{Math.abs(growthMetrics.employeeGrowth).toFixed(1)}%</span>
+                <div className={`mt-1 flex items-center text-xs ${growthMetrics.employeeGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}> 
+                  {growthMetrics.employeeGrowth >= 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />} 
+                  <span className="ml-1">{Math.abs(growthMetrics.employeeGrowth).toFixed(1)}% vs last year</span>
                 </div>
               )}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <div className="flex items-center">
-              <Wallet className="text-orange-500 mr-3" size={24} />
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Average Monthly Pay</p>
-                <p className="text-xl font-semibold text-gray-900 dark:text-white">{numeral(latestData.averagePay).format('0,0')}€</p>
-              </div>
-            </div>
-          </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Avg. Monthly Pay</CardTitle>
+              <Wallet className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{numeral(latestData.averagePay).format('0,0')}€</div>
+               {/* Growth calculation for avg pay could be added here if needed */} 
+               <p className="text-xs text-muted-foreground mt-1">
+                  Latest available average
+               </p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Historical Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Income & Profit Trends</h3>
-            <div className="h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={companyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis dataKey="year" stroke="#9CA3AF" />
-                  <YAxis stroke="#9CA3AF" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(17, 24, 39, 0.8)',
-                      border: 'none',
-                      borderRadius: '4px',
-                      color: '#fff'
-                    }}
-                    formatter={(value) => numeral(value).format('0,0') + '€'} 
-                  />
-                  <Line type="monotone" dataKey="totalIncome" stroke="#3B82F6" name="Total Income" />
-                  <Line type="monotone" dataKey="profit" stroke="#10B981" name="Profit" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+        {/* Historical Charts Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8"> 
+          <Card>
+            <CardHeader>
+              <CardTitle>Income & Profit Trends</CardTitle>
+            </CardHeader>
+            <CardContent className="pl-2"> 
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={companyData}
+                    margin={{ top: 5, right: 20, left: 10, bottom: 5 }} 
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" /> 
+                    <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} /> 
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `€${numeral(value).format('0a')}`} /> 
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--background))', 
+                        border: '1px solid hsl(var(--border))', 
+                        borderRadius: 'var(--radius)', 
+                        color: 'hsl(var(--foreground))' 
+                      }}
+                      formatter={(value: number, name: string) => [`${numeral(value).format('0,0')}€`, name]} 
+                      cursor={{ fill: 'hsl(var(--muted) / 0.3)' }} 
+                    />
+                    <Line type="monotone" dataKey="totalIncome" stroke="hsl(var(--primary))" name="Total Income" dot={false} /> 
+                    <Line type="monotone" dataKey="profit" stroke="hsl(var(--chart-2))" name="Profit" dot={false} /> 
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Employee Count & Efficiency</h3>
-            <div className="h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={companyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis dataKey="year" stroke="#9CA3AF" />
-                  <YAxis yAxisId="left" stroke="#9CA3AF" />
-                  <YAxis yAxisId="right" orientation="right" stroke="#9CA3AF" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(17, 24, 39, 0.8)',
-                      border: 'none',
-                      borderRadius: '4px',
-                      color: '#fff'
-                    }}
-                  />
-                  <Line yAxisId="left" type="monotone" dataKey="employeeCount" stroke="#8B5CF6" name="Employees" />
-                  <Line yAxisId="right" type="monotone" dataKey="incomePerEmployee" stroke="#F59E0B" name="Income per Employee" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Employee Count & Efficiency</CardTitle>
+            </CardHeader>
+            <CardContent className="pl-2"> 
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={companyData}
+                     margin={{ top: 5, right: 20, left: 10, bottom: 5 }} 
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" /> 
+                    <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} /> 
+                    <YAxis yAxisId="left" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${numeral(value).format('0a')}`} /> 
+                    <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `€${numeral(value).format('0a')}`} /> 
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--background))', 
+                        border: '1px solid hsl(var(--border))', 
+                        borderRadius: 'var(--radius)', 
+                        color: 'hsl(var(--foreground))' 
+                      }}
+                      formatter={(value: number, name: string) => [
+                        name === 'Employees' ? `${numeral(value).format('0,0')}` : `${numeral(value).format('0,0')}€`,
+                        name
+                      ]}
+                      cursor={{ fill: 'hsl(var(--muted) / 0.3)' }} 
+                    />
+                    <Line yAxisId="left" type="monotone" dataKey="employeeCount" stroke="hsl(var(--chart-3))" name="Employees" dot={false} /> 
+                    <Line yAxisId="right" type="monotone" dataKey="incomePerEmployee" stroke="hsl(var(--chart-4))" name="Income per Employee" dot={false} /> 
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Yearly Data Table */}
-        <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-          <h3 className="text-lg font-semibold p-6 border-b border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white">Historical Data</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-900">
-                <tr>
+        {/* Yearly Data Table Card */}
+        <Card> 
+          <CardHeader>
+             <CardTitle>Historical Data</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table> 
+              <TableHeader>
+                <TableRow>
                   {columns.map((column) => (
-                    <th 
+                    <TableHead  
                       key={column.key}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                      className="cursor-pointer hover:bg-muted/50" 
                       onClick={() => requestSort(column.key)}
                     >
                       {column.label}
                       {getSortIcon(column.key)}
-                    </th>
+                    </TableHead>
                   ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                </TableRow>
+              </TableHeader>
+              <TableBody> 
                 {sortedData.map((yearData) => (
-                  <tr key={yearData.year}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{yearData.year}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{numeral(yearData.totalIncome).format('0,0')}€</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{numeral(yearData.profit).format('0,0')}€</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{yearData.employeeCount}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{numeral(yearData.averagePay).format('0,0')}€</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{numeral(yearData.incomePerEmployee).format('0,0')}€</td>
-                  </tr>
+                  <TableRow key={yearData.year}> 
+                    <TableCell className="font-medium">{yearData.year}</TableCell> 
+                    <TableCell>{numeral(yearData.totalIncome).format('0,0')}€</TableCell>
+                    <TableCell>{numeral(yearData.profit).format('0,0')}€</TableCell>
+                    <TableCell>{yearData.employeeCount}</TableCell>
+                    <TableCell>{numeral(yearData.averagePay).format('0,0')}€</TableCell>
+                    <TableCell>{numeral(yearData.incomePerEmployee).format('0,0')}€</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

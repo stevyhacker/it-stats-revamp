@@ -5,12 +5,11 @@ import {
   Route,
   useNavigate,
 } from "react-router-dom";
-import { Header } from "./components/Header";
+// import { Header } from "./components/Header"; // Keep for now, might be replaced later
 import { CompanyCard } from "./components/CompanyCard";
-// import { MarketShareTreemap } from "./components/MarketShareTreemap";
 import { TrendLineChart } from "./components/TrendLineChart";
-import { data as rawData } from "./data"; // Rename to avoid conflict
-import { YearData, CompanyData } from "./types"; // Import types
+import { data as rawData } from "./data";
+import { YearData, CompanyData } from "./types";
 import {
   Moon,
   Sun,
@@ -20,8 +19,11 @@ import {
   Briefcase,
 } from "lucide-react";
 import numeral from "numeral";
-import CompanyTable from "./components/CompanyTable"; // Import the new component
-import { CompanyPage } from "./components/CompanyPage"; // Re-import CompanyPage
+import CompanyTable from "./components/CompanyTable";
+import { CompanyPage } from "./components/CompanyPage";
+import { Button } from "@/components/ui/button"; 
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"; 
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"; 
 
 // Cast rawData to the correct type
 const data: YearData[] = rawData as YearData[];
@@ -107,132 +109,119 @@ function Dashboard({
     : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-      <Header />
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-200">
+      {/* <Header /> Maybe replace later */} 
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Dark Mode Toggle */}
-        <button
+        {/* Dark Mode Toggle using shadcn Button */}
+        <Button
+          variant="outline"
+          size="icon"
           onClick={toggleDarkMode}
-          className="fixed bottom-4 right-4 p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-shadow"
+          className="fixed bottom-4 right-4 z-50"
           aria-label="Toggle dark mode"
         >
           {isDark ? (
-            <Sun className="w-6 h-6 text-yellow-500" />
+            <Sun className="w-5 h-5" />
           ) : (
-            <Moon className="w-6 h-6 text-gray-700" />
+            <Moon className="w-5 h-5" />
           )}
-        </button>
+        </Button>
 
-        {/* Year Tabs */}
-        <div className="mb-8">
-          <div className="border-b border-gray-200 dark:border-gray-700 overflow-x-auto md:overflow-x-visible">
-            <nav className="-mb-px flex space-x-8 px-4 md:px-0">
-              {years.map((year) => (
-                <button
-                  key={year}
-                  onClick={() => setSelectedYear(year)}
-                  className={`
-                    whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
-                    ${
-                      selectedYear === year
-                        ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                        : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300"
-                    }
-                  `}
-                >
-                  {year}
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
+        {/* Year Tabs using shadcn Tabs */}
+        <Tabs value={selectedYear} onValueChange={setSelectedYear} className="mb-8">
+          <TabsList className="overflow-x-auto h-auto p-1 md:overflow-x-visible justify-start">
+            {years.map((year) => (
+              <TabsTrigger key={year} value={year} className="whitespace-nowrap">
+                {year}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
 
-        {/* Market Overview */}
+        {/* Market Overview using shadcn Card */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+          <h2 className="text-2xl font-bold mb-6">
             Market Overview ({selectedYear})
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-              <div className="flex items-center space-x-3">
-                <Building2 className="text-blue-500" size={24} />
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Total Market Revenue
-                  </p>
-                  <p className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {numeral(marketStats.totalRevenue).format("0,0")}€
-                  </p>
-                  <div
-                    className={`flex items-center mt-1 text-sm ${
-                      marketStats.revenueGrowth >= 0
-                        ? "text-green-500"
-                        : "text-red-500"
-                    }`}
-                  >
-                    {marketStats.revenueGrowth >= 0 ? (
-                      <TrendingUp size={16} className="mr-1" />
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total Market Revenue
+                </CardTitle>
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {numeral(marketStats.totalRevenue).format("0,0")}€
+                </div>
+                <p className={`text-xs mt-1 ${ marketStats.revenueGrowth >= 0 ? "text-green-500" : "text-red-500" } flex items-center`}>
+                   {marketStats.revenueGrowth >= 0 ? (
+                      <TrendingUp size={14} className="mr-1" />
                     ) : (
-                      <TrendingUp
-                        size={16}
-                        className="mr-1 transform rotate-180"
-                      />
+                      <TrendingUp size={14} className="mr-1 transform rotate-180 scale-x-[-1]" /> 
                     )}
-                    <span>{marketStats.revenueGrowth.toFixed(2)}%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+                  {marketStats.revenueGrowth.toFixed(2)}% vs PY
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-              <div className="flex items-center space-x-3">
-                <Users className="text-purple-500" size={24} />
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Total Employees
-                  </p>
-                  <p className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {numeral(marketStats.totalEmployees).format("0,0")}
-                  </p>
-                  <div className={`flex items-center mt-1 text-sm ${marketStats.employeeGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {marketStats.employeeGrowth >= 0 ? <TrendingUp size={16} className="mr-1" /> : <TrendingUp size={16} className="mr-1 transform rotate-180" />}
-                    <span>{marketStats.employeeGrowth.toFixed(2)}%</span>
-                  </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {numeral(marketStats.totalEmployees).format("0,0")}
                 </div>
-              </div>
-            </div>
+                 <p className={`text-xs mt-1 ${ marketStats.employeeGrowth >= 0 ? "text-green-500" : "text-red-500" } flex items-center`}>
+                   {marketStats.employeeGrowth >= 0 ? (
+                      <TrendingUp size={14} className="mr-1" />
+                    ) : (
+                      <TrendingUp size={14} className="mr-1 transform rotate-180 scale-x-[-1]" /> 
+                    )}
+                  {marketStats.employeeGrowth.toFixed(2)}% vs PY
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-              <div className="flex items-center space-x-3">
-                <Briefcase className="text-emerald-500" size={24} />
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Average Company Revenue</p>
-                  <p className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {numeral(marketStats.totalRevenue / selectedYearData!.companyList.length).format('0,0')}€
-                  </p>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Average Company Revenue</CardTitle>
+                 <Briefcase className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                 <div className="text-2xl font-bold">
+                    {selectedYearData?.companyList.length
+                       ? numeral(marketStats.totalRevenue / selectedYearData.companyList.length).format('0,0')
+                       : 0}€
+                 </div>
+                 <p className="text-xs text-muted-foreground mt-1">per company</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Average Team Size</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {selectedYearData?.companyList.length
+                     ? Math.round(marketStats.totalEmployees / selectedYearData.companyList.length)
+                     : 0}
                 </div>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-              <div className="flex items-center space-x-3">
-                <Users className="text-amber-500" size={24} />
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Average Team Size</p>
-                  <p className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {Math.round(marketStats.totalEmployees / selectedYearData!.companyList.length)}
-                  </p>
-                </div>
-              </div>
-            </div>
-
+                <p className="text-xs text-muted-foreground mt-1">employees per company</p>
+              </CardContent>
+            </Card>
           </div>
         </section>
 
         {/* Top Companies */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-6">
             Top Companies
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -250,43 +239,32 @@ function Dashboard({
           </div>
         </section>
 
-        {/* Market Share Treemap
-        {selectedYearData && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
-              Market Share Distribution ({selectedYear})
-            </h2>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md h-96">
-              <MarketShareTreemap companies={selectedYearData.companyList} />
-            </div>
-          </section>
-        )} */}
-
-         {/* Revenue Trend Line Chart */}
+         {/* Revenue Trend Line Chart using shadcn Card */}
          <section className="mb-12">
-           <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
-             Trends Over Years
-           </h2>
-           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md" style={{  }}>
-              <TrendLineChart data={data} selectedYear={selectedYear} />
-           </div>
+           <Card>
+             <CardHeader>
+                <CardTitle>Trends Over Years</CardTitle>
+             </CardHeader>
+             <CardContent>
+                <TrendLineChart data={data} selectedYear={selectedYear} />
+             </CardContent>
+           </Card>
          </section>
 
-        {/* All Companies Table */}
+        {/* All Companies Table using shadcn Card */}
         <section className="mb-12">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                All Companies ({selectedYear})
-              </h2>
-            </div>
-            <div className="overflow-x-auto relative">
-              <CompanyTable
-                selectedYearData={selectedYearData} // Pass the data for the selected year
-                onCompanySelect={handleCompanySelect} // Pass the navigation handler
-              />
-            </div>
-          </div>
+          <Card>
+            <CardHeader>
+               <CardTitle>All Companies ({selectedYear})</CardTitle>
+            </CardHeader>
+            <CardContent>
+               {/* The CompanyTable component itself handles layout now */}
+               <CompanyTable
+                selectedYearData={selectedYearData}
+                onCompanySelect={handleCompanySelect}
+               />
+            </CardContent>
+          </Card>
         </section>
       </main>
     </div>
@@ -349,7 +327,7 @@ function App() {
               setSelectedYear={setSelectedYear}
               isDark={isDark}
               toggleDarkMode={toggleDarkMode}
-              data={data} // Pass the full data
+              data={data} 
             />
           }
         />

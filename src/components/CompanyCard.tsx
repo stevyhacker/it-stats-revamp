@@ -1,6 +1,7 @@
-import React from 'react';
+// import React from 'react'; // No longer needed with new JSX transform
 import { TrendingUp, Users, DollarSign } from 'lucide-react';
 import numeral from 'numeral';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'; // Import shadcn Card components
 
 interface CompanyCardProps {
   name: string;
@@ -13,40 +14,44 @@ interface CompanyCardProps {
 
 export const CompanyCard = ({ name, totalIncome, profit, employeeCount, averagePay, onClick }: CompanyCardProps) => {
   return (
-    <div 
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
+    <Card 
+      className="cursor-pointer hover:border-primary transition-colors" 
       onClick={onClick}
     >
-      <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">{name}</h3>
-      <div className="space-y-4">
+      <CardHeader>
+        <CardTitle className="text-xl">{name}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
         <div className="flex items-center space-x-3">
-          <DollarSign className="text-blue-500" size={20} />
+          <DollarSign className="text-blue-500 h-5 w-5" />
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Total Income</p>
-            <p className="font-semibold text-gray-900 dark:text-white">{numeral(totalIncome).format('0,0')}€</p>
+            <p className="text-sm text-muted-foreground">Total Income</p>
+            <p className="font-semibold">{numeral(totalIncome).format('0,0')}€</p>
           </div>
         </div>
         <div className="flex items-center space-x-3">
-          <TrendingUp className="text-green-500" size={20} />
+          <TrendingUp className="text-green-500 h-5 w-5" />
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Profit</p>
-            <p className="font-semibold text-gray-900 dark:text-white">{numeral(profit).format('0,0')}€</p>
+            <p className="text-sm text-muted-foreground">Profit</p>
+            <p className="font-semibold">{numeral(profit).format('0,0')}€</p>
           </div>
         </div>
         <div className="flex items-center space-x-3">
-          <Users className="text-purple-500" size={20} />
+          <Users className="text-purple-500 h-5 w-5" />
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Employees</p>
-            <p className="font-semibold text-gray-900 dark:text-white">{employeeCount}</p>
+            <p className="text-sm text-muted-foreground">Employees</p>
+            <p className="font-semibold">{employeeCount}</p>
           </div>
         </div>
         {averagePay && (
-          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Average Monthly Salary</p>
-            <p className="font-semibold text-gray-900 dark:text-white">{numeral(averagePay).format('0,0')}€</p>
+          <div className="flex items-center space-x-3 pt-3 mt-3 border-t">
+            <div>
+              <p className="text-sm text-muted-foreground">Average Monthly Salary</p>
+              <p className="font-semibold">{numeral(averagePay).format('0,0')}€</p>
+            </div>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
