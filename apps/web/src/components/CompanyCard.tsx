@@ -1,7 +1,8 @@
-import { TrendingUp, Users, DollarSign } from 'lucide-react';
-import numeral from 'numeral';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'; // Import shadcn Card components
+import { TrendingUp, Users, DollarSign } from "lucide-react";
+import numeral from "numeral";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // Import shadcn Card components
 import { cn } from "@/lib/utils"; // Correct import path for cn utility
+import { useState } from "react";
 
 interface CompanyCardProps {
   name: string;
@@ -13,10 +14,27 @@ interface CompanyCardProps {
   className?: string;
 }
 
-export const CompanyCard = ({ name, totalIncome, profit, employeeCount, averagePay, onClick, className }: CompanyCardProps) => {
+export const CompanyCard = ({
+  name,
+  totalIncome,
+  profit,
+  employeeCount,
+  averagePay,
+  onClick,
+  className,
+}: CompanyCardProps) => {
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("darkMode") === "true";
+    }
+    return false;
+  });
+
   return (
-    <Card 
-      className={cn("cursor-pointer hover:border-primary transition-colors", className)} 
+    <Card
+      className={`p-4 md:p-6 rounded-xl ${
+        isDark ? "bg-neu-dark-base" : "bg-white"
+      } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}
       onClick={onClick}
     >
       <CardHeader>
@@ -27,14 +45,16 @@ export const CompanyCard = ({ name, totalIncome, profit, employeeCount, averageP
           <DollarSign className="text-blue-500 h-5 w-5" />
           <div>
             <p className="text-sm text-muted-foreground">Total Income</p>
-            <p className="font-semibold">{numeral(totalIncome).format('0,0')}€</p>
+            <p className="font-semibold">
+              {numeral(totalIncome).format("0,0")}€
+            </p>
           </div>
         </div>
         <div className="flex items-center space-x-3">
           <TrendingUp className="text-green-500 h-5 w-5" />
           <div>
             <p className="text-sm text-muted-foreground">Profit</p>
-            <p className="font-semibold">{numeral(profit).format('0,0')}€</p>
+            <p className="font-semibold">{numeral(profit).format("0,0")}€</p>
           </div>
         </div>
         <div className="flex items-center space-x-3">
@@ -47,8 +67,12 @@ export const CompanyCard = ({ name, totalIncome, profit, employeeCount, averageP
         {averagePay && (
           <div className="flex items-center space-x-3 pt-3 mt-3 border-t">
             <div>
-              <p className="text-sm text-muted-foreground">Average Monthly Salary</p>
-              <p className="font-semibold">{numeral(averagePay).format('0,0')}€</p>
+              <p className="text-sm text-muted-foreground">
+                Average Monthly Salary
+              </p>
+              <p className="font-semibold">
+                {numeral(averagePay).format("0,0")}€
+              </p>
             </div>
           </div>
         )}

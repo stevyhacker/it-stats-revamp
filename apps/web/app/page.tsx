@@ -1,45 +1,64 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { data as rawData } from "../src/data";
-import type { YearData } from "../src/types";
 import { Dashboard } from "../src/components/Dashboard";
 
-const data: YearData[] = rawData as YearData[];
+// Define types locally
+interface Company {
+  id: number; 
+  pib: string;
+  maticniBroj: string;
+  name: string;
+  address: string | null;
+  municipality: string | null;
+  activityCode: string | null;
+  activityName: string | null;
+  employeeCount: number | null; 
+  averagePay: number | null; 
+  yearId: number; 
+  totalIncome: number | null;  
+  profit: number | null;       
+  incomePerEmployee: number | null; 
+  // Add other fields expected from the API and needed by Dashboard
+}
 
-export default function HomePage() {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem("darkMode") === "true";
+interface YearData {
+  year: string;
+  companyList: Company[]; 
+}
+
+async function fetchData(): Promise<YearData[]> {
+  // Read the API base URL from environment variables, default to localhost:3001
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  console.log(`Fetching data from: ${apiBaseUrl}/companies`); // Add log
+  try {
+    const res = await fetch(`${apiBaseUrl}/companies`, {
+      cache: 'no-store', // Ensure fresh data on each request for development
+    });
+    if (!res.ok) {
+      console.error("Failed to fetch companies:", res.status, res.statusText);
+      return [];
     }
-    return false;
-  });
-  const [selectedYear, setSelectedYear] = useState<string>(data[0]?.year || "");
+    const data = await res.json();
+    return data as YearData[];
+  } catch (error) {
+    console.error("Error fetching /companies:", error);
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  const data: YearData[] = await fetchData();
+
   const years = data.map((d) => d.year);
+  const selectedYear = years[0] || "";
 
-  useEffect(() => {
-    console.log("Dark mode useEffect triggered. isDark:", isDark);
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("darkMode", "true");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("darkMode", "false");
-    }
-  }, [isDark]);
-
-  const toggleDarkMode = () => {
-    setIsDark(!isDark);
-  };
+  if (data.length === 0) {
+    return <main className="p-4">Failed to load company data. Please check the API server.</main>;
+  }
 
   return (
     <main className="">
       <Dashboard
         years={years}
-        selectedYear={selectedYear}
-        setSelectedYear={setSelectedYear}
-        isDark={isDark}
-        toggleDarkMode={toggleDarkMode}
+        // selectedYear={selectedYear} // Removed: Dashboard manages this internally
         data={data}
       />
     </main>

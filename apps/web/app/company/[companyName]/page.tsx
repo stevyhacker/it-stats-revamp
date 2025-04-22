@@ -144,6 +144,14 @@ const CompanyPage = () => {
     { key: 'incomePerEmployee', label: 'Income/Employee', format: formatCurrency },
   ];
 
+  // Add dark mode state
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem("darkMode") === "true";
+    }
+    return false; // Default to false if window is not available (SSR)
+  });
+
   if (companyHistoricalData.length === 0) {
     return (
       <div className="min-h-screen bg-background p-8 text-foreground">
@@ -182,7 +190,9 @@ const CompanyPage = () => {
         {/* Key Metrics Summary - Use ?. and ?? for safety */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {/* Total Revenue Card */}
-          <Card className="p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neu-light hover:border-neu-dark transition-all duration-200 transform hover:scale-[1.02] hover:bg-neutral-50 dark:hover:bg-neutral-700">
+          <Card className={`p-4 md:p-6 rounded-xl ${
+              isDark ? "bg-neu-dark-base" : "bg-white"
+            } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Revenue ({latestYearData?.year ?? 'N/A'})</CardTitle>
               <Wallet className="h-4 w-4 text-muted-foreground" />
@@ -199,7 +209,9 @@ const CompanyPage = () => {
           </Card>
 
           {/* Profit Card */}
-          <Card className="p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neu-light hover:border-neu-dark transition-all duration-200 transform hover:scale-[1.02] hover:bg-neutral-50 dark:hover:bg-neutral-700">
+          <Card className={`p-4 md:p-6 rounded-xl ${
+              isDark ? "bg-neu-dark-base" : "bg-white"
+            } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Profit ({latestYearData?.year ?? 'N/A'})</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -216,7 +228,9 @@ const CompanyPage = () => {
           </Card>
 
           {/* Employees Card */}
-          <Card className="p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neu-light hover:border-neu-dark transition-all duration-200 transform hover:scale-[1.02] hover:bg-neutral-50 dark:hover:bg-neutral-700">
+          <Card className={`p-4 md:p-6 rounded-xl ${
+              isDark ? "bg-neu-dark-base" : "bg-white"
+            } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Employees ({latestYearData?.year ?? 'N/A'})</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
@@ -233,7 +247,9 @@ const CompanyPage = () => {
           </Card>
 
           {/* Profit Margin Card */}
-          <Card className="p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neu-light hover:border-neu-dark transition-all duration-200 transform hover:scale-[1.02] hover:bg-neutral-50 dark:hover:bg-neutral-700">
+          <Card className={`p-4 md:p-6 rounded-xl ${
+              isDark ? "bg-neu-dark-base" : "bg-white"
+            } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Profit Margin ({latestYearData?.year ?? 'N/A'})</CardTitle>
               <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -246,9 +262,9 @@ const CompanyPage = () => {
         </div>
 
         {/* Performance Trends Chart */}
-        <Card className="mb-12 p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neu-light hover:border-neu-dark transition-all duration-200 transform hover:scale-[1.02] hover:bg-neutral-50 dark:hover:bg-neutral-700">
+        <Card className={`p-4 md:p-6 rounded-xl ${isDark ? "bg-neu-dark-base" : "bg-white"} shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
           <CardHeader>
-            <CardTitle>Performance Trends Over Years</CardTitle>
+            <CardTitle>Financial Trends</CardTitle>
           </CardHeader>
           <CardContent className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -270,7 +286,7 @@ const CompanyPage = () => {
         </Card>
 
         {/* Historical Data Table */}
-        <Card className="p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-800 shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neu-light hover:border-neu-dark transition-all duration-200 transform hover:scale-[1.02] hover:bg-neutral-50 dark:hover:bg-neutral-700">
+        <Card className={`p-4 mt-12 md:p-6 rounded-xl ${isDark ? "bg-neu-dark-base" : "bg-white"} shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
           <CardHeader>
             <CardTitle>Historical Data</CardTitle>
           </CardHeader>
