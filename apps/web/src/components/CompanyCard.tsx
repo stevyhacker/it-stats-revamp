@@ -12,6 +12,7 @@ interface CompanyCardProps {
   averagePay?: number | string;
   onClick?: () => void;
   className?: string;
+  isDark?: boolean;
 }
 
 export const CompanyCard = ({
@@ -22,18 +23,21 @@ export const CompanyCard = ({
   averagePay,
   onClick,
   className,
+  isDark,
 }: CompanyCardProps) => {
-  const [isDark, setIsDark] = useState(() => {
+  const [localIsDark, setLocalIsDark] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("darkMode") === "true";
     }
     return false;
   });
 
+  const usedIsDark = isDark !== undefined ? isDark : localIsDark;
+
   return (
     <Card
       className={`p-4 md:p-6 rounded-xl ${
-        isDark ? "bg-neu-dark-base" : "bg-white"
+        usedIsDark ? "bg-neu-dark-base" : "bg-white"
       } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}
       onClick={onClick}
     >

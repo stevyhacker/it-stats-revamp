@@ -16,9 +16,10 @@ interface TrendLineChartProps {
   data: YearData[];
   selectedCompanies?: string[];
   selectedYear: string;
+  isDark?: boolean;
 }
 
-export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: TrendLineChartProps) => {
+export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear, isDark }: TrendLineChartProps) => {
   const [metricType, setMetricType] = useState<'revenue' | 'employees' | 'profit'>('revenue');
   
   // Filter data up to the selected year
@@ -107,7 +108,7 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: T
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+    <div className={`bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md ${isDark ? 'dark' : ''}`}>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
           {metricType === 'revenue' ? 'Revenue Trends' : metricType === 'employees' ? 'Employee Count Trends' : 'Profit Trends'}

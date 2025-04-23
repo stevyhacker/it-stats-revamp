@@ -17,9 +17,10 @@ type SortDirection = 'asc' | 'desc';
 interface CompanyTableProps {
   selectedYearData: YearData | undefined;
   onCompanySelect: (companyName: string) => void;
+  isDark?: boolean;
 }
 
-const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompanySelect }) => {
+const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompanySelect, isDark }) => {
   const [sortColumn, setSortColumn] = useState<SortableColumn>('totalIncome');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
@@ -80,80 +81,82 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
   };
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead
-            className="cursor-pointer hover:bg-accent/80 transition-colors"
-            onClick={() => handleSort('name')}
-          >
-            Company Name
-            {renderSortIcon('name')}
-          </TableHead>
-          <TableHead
-            className="text-right cursor-pointer hover:bg-accent/80 transition-colors"
-            onClick={() => handleSort('totalIncome')}
-          >
-            Total Income
-            {renderSortIcon('totalIncome')}
-          </TableHead>
-          <TableHead
-            className="text-right cursor-pointer hover:bg-accent/80 transition-colors"
-            onClick={() => handleSort('profit')}
-          >
-            Profit
-            {renderSortIcon('profit')}
-          </TableHead>
-          <TableHead
-            className="text-right cursor-pointer hover:bg-accent/80 transition-colors"
-            onClick={() => handleSort('employeeCount')}
-          >
-            Employees
-            {renderSortIcon('employeeCount')}
-          </TableHead>
-          <TableHead
-            className="text-right cursor-pointer hover:bg-accent/80 transition-colors"
-            onClick={() => handleSort('averagePay')}
-          >
-            Avg Monthly Pay
-            {renderSortIcon('averagePay')}
-          </TableHead>
-          <TableHead
-            className="text-right cursor-pointer hover:bg-accent/80 transition-colors"
-            onClick={() => handleSort('incomePerEmployee')}
-          >
-            Income/Employee
-            {renderSortIcon('incomePerEmployee')}
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {sortedCompanyList.map((company: CompanyData) => (
-          <TableRow
-            key={company.name}
-            onClick={() => onCompanySelect(company.name)}
-            className="cursor-pointer"
-          >
-            <TableCell className="font-medium">{company.name}</TableCell>
-            <TableCell className="text-right">
-              {numeral(company.totalIncome).format('0,0')}€
-            </TableCell>
-            <TableCell className="text-right">
-              {numeral(company.profit).format('0,0')}€
-            </TableCell>
-            <TableCell className="text-right">
-              {company.employeeCount}
-            </TableCell>
-            <TableCell className="text-right">
-              {numeral(company.averagePay).format('0,0')}€
-            </TableCell>
-            <TableCell className="text-right">
-              {numeral(company.incomePerEmployee).format('0,0')}€
-            </TableCell>
+    <div className="overflow-x-auto rounded-lg p-2 shadow-neu-light-inset dark:shadow-neu-dark-inset bg-neu-light-base dark:bg-neu-dark-base">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead
+              className="cursor-pointer hover:bg-accent/80 transition-colors"
+              onClick={() => handleSort('name')}
+            >
+              Company Name
+              {renderSortIcon('name')}
+            </TableHead>
+            <TableHead
+              className="text-right cursor-pointer hover:bg-accent/80 transition-colors"
+              onClick={() => handleSort('totalIncome')}
+            >
+              Total Income
+              {renderSortIcon('totalIncome')}
+            </TableHead>
+            <TableHead
+              className="text-right cursor-pointer hover:bg-accent/80 transition-colors"
+              onClick={() => handleSort('profit')}
+            >
+              Profit
+              {renderSortIcon('profit')}
+            </TableHead>
+            <TableHead
+              className="text-right cursor-pointer hover:bg-accent/80 transition-colors"
+              onClick={() => handleSort('employeeCount')}
+            >
+              Employees
+              {renderSortIcon('employeeCount')}
+            </TableHead>
+            <TableHead
+              className="text-right cursor-pointer hover:bg-accent/80 transition-colors"
+              onClick={() => handleSort('averagePay')}
+            >
+              Avg Monthly Pay
+              {renderSortIcon('averagePay')}
+            </TableHead>
+            <TableHead
+              className="text-right cursor-pointer hover:bg-accent/80 transition-colors"
+              onClick={() => handleSort('incomePerEmployee')}
+            >
+              Income/Employee
+              {renderSortIcon('incomePerEmployee')}
+            </TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {sortedCompanyList.map((company: CompanyData) => (
+            <TableRow
+              key={company.name}
+              onClick={() => onCompanySelect(company.name)}
+              className="cursor-pointer"
+            >
+              <TableCell className="font-medium">{company.name}</TableCell>
+              <TableCell className="text-right">
+                {numeral(company.totalIncome).format('0,0')}€
+              </TableCell>
+              <TableCell className="text-right">
+                {numeral(company.profit).format('0,0')}€
+              </TableCell>
+              <TableCell className="text-right">
+                {company.employeeCount}
+              </TableCell>
+              <TableCell className="text-right">
+                {numeral(company.averagePay).format('0,0')}€
+              </TableCell>
+              <TableCell className="text-right">
+                {numeral(company.incomePerEmployee).format('0,0')}€
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 

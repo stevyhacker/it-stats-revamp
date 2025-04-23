@@ -17,6 +17,7 @@ import CompanyTable from "./CompanyTable";
 import { Button } from "@/components/ui/button"; 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"; 
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"; 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; 
 
 interface Company {
   id: number;
@@ -157,46 +158,70 @@ export function Dashboard({
           )}
         </Button>
 
-        <Tabs
-          value={selectedYear}
-          onValueChange={setSelectedYear}
-          className="mb-8"
-        >
-          <TabsList
-            className={`overflow-x-auto h-auto p-1 md:overflow-x-visible justify-start rounded-lg shadow-neu-light-inset dark:shadow-neu-dark-inset ${
-              isDark ? "bg-neu-dark-base" : "bg-neu-light-base"
-            }`}
+        {/* Year Selection - Conditional Rendering */}
+        <div className="mb-8">
+          {/* Tabs for Medium and Up */}
+          <Tabs
+            value={selectedYear}
+            onValueChange={setSelectedYear}
+            className="hidden md:block" // Hide on small screens
           >
-            {years.map((year) => (
-              <TabsTrigger
-                key={year}
-                value={year}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ease-in-out relative 
-                          ${
-                            isDark
-                              ? "text-gray-300"
-                              : "text-gray-700"
-                          } 
-                          data-[state=active]:${
-                            isDark
-                              ? "bg-neu-dark-base text-white"
-                              : "bg-neu-light-base text-black"
-                          } 
-                          data-[state=active]:shadow-neu-light-convex dark:data-[state=active]:shadow-neu-dark-convex 
-                          hover:bg-opacity-70 
-                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
-              >
-                {year}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+            <TabsList
+              className={`overflow-x-auto h-auto p-1 md:overflow-x-visible justify-start rounded-lg shadow-neu-light-inset dark:shadow-neu-dark-inset ${
+                isDark ? "bg-neu-dark-base" : "bg-neu-light-base"
+              }`}
+            >
+              {years.map((year) => (
+                <TabsTrigger
+                  key={year}
+                  value={year}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ease-in-out relative 
+                            ${
+                              isDark
+                                ? "text-gray-300"
+                                : "text-gray-700"
+                            } 
+                            data-[state=active]:${
+                              isDark
+                                ? "bg-neu-dark-base text-white"
+                                : "bg-neu-light-base text-black"
+                            } 
+                            data-[state=active]:shadow-neu-light-convex dark:data-[state=active]:shadow-neu-dark-convex 
+                            hover:bg-opacity-70 
+                            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
+                >
+                  {year}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+
+          {/* Select Dropdown for Small Screens */}
+          <div className="block md:hidden"> {/* Show only on small screens */}
+            <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <SelectTrigger className={`w-full rounded-lg shadow-neu-light-convex dark:shadow-neu-dark-convex border-none px-4 py-2 text-sm font-medium ${ isDark ? "bg-neu-dark-base text-gray-300" : "bg-neu-light-base text-gray-700" }`}>
+                <SelectValue placeholder="Select Year" />
+              </SelectTrigger>
+              <SelectContent className={`rounded-lg shadow-neu-light-convex dark:shadow-neu-dark-convex border-none ${ isDark ? "bg-neu-dark-base" : "bg-neu-light-base" }`}>
+                {years.map((year) => (
+                  <SelectItem
+                    key={year}
+                    value={year}
+                    className={`cursor-pointer px-4 py-2 ${ isDark ? "text-gray-300 hover:bg-gray-700 data-[state=checked]:bg-gray-600" : "text-gray-700 hover:bg-gray-200 data-[state=checked]:bg-gray-300" }`}
+                  >
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6">
             Market Overview ({selectedYear})
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
             <Card
               className={`p-4 md:p-6 rounded-xl ${
                 isDark ? "bg-neu-dark-base" : "bg-white"
@@ -331,7 +356,7 @@ export function Dashboard({
           <h2 className="text-2xl font-bold mb-6">
             Top Companies ({selectedYear})
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
             {topCompanies.map((company) => (
               <CompanyCard
                 key={company.pib}
@@ -341,6 +366,7 @@ export function Dashboard({
                 employeeCount={company.employeeCount}
                 averagePay={company.averagePay}
                 onClick={() => handleCompanySelect(company.name)}
+                isDark={isDark} // Pass isDark prop
               />
             ))}
           </div>
@@ -348,7 +374,7 @@ export function Dashboard({
 
         <section className="mb-12">
           <Card
-            className={`p-4 md:p-6 rounded-xl ${
+            className={`md:p-6 rounded-xl ${
               isDark ? "bg-neu-dark-base" : "bg-white"
             } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}
           >
@@ -359,13 +385,14 @@ export function Dashboard({
               <TrendLineChart
                 data={data} // Pass the full data (containing all years)
                 selectedYear={selectedYear} // Pass the currently selected year
+                isDark={isDark} // Pass isDark prop
               />
             </CardContent>
           </Card>
         </section>
 
         <section aria-labelledby="all-companies-heading">
-          <Card className={`p-4 md:p-6 rounded-xl ${
+          <Card className={`md:p-6 rounded-xl ${
               isDark ? "bg-neu-dark-base" : "bg-white"
             } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
             <CardHeader>
@@ -375,6 +402,7 @@ export function Dashboard({
               <CompanyTable
                 selectedYearData={selectedYearData} 
                 onCompanySelect={handleCompanySelect} 
+                isDark={isDark} // Pass isDark prop
               />
             </CardContent>
           </Card>
