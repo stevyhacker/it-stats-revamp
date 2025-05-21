@@ -29,6 +29,8 @@ export const companies = pgTable('companies', {
   netPayCosts: integer('net_pay_costs'),
   averagePay: integer('average_pay'), // Storing as integer
   incomePerEmployee: integer('income_per_employee'),
+  websiteUrl: varchar('website_url', { length: 255 }),
+  companyDescription: text('company_description'),
   yearId: integer('year_id').notNull().references(() => years.id, { onDelete: 'cascade' }), // Foreign key to years table
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

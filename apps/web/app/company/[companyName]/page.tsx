@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo } from 'react';
-import { useRouter, useParams } from 'next/navigation'; // Use Next.js router
+import { useState, useMemo, useEffect } from 'react'; // Added useEffect
+import { useRouter, useParams, useSearchParams } from 'next/navigation'; // Use Next.js router, Added useSearchParams
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Building2, TrendingUp, Users, Wallet, ArrowUpRight, ArrowDownRight, ChevronUp, ChevronDown, ArrowLeft } from 'lucide-react';
 import numeral from 'numeral';
-import { data } from '@/data'; // Adjust path if needed
+// import { data } from '@/data'; // REMOVED hardcoded data import
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
@@ -18,15 +18,31 @@ import {
 } from '@/components/ui/table';
 import type { CompanyData } from '@/types'; // Adjust path if needed
 
-// Define data structure for company year data - Make properties optional, except name
+// Define data structure for company year data
 interface CompanyYearData {
-  year: string;
-  name: string; // Make name required again
-  totalIncome?: number; // Optional
-  profit?: number; // Optional
-  employeeCount?: number; // Optional
-  averagePay?: number; // Optional
-  incomePerEmployee?: number; // Optional
+  year: string; // Will be derived from yearValue
+  // name: string; // Name will be part of each year's data from API
+  totalIncome?: number;
+  profit?: number;
+  employeeCount?: number;
+  averagePay?: number;
+  incomePerEmployee?: number;
+  // Add other fields from API if necessary, e.g., pib, maticniBroj
+  websiteUrl?: string | null;
+  companyDescription?: string | null;
+}
+
+// Interface for the raw API response item
+interface ApiCompanyYearData {
+  yearValue: number;
+  name: string;
+  totalIncome: number;
+  profit: number;
+  employeeCount: number;
+  averagePay?: number; // Assuming API might not always provide this
+  websiteUrl?: string | null;
+  companyDescription?: string | null;
+  // Add other fields from API like pib, maticniBroj if they exist in the response
 }
 
 // Define structure for sorting configuration
@@ -37,44 +53,79 @@ interface SortConfig {
 
 // The Page Component
 const CompanyPage = () => {
-  const router = useRouter(); // Use Next.js router
-  const { companyName } = useParams();
-  const decodedCompanyName = decodeURIComponent(companyName as string); // Decode company name from URL
+  const router = useRouter();
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const companyName = params.companyName;
+  const decodedCompanyName = decodeURIComponent(companyName as string);
+  const pib = searchParams.get('pib');
 
-  // Extract and process historical data for the specific company
-  const companyHistoricalData: CompanyYearData[] = useMemo(() => data
-    .map(yearData => {
-      // Find the company
-      const foundCompany = yearData.companyList.find(c => c.name === decodedCompanyName);
-      if (!foundCompany) return null; // Skip years where the company doesn't exist
-
-      // Explicitly cast to CompanyData to help TypeScript inference
-      const company = foundCompany as CompanyData;
-
-      // Ensure numeric types, provide defaults or handle undefined
-      const totalIncome = company.totalIncome != null ? Number(company.totalIncome) : undefined;
-      const profit = company.profit != null ? Number(company.profit) : undefined;
-      const employeeCount = company.employeeCount != null ? Number(company.employeeCount) : undefined;
-      const averagePay = company.averagePay != null ? Number(company.averagePay) : undefined; // Should work now
-      // Recalculate incomePerEmployee safely
-      const incomePerEmployee = (employeeCount && employeeCount !== 0 && totalIncome) ? totalIncome / employeeCount : undefined;
-
-      return {
-        year: yearData.year,
-        name: company.name, // Name is now required in CompanyYearData
-        totalIncome,
-        profit,
-        employeeCount,
-        averagePay, // Include averagePay
-        incomePerEmployee,
-      };
-    })
-    .filter(item => item !== null) // Remove explicit type predicate, let TS infer
-    .sort((a, b) => parseInt(a.year) - parseInt(b.year)), // Sort by year ascending
-    [decodedCompanyName]);
+  const [companyHistoricalData, setCompanyHistoricalData] = useState<CompanyYearData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // State for table sorting
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'year', direction: 'ascending' });
+
+  useEffect(() => {
+    // Dark mode effect from original code, ensuring useEffect is imported
+    if (typeof window !== 'undefined') {
+      const darkMode = localStorage.getItem("darkMode") === "true";
+      setIsDark(darkMode); // setIsDark should be defined, see below
+      if (darkMode) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
+  }, []); // Empty dependency array for one-time effect
+
+  useEffect(() => {
+    if (pib) {
+      const fetchData = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/companies/${pib}`);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch company data. Status: ${response.status}`);
+          }
+          const rawData: ApiCompanyYearData[] = await response.json();
+          
+          const processedData: CompanyYearData[] = rawData.map(item => {
+            const totalIncome = Number(item.totalIncome) || undefined;
+            const profit = Number(item.profit) || undefined;
+            const employeeCount = Number(item.employeeCount) || undefined;
+            const averagePay = item.averagePay != null ? Number(item.averagePay) : undefined;
+            const incomePerEmployee = (employeeCount && employeeCount !== 0 && totalIncome) 
+                                      ? totalIncome / employeeCount 
+                                      : undefined;
+            return {
+              year: item.yearValue.toString(),
+              // name: item.name, // Name is part of ApiCompanyYearData, not directly in CompanyYearData for the table structure
+              totalIncome,
+              profit,
+              employeeCount,
+              averagePay,
+              incomePerEmployee,
+              websiteUrl: item.websiteUrl,
+              companyDescription: item.companyDescription,
+            };
+          }).sort((a, b) => parseInt(a.year) - parseInt(b.year)); // Sort by year ascending
+
+          setCompanyHistoricalData(processedData);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "An unknown error occurred");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchData();
+    } else {
+      setError("PIB is missing from URL parameters.");
+      setLoading(false);
+    }
+  }, [pib]);
 
   // Function to handle sorting
   const handleSort = (key: keyof CompanyYearData) => {
@@ -145,20 +196,40 @@ const CompanyPage = () => {
   ];
 
   // Add dark mode state
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem("darkMode") === "true";
-    }
-    return false; // Default to false if window is not available (SSR)
-  });
+  const [isDark, setIsDark] = useState(false); // Initialized to false, useEffect will update
 
-  if (companyHistoricalData.length === 0) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-background p-8 text-foreground">
+      <div className="min-h-screen flex items-center justify-center bg-background p-8 text-foreground">
+        <p>Loading company data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-8 text-foreground">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.back()}
+          className="absolute top-6 left-6 z-10"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <p className="text-red-500">Error: {error}</p>
+        <p>Could not load data for {decodedCompanyName}.</p>
+      </div>
+    );
+  }
+
+  if (companyHistoricalData.length === 0 && !loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-8 text-foreground">
          <Button
             variant="ghost"
             size="icon"
-            onClick={() => router.back()} // Use Next.js router
+            onClick={() => router.back()}
             className="absolute top-6 left-6 z-10"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -169,14 +240,14 @@ const CompanyPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neu-base dark:bg-neu-dark-base text-neu-text dark:text-neu-dark-text p-4 sm:p-6 lg:p-8 transition-colors duration-200">
+    <div className={`min-h-screen ${isDark ? "bg-neu-dark-base text-neu-dark-text" : "bg-neu-base text-neu-text"} p-4 sm:p-6 lg:p-8 transition-colors duration-200`}>
       <div className="relative max-w-7xl mx-auto">
         {/* Back Button */}
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => router.back()} // Use Next.js router
-          className="absolute top-0 left-0 z-10"
+          onClick={() => router.back()}
+          className="absolute top-0 left-0 z-10 text-current" // Ensure text color matches theme
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -184,8 +255,33 @@ const CompanyPage = () => {
         {/* Header */}
         <div className="text-center mb-12 pt-8">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">{decodedCompanyName}</h1>
+          {/* Website URL - Placed below company name */}
+          {latestYearData?.websiteUrl && (
+            <a
+              href={latestYearData.websiteUrl.startsWith('http') ? latestYearData.websiteUrl : `http://${latestYearData.websiteUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`text-blue-500 dark:text-blue-400 hover:underline mb-2 inline-block ${
+                isDark ? "hover:text-blue-300" : "hover:text-blue-600"
+              }`}
+            >
+              Visit Website
+            </a>
+          )}
           <p className="text-muted-foreground">Historical Performance Analysis</p>
         </div>
+
+        {/* About the Company Section */}
+        {latestYearData?.companyDescription && (
+          <Card className={`mb-8 p-4 md:p-6 rounded-xl ${isDark ? "bg-neu-dark-base" : "bg-white"} shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200`}>
+            <CardHeader>
+              <CardTitle>About {decodedCompanyName}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm md:text-base leading-relaxed">{latestYearData.companyDescription}</p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Key Metrics Summary - Use ?. and ?? for safety */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -267,28 +363,36 @@ const CompanyPage = () => {
             <CardTitle>Financial Trends</CardTitle>
           </CardHeader>
           <CardContent className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={companyHistoricalData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
-                <YAxis yAxisId="left" tickFormatter={(value) => numeral(value).format('0a')} />
-                <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => numeral(value).format('0,0')} />
-                <Tooltip formatter={(value: number, name) => [
-                  name === 'employeeCount' ? numeral(value).format('0,0') : numeral(value).format('0,0a'),
-                  name === 'totalIncome' ? 'Total Income' : name === 'profit' ? 'Profit' : 'Employees'
-                  ]} />
-                <Line yAxisId="left" type="monotone" dataKey="totalIncome" stroke="#8884d8" strokeWidth={2} name="Total Income" dot={false} />
-                <Line yAxisId="left" type="monotone" dataKey="profit" stroke="#82ca9d" strokeWidth={2} name="Profit" dot={false} />
-                <Line yAxisId="right" type="monotone" dataKey="employeeCount" stroke="#ffc658" strokeWidth={2} name="Employees" dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
+            {companyHistoricalData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={companyHistoricalData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#444" : "#ccc"} />
+                  <XAxis dataKey="year" stroke={isDark ? "#999" : "#666"} />
+                  <YAxis yAxisId="left" tickFormatter={(value) => numeral(value).format('0a')} stroke={isDark ? "#999" : "#666"} />
+                  <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => numeral(value).format('0,0')} stroke={isDark ? "#999" : "#666"} />
+                  <Tooltip 
+                    formatter={(value: number, name) => [
+                      name === 'employeeCount' ? numeral(value).format('0,0') : numeral(value).format('0,0a'),
+                      name === 'totalIncome' ? 'Total Income' : name === 'profit' ? 'Profit' : 'Employees'
+                    ]} 
+                    contentStyle={isDark ? { backgroundColor: '#333', border: 'none' } : {}}
+                    labelStyle={isDark ? { color: '#fff' } : {}}
+                  />
+                  <Line yAxisId="left" type="monotone" dataKey="totalIncome" stroke="#8884d8" strokeWidth={2} name="Total Income" dot={{ r: 3, fill: isDark ? "#6660A0" : "#8884d8" }} activeDot={{ r: 5 }} />
+                  <Line yAxisId="left" type="monotone" dataKey="profit" stroke="#82ca9d" strokeWidth={2} name="Profit" dot={{ r: 3, fill: isDark ? "#5E9073" : "#82ca9d" }} activeDot={{ r: 5 }} />
+                  <Line yAxisId="right" type="monotone" dataKey="employeeCount" stroke="#ffc658" strokeWidth={2} name="Employees" dot={{ r: 3, fill: isDark ? "#B08D3E" : "#ffc658" }} activeDot={{ r: 5 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <p>Not enough data to display trends.</p>
+            )}
           </CardContent>
         </Card>
 
         {/* Historical Data Table */}
         <Card className={`p-4 mt-12 md:p-6 rounded-xl ${isDark ? "bg-neu-dark-base" : "bg-white"} shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
           <CardHeader>
-            <CardTitle>Historical Data</CardTitle>
+            <CardTitle>Historical Data ({decodedCompanyName})</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>

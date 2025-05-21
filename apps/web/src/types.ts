@@ -3,9 +3,10 @@ export interface CompanyData {
   totalIncome: number;
   profit: number;
   employeeCount: number;
+  pib: string;
   netPayCosts?: number;
-  averagePay?: number | string;
-  incomePerEmployee: number | string;
+  averagePay?: number | undefined;
+  incomePerEmployee: number | undefined;
 }
 
 export interface YearData {
