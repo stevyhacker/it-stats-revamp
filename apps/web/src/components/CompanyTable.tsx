@@ -16,7 +16,7 @@ type SortDirection = 'asc' | 'desc';
 
 interface CompanyTableProps {
   selectedYearData: YearData | undefined;
-  onCompanySelect: (companyName: string) => void;
+  onCompanySelect: (companyName: string, pib: string) => void;
   isDark?: boolean;
 }
 
@@ -133,7 +133,7 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
           {sortedCompanyList.map((company: CompanyData) => (
             <TableRow
               key={company.name}
-              onClick={() => onCompanySelect(company.name)}
+              onClick={() => onCompanySelect(company.name, company.pib)}
               className="cursor-pointer"
             >
               <TableCell className="font-medium">{company.name}</TableCell>

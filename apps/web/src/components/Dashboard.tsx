@@ -131,8 +131,8 @@ export function Dashboard({
         .slice(0, 6)
     : [];
 
-  const handleCompanySelect = (companyName: string) => {
-    router.push(`/company/${encodeURIComponent(companyName)}`);
+  const handleCompanySelect = (companyName: string, pib: string) => {
+    router.push(`/company/${encodeURIComponent(companyName)}?pib=${pib}`);
   };
 
   return (
@@ -365,7 +365,7 @@ export function Dashboard({
                 profit={company.profit}
                 employeeCount={company.employeeCount}
                 averagePay={company.averagePay}
-                onClick={() => handleCompanySelect(company.name)}
+                onClick={() => handleCompanySelect(company.name, company.pib)}
                 isDark={isDark} // Pass isDark prop
               />
             ))}

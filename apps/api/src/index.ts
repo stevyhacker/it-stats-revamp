@@ -79,6 +79,8 @@ app.get('/companies/:pib', async (c) => {
         netPayCosts: schema.companies.netPayCosts,
         averagePay: schema.companies.averagePay,
         incomePerEmployee: schema.companies.incomePerEmployee,
+        websiteUrl: schema.companies.websiteUrl,
+        companyDescription: schema.companies.companyDescription,
         yearId: schema.companies.yearId, // Keep yearId if needed
         createdAt: schema.companies.createdAt,
         updatedAt: schema.companies.updatedAt,
@@ -118,6 +120,8 @@ app.get('/companies', async (c) => {
              netPayCosts: schema.companies.netPayCosts,
              averagePay: schema.companies.averagePay,
              incomePerEmployee: schema.companies.incomePerEmployee,
+             websiteUrl: schema.companies.websiteUrl,
+             companyDescription: schema.companies.companyDescription,
              yearId: schema.companies.yearId, // Keep yearId for the base Company type
              createdAt: schema.companies.createdAt,
              updatedAt: schema.companies.updatedAt,

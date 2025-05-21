@@ -94,6 +94,8 @@ async function seed() {
                     netPayCosts: netPayCosts,
                     averagePay: averagePayInt,
                     incomePerEmployee: incomePerEmployee,
+                    websiteUrl: company.name === 'Nelt Co d.o.o.' ? 'https://www.nelt.com' : (company.name === 'Mercator-S d.o.o.' ? 'https://www.mercator.rs' : null),
+                    companyDescription: company.name === 'Nelt Co d.o.o.' ? 'Nelt Co is a leading distribution and logistics company in the Western Balkans.' : (company.name === 'Mercator-S d.o.o.' ? 'Mercator-S is one of the largest retail chains in Serbia.' : 'No description available.'),
                     yearId: yearId,
                 });
                 return acc; // Return the updated accumulator
