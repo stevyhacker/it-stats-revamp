@@ -27,6 +27,8 @@ interface CompanyYearData {
   employeeCount?: number; // Optional
   averagePay?: number; // Optional
   incomePerEmployee?: number; // Optional
+  netPayCosts?: number; // Optional
+  profitMargin?: number; // Derived
 }
 
 // Define structure for sorting configuration
@@ -56,8 +58,10 @@ const CompanyPage = () => {
       const profit = company.profit != null ? Number(company.profit) : undefined;
       const employeeCount = company.employeeCount != null ? Number(company.employeeCount) : undefined;
       const averagePay = company.averagePay != null ? Number(company.averagePay) : undefined; // Should work now
+      const netPayCosts = company.netPayCosts != null ? Number(company.netPayCosts) : undefined;
       // Recalculate incomePerEmployee safely
       const incomePerEmployee = (employeeCount && employeeCount !== 0 && totalIncome) ? totalIncome / employeeCount : undefined;
+      const profitMargin = (totalIncome && profit) ? profit / totalIncome : undefined;
 
       return {
         year: yearData.year,
@@ -67,6 +71,8 @@ const CompanyPage = () => {
         employeeCount,
         averagePay, // Include averagePay
         incomePerEmployee,
+        netPayCosts,
+        profitMargin,
       };
     })
     .filter(item => item !== null) // Remove explicit type predicate, let TS infer
@@ -129,6 +135,8 @@ const CompanyPage = () => {
   const revenueGrowth = calculateGrowth(latestYearData?.totalIncome, previousYearData?.totalIncome);
   const profitGrowth = calculateGrowth(latestYearData?.profit, previousYearData?.profit);
   const employeeGrowth = calculateGrowth(latestYearData?.employeeCount, previousYearData?.employeeCount);
+  const averagePayGrowth = calculateGrowth(latestYearData?.averagePay, previousYearData?.averagePay);
+  const netPayGrowth = calculateGrowth(latestYearData?.netPayCosts, previousYearData?.netPayCosts);
   // Use nullish coalescing (??) for safe division
   const profitMargin = (latestYearData?.totalIncome && latestYearData.totalIncome !== 0)
      ? (latestYearData.profit ?? 0) / latestYearData.totalIncome
@@ -142,6 +150,8 @@ const CompanyPage = () => {
     { key: 'employeeCount', label: 'Employees', format: formatNumber },
     { key: 'averagePay', label: 'Avg. Pay', format: formatCurrency },
     { key: 'incomePerEmployee', label: 'Income/Employee', format: formatCurrency },
+    { key: 'netPayCosts', label: 'Net Pay', format: formatCurrency },
+    { key: 'profitMargin', label: 'Profit Margin', format: formatPercentage },
   ];
 
   // Add dark mode state
@@ -246,20 +256,58 @@ const CompanyPage = () => {
             </CardContent>
           </Card>
 
-          {/* Profit Margin Card */}
-          <Card className={`p-4 md:p-6 rounded-xl ${
+        {/* Profit Margin Card */}
+        <Card className={`p-4 md:p-6 rounded-xl ${
               isDark ? "bg-neu-dark-base" : "bg-white"
             } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Profit Margin ({latestYearData?.year ?? 'N/A'})</CardTitle>
-              <Building2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatPercentage(profitMargin)}</div>
-              <p className="text-xs text-muted-foreground">Profit / Total Revenue</p>
-            </CardContent>
-          </Card>
-        </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Profit Margin ({latestYearData?.year ?? 'N/A'})</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatPercentage(profitMargin)}</div>
+            <p className="text-xs text-muted-foreground">Profit / Total Revenue</p>
+          </CardContent>
+        </Card>
+
+        {/* Average Pay Card */}
+        <Card className={`p-4 md:p-6 rounded-xl ${
+              isDark ? "bg-neu-dark-base" : "bg-white"
+            } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg. Pay ({latestYearData?.year ?? 'N/A'})</CardTitle>
+            <Wallet className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(latestYearData?.averagePay)}</div>
+            {averagePayGrowth !== undefined && (
+              <p className={`text-xs ${averagePayGrowth >= 0 ? 'text-green-500' : 'text-red-500'} flex items-center`}>
+                {averagePayGrowth >= 0 ? <ArrowUpRight className="h-3 w-3 mr-1" /> : <ArrowDownRight className="h-3 w-3 mr-1" />}
+                {formatPercentage(averagePayGrowth)} vs PY
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Net Pay Card */}
+        <Card className={`p-4 md:p-6 rounded-xl ${
+              isDark ? "bg-neu-dark-base" : "bg-white"
+            } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Net Pay ({latestYearData?.year ?? 'N/A'})</CardTitle>
+            <Wallet className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(latestYearData?.netPayCosts)}</div>
+            {netPayGrowth !== undefined && (
+              <p className={`text-xs ${netPayGrowth >= 0 ? 'text-green-500' : 'text-red-500'} flex items-center`}>
+                {netPayGrowth >= 0 ? <ArrowUpRight className="h-3 w-3 mr-1" /> : <ArrowDownRight className="h-3 w-3 mr-1" />}
+                {formatPercentage(netPayGrowth)} vs PY
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
         {/* Performance Trends Chart */}
         <Card className={`p-4 md:p-6 rounded-xl ${isDark ? "bg-neu-dark-base" : "bg-white"} shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
