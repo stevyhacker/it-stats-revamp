@@ -1,0 +1,14 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "setup": "bun run setup-db.ts",
+    "import": "bun run import-data.ts",
+    "full-import": "bun run setup && bun run import"
+  },
+  "dependencies": {
+    "pg": "^8.11.3",
+    "@types/pg": "^8.10.7"
+  }
+} 
