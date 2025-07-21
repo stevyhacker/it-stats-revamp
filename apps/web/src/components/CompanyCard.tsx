@@ -1,8 +1,7 @@
-import { TrendingUp, Users, DollarSign } from "lucide-react";
+import { TrendingUp, Users, DollarSign, Building2 } from "lucide-react";
 import numeral from "numeral";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; // Import shadcn Card components
-import { cn } from "@/lib/utils"; // Correct import path for cn utility
-import { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface CompanyCardProps {
   name: string;
@@ -25,61 +24,69 @@ export const CompanyCard = ({
   className,
   isDark,
 }: CompanyCardProps) => {
-  const [localIsDark, setLocalIsDark] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("darkMode") === "true";
-    }
-    return false;
-  });
-
-  const usedIsDark = isDark !== undefined ? isDark : localIsDark;
+  // Theme is now handled globally via ThemeProvider
 
   return (
     <Card
-      className={`p-4 md:p-6 rounded-xl ${
-        usedIsDark ? "bg-neu-dark-base" : "bg-white"
-      } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}
+      className={cn(
+        "p-4 md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 group",
+        "hover:scale-[1.02] animate-slide-up",
+        onClick ? "cursor-pointer" : "",
+        className
+      )}
       onClick={onClick}
     >
-      <CardHeader>
-        <CardTitle className="text-xl">{name}</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+        <CardTitle className="text-lg font-semibold line-clamp-2 group-hover:text-primary transition-colors">
+          {name}
+        </CardTitle>
+        <Building2 className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex items-center space-x-3">
-          <DollarSign className="text-blue-500 h-5 w-5" />
-          <div>
-            <p className="text-sm text-muted-foreground">Total Income</p>
-            <p className="font-semibold">
-              {numeral(totalIncome).format("0,0")}€
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center space-x-2">
+              <DollarSign className="h-4 w-4 text-chart-1" />
+              <p className="text-xs text-muted-foreground font-medium">Revenue</p>
+            </div>
+            <p className="font-bold text-lg">
+              {numeral(totalIncome).format("0.0a")}€
+            </p>
+          </div>
+          
+          <div className="space-y-1">
+            <div className="flex items-center space-x-2">
+              <TrendingUp className={`h-4 w-4 ${
+                profit >= 0 ? "text-chart-2" : "text-destructive"
+              }`} />
+              <p className="text-xs text-muted-foreground font-medium">Profit</p>
+            </div>
+            <p className={`font-bold text-lg ${
+              profit >= 0 ? "text-success" : "text-destructive"
+            }`}>
+              {numeral(profit).format("0.0a")}€
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <TrendingUp className="text-green-500 h-5 w-5" />
-          <div>
-            <p className="text-sm text-muted-foreground">Profit</p>
-            <p className="font-semibold">{numeral(profit).format("0,0")}€</p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-3">
-          <Users className="text-purple-500 h-5 w-5" />
-          <div>
-            <p className="text-sm text-muted-foreground">Employees</p>
-            <p className="font-semibold">{employeeCount}</p>
-          </div>
-        </div>
-        {averagePay && (
-          <div className="flex items-center space-x-3 pt-3 mt-3 border-t">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Average Monthly Salary
-              </p>
-              <p className="font-semibold">
-                {numeral(averagePay).format("0,0")}€
-              </p>
+        
+        <div className="pt-3 border-t border-border/50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Users className="h-4 w-4 text-chart-4" />
+              <span className="text-sm text-muted-foreground">Team Size</span>
             </div>
+            <span className="font-semibold">{employeeCount}</span>
           </div>
-        )}
+          
+          {averagePay && (
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-sm text-muted-foreground">Avg. Salary</span>
+              <span className="font-semibold text-sm">
+                {numeral(averagePay).format("0.0a")}€/mo
+              </span>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

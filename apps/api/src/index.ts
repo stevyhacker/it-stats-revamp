@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
-import { clerkMiddleware, getAuth } from '@hono/clerk-auth';
+// import { clerkMiddleware, getAuth } from '@hono/clerk-auth';
 import 'dotenv/config';
 import { db, years, companies, eq, desc, asc } from 'db';
 import * as schema from 'db/schema';
@@ -185,10 +185,10 @@ app.get('/years', async (c) => {
 // --- Clerk Authentication ---
 // Initialize Clerk middleware (ensure env vars are set)
 // Note: Adjust publishableKey and secretKey based on your needs if loaded differently
-const clerk = clerkMiddleware({
-  secretKey: process.env.CLERK_SECRET_KEY,
-  publishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
-});
+// const clerk = clerkMiddleware({
+//   secretKey: process.env.CLERK_SECRET_KEY,
+//   publishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+// });
 
 // Example public route
 app.get('/', (c) => {
@@ -200,26 +200,30 @@ app.get('/', (c) => {
 const appRoutes = app.basePath('/api'); // Example base path
 
 // Apply Clerk middleware to this group
-appRoutes.use(clerk);
+// appRoutes.use(clerk);
 
 appRoutes.get('/protected', (c) => {
-  const auth = getAuth(c);
+  // const auth = getAuth(c);
 
-  if (!auth?.userId) {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
+  // if (!auth?.userId) {
+  //   return c.json({ error: 'Unauthorized' }, 401);
+  // }
 
   // Access user data if needed: auth.userId, auth.sessionClaims, etc.
-  return c.json({ message: 'This is a protected route', userId: auth.userId });
+  // return c.json({ message: 'This is a protected route', userId: auth.userId });
+  return c.json({ message: 'This is a protected route' });
 });
 
 // --- Server Start ---
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3004;
-console.log(`API server starting on port ${port}`);
+const isDev = process.env.NODE_ENV !== 'production';
+
+console.log(`API server starting on port ${port} (${isDev ? 'development' : 'production'})`);
 
 import { serve } from 'bun';
 
 serve({
   port: port,
+  hostname: isDev ? 'localhost' : '0.0.0.0', // Listen on all interfaces in production
   fetch: app.fetch,
 });

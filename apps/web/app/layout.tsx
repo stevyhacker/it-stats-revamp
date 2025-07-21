@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ThemeScript } from "@/components/ThemeScript";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -44,13 +46,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      {/* Ensure head is present if needed, or body is directly inside html */}
+      <head>
+        <meta name="theme-color" content="#ffffff" />
+        <ThemeScript />
+      </head>
       <body className={inter.className}>
-        {/* 
-            You might add a ThemeProvider here if needed for more complex theme switching,
-            otherwise Tailwind's 'class' strategy in globals.css and tailwind.config.js handles dark mode.
-          */}
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,4 +1,5 @@
 import { Dashboard } from "../src/components/Dashboard";
+import { Header } from "../src/components/Header";
 
 // Define types locally
 interface Company {
@@ -55,12 +56,14 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="">
-      <Dashboard
-        years={years}
-        // selectedYear={selectedYear} // Removed: Dashboard manages this internally
-        data={data}
-      />
-    </main>
+    <>
+      <Header />
+      <main>
+        <Dashboard
+          years={years}
+          data={data}
+        />
+      </main>
+    </>
   );
 }

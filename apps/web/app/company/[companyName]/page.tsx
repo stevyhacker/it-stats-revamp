@@ -27,8 +27,6 @@ interface CompanyYearData {
   employeeCount?: number; // Optional
   averagePay?: number; // Optional
   incomePerEmployee?: number; // Optional
-  netPayCosts?: number; // Optional
-  profitMargin?: number; // Derived
 }
 
 // Define structure for sorting configuration
@@ -58,10 +56,8 @@ const CompanyPage = () => {
       const profit = company.profit != null ? Number(company.profit) : undefined;
       const employeeCount = company.employeeCount != null ? Number(company.employeeCount) : undefined;
       const averagePay = company.averagePay != null ? Number(company.averagePay) : undefined; // Should work now
-      const netPayCosts = company.netPayCosts != null ? Number(company.netPayCosts) : undefined;
       // Recalculate incomePerEmployee safely
       const incomePerEmployee = (employeeCount && employeeCount !== 0 && totalIncome) ? totalIncome / employeeCount : undefined;
-      const profitMargin = (totalIncome && profit) ? profit / totalIncome : undefined;
 
       return {
         year: yearData.year,
@@ -71,8 +67,6 @@ const CompanyPage = () => {
         employeeCount,
         averagePay, // Include averagePay
         incomePerEmployee,
-        netPayCosts,
-        profitMargin,
       };
     })
     .filter(item => item !== null) // Remove explicit type predicate, let TS infer
@@ -135,8 +129,6 @@ const CompanyPage = () => {
   const revenueGrowth = calculateGrowth(latestYearData?.totalIncome, previousYearData?.totalIncome);
   const profitGrowth = calculateGrowth(latestYearData?.profit, previousYearData?.profit);
   const employeeGrowth = calculateGrowth(latestYearData?.employeeCount, previousYearData?.employeeCount);
-  const averagePayGrowth = calculateGrowth(latestYearData?.averagePay, previousYearData?.averagePay);
-  const netPayGrowth = calculateGrowth(latestYearData?.netPayCosts, previousYearData?.netPayCosts);
   // Use nullish coalescing (??) for safe division
   const profitMargin = (latestYearData?.totalIncome && latestYearData.totalIncome !== 0)
      ? (latestYearData.profit ?? 0) / latestYearData.totalIncome
@@ -150,17 +142,10 @@ const CompanyPage = () => {
     { key: 'employeeCount', label: 'Employees', format: formatNumber },
     { key: 'averagePay', label: 'Avg. Pay', format: formatCurrency },
     { key: 'incomePerEmployee', label: 'Income/Employee', format: formatCurrency },
-    { key: 'netPayCosts', label: 'Net Pay', format: formatCurrency },
-    { key: 'profitMargin', label: 'Profit Margin', format: formatPercentage },
   ];
 
-  // Add dark mode state
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem("darkMode") === "true";
-    }
-    return false; // Default to false if window is not available (SSR)
-  });
+  // Theme is now handled globally via ThemeProvider
+  // const { isDark } = useTheme(); // Can be used if needed for specific logic
 
   if (companyHistoricalData.length === 0) {
     return (
@@ -200,9 +185,7 @@ const CompanyPage = () => {
         {/* Key Metrics Summary - Use ?. and ?? for safety */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {/* Total Revenue Card */}
-          <Card className={`p-4 md:p-6 rounded-xl ${
-              isDark ? "bg-neu-dark-base" : "bg-white"
-            } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
+          <Card className="p-4 md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 hover:scale-[1.02] animate-slide-up">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Revenue ({latestYearData?.year ?? 'N/A'})</CardTitle>
               <Wallet className="h-4 w-4 text-muted-foreground" />
@@ -219,9 +202,7 @@ const CompanyPage = () => {
           </Card>
 
           {/* Profit Card */}
-          <Card className={`p-4 md:p-6 rounded-xl ${
-              isDark ? "bg-neu-dark-base" : "bg-white"
-            } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
+          <Card className="p-4 md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 hover:scale-[1.02] animate-slide-up">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Profit ({latestYearData?.year ?? 'N/A'})</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -238,9 +219,7 @@ const CompanyPage = () => {
           </Card>
 
           {/* Employees Card */}
-          <Card className={`p-4 md:p-6 rounded-xl ${
-              isDark ? "bg-neu-dark-base" : "bg-white"
-            } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
+          <Card className="p-4 md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 hover:scale-[1.02] animate-slide-up">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Employees ({latestYearData?.year ?? 'N/A'})</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
@@ -256,61 +235,21 @@ const CompanyPage = () => {
             </CardContent>
           </Card>
 
-        {/* Profit Margin Card */}
-        <Card className={`p-4 md:p-6 rounded-xl ${
-              isDark ? "bg-neu-dark-base" : "bg-white"
-            } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Profit Margin ({latestYearData?.year ?? 'N/A'})</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatPercentage(profitMargin)}</div>
-            <p className="text-xs text-muted-foreground">Profit / Total Revenue</p>
-          </CardContent>
-        </Card>
-
-        {/* Average Pay Card */}
-        <Card className={`p-4 md:p-6 rounded-xl ${
-              isDark ? "bg-neu-dark-base" : "bg-white"
-            } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Pay ({latestYearData?.year ?? 'N/A'})</CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(latestYearData?.averagePay)}</div>
-            {averagePayGrowth !== undefined && (
-              <p className={`text-xs ${averagePayGrowth >= 0 ? 'text-green-500' : 'text-red-500'} flex items-center`}>
-                {averagePayGrowth >= 0 ? <ArrowUpRight className="h-3 w-3 mr-1" /> : <ArrowDownRight className="h-3 w-3 mr-1" />}
-                {formatPercentage(averagePayGrowth)} vs PY
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Net Pay Card */}
-        <Card className={`p-4 md:p-6 rounded-xl ${
-              isDark ? "bg-neu-dark-base" : "bg-white"
-            } shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Pay ({latestYearData?.year ?? 'N/A'})</CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(latestYearData?.netPayCosts)}</div>
-            {netPayGrowth !== undefined && (
-              <p className={`text-xs ${netPayGrowth >= 0 ? 'text-green-500' : 'text-red-500'} flex items-center`}>
-                {netPayGrowth >= 0 ? <ArrowUpRight className="h-3 w-3 mr-1" /> : <ArrowDownRight className="h-3 w-3 mr-1" />}
-                {formatPercentage(netPayGrowth)} vs PY
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+          {/* Profit Margin Card */}
+          <Card className="p-4 md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 hover:scale-[1.02] animate-slide-up">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Profit Margin ({latestYearData?.year ?? 'N/A'})</CardTitle>
+              <Building2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatPercentage(profitMargin)}</div>
+              <p className="text-xs text-muted-foreground">Profit / Total Revenue</p>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Performance Trends Chart */}
-        <Card className={`p-4 md:p-6 rounded-xl ${isDark ? "bg-neu-dark-base" : "bg-white"} shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
+        <Card className="p-4 md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 animate-slide-up">
           <CardHeader>
             <CardTitle>Financial Trends</CardTitle>
           </CardHeader>
@@ -334,7 +273,7 @@ const CompanyPage = () => {
         </Card>
 
         {/* Historical Data Table */}
-        <Card className={`p-4 mt-12 md:p-6 rounded-xl ${isDark ? "bg-neu-dark-base" : "bg-white"} shadow-neu-light-convex dark:shadow-neu-dark-convex border border-transparent dark:hover:border-neutral-700 hover:border-neutral-300 transition-all duration-200 transform hover:scale-[1.02]`}>
+        <Card className="p-4 mt-12 md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 animate-slide-up">
           <CardHeader>
             <CardTitle>Historical Data</CardTitle>
           </CardHeader>
@@ -343,7 +282,7 @@ const CompanyPage = () => {
               <TableHeader>
                 <TableRow>
                   {columns.map((column) => (
-                    <TableHead key={column.key} onClick={() => handleSort(column.key)} className="cursor-pointer">
+                    <TableHead key={column.key} onClick={() => handleSort(column.key)} className="cursor-pointer hover:bg-primary/10 hover:text-primary transition-all duration-300 font-semibold text-xs uppercase tracking-wider rounded-t-md">
                       {column.label}
                       {sortConfig.key === column.key ? (
                         sortConfig.direction === 'ascending' ? <ChevronUp className="inline ml-1 h-4 w-4" /> : <ChevronDown className="inline ml-1 h-4 w-4" />
@@ -353,10 +292,10 @@ const CompanyPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedData.map((row) => (
-                  <TableRow key={row.year}>
-                    {columns.map((column) => (
-                      <TableCell key={column.key}>
+                {sortedData.map((row, rowIndex) => (
+                  <TableRow key={row.year} className="hover:bg-gradient-to-r hover:from-primary/5 hover:via-chart-1/3 hover:to-primary/5 hover:border-l-4 hover:border-l-primary/60 transition-all duration-300 group relative overflow-hidden">
+                    {columns.map((column, cellIndex) => (
+                      <TableCell key={column.key} className="group-hover:text-foreground/90 group-hover:font-medium transition-all duration-300 relative z-10" style={{ '--cell-index': cellIndex } as React.CSSProperties}>
                         {/* Use nullish coalescing for default value */}
                         {column.format ? column.format(row[column.key]) : row[column.key] ?? 'N/A'}
                       </TableCell>
