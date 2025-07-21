@@ -17,10 +17,9 @@ type SortDirection = 'asc' | 'desc';
 interface CompanyTableProps {
   selectedYearData: YearData | undefined;
   onCompanySelect: (companyName: string) => void;
-  isDark?: boolean;
 }
 
-const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompanySelect, isDark }) => {
+const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompanySelect }) => {
   const [sortColumn, setSortColumn] = useState<SortableColumn>('totalIncome');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
@@ -81,8 +80,8 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
   };
 
   return (
-    <div className="overflow-x-auto rounded-lg neu-inset bg-muted/20 backdrop-blur-sm">
-      <Table>
+    <div className="w-full overflow-x-auto rounded-lg neu-inset bg-muted/20 backdrop-blur-sm">
+      <Table className="w-full">
         <TableHeader className="sticky top-0 bg-gradient-to-r from-muted/80 via-background/90 to-muted/80 backdrop-blur-sm border-b-2 border-primary/20 shadow-sm">
           <TableRow>
             <TableHead
@@ -107,18 +106,18 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
               {renderSortIcon('profit')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-chart-4/10 hover:text-chart-4 transition-all duration-300 font-semibold text-xs uppercase tracking-wider rounded-t-md"
-              onClick={() => handleSort('employeeCount')}
-            >
-              Employees
-              {renderSortIcon('employeeCount')}
-            </TableHead>
-            <TableHead
               className="cursor-pointer hover:bg-chart-3/10 hover:text-chart-3 transition-all duration-300 font-semibold text-xs uppercase tracking-wider rounded-t-md"
               onClick={() => handleSort('averagePay')}
             >
               Avg Monthly Pay
               {renderSortIcon('averagePay')}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer hover:bg-chart-4/10 hover:text-chart-4 transition-all duration-300 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+              onClick={() => handleSort('employeeCount')}
+            >
+              Employees
+              {renderSortIcon('employeeCount')}
             </TableHead>
             <TableHead
               className="cursor-pointer hover:bg-chart-5/10 hover:text-chart-5 transition-all duration-300 font-semibold text-xs uppercase tracking-wider rounded-t-md"
@@ -145,11 +144,11 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
                   {numeral(company.profit).format('0,0')}€
                 </span>
               </TableCell>
-              <TableCell className="group-hover:text-chart-4 group-hover:font-semibold transition-all duration-300 relative z-10">
-                {company.employeeCount}
-              </TableCell>
               <TableCell className="group-hover:text-chart-3 group-hover:font-semibold transition-all duration-300 relative z-10">
                 {numeral(company.averagePay).format('0,0')}€
+              </TableCell>
+              <TableCell className="group-hover:text-chart-4 group-hover:font-semibold transition-all duration-300 relative z-10">
+                {company.employeeCount}
               </TableCell>
               <TableCell className="group-hover:text-chart-5 group-hover:font-semibold transition-all duration-300 relative z-10">
                 {numeral(company.incomePerEmployee).format('0,0')}€

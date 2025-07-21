@@ -1,31 +1,53 @@
-FROM oven/bun:1 AS base
-WORKDIR /usr/src/app
+# Build stage
+FROM node:20-alpine AS builder
 
-# Copy workspace files
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY packages/db/package.json ./packages/db/
-COPY apps/api/package.json ./apps/api/
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@10.13.1 --activate
 
-# Install dependencies
-RUN bun install --frozen-lockfile
+# Install bun
+RUN apk add --no-cache bash curl && \
+    curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:$PATH"
 
-# Copy source code
-COPY packages/db ./packages/db
-COPY apps/api ./apps/api
+WORKDIR /app
 
-# Build the database package first
-WORKDIR /usr/src/app/packages/db
-RUN bun run build || true
+# Copy root package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 
-# Build the API
-WORKDIR /usr/src/app/apps/api
-RUN bun run build
+# Copy all packages and apps
+COPY packages ./packages
+COPY apps ./apps
 
-# Expose port
-EXPOSE 3004
+# Install ALL dependencies (needed for building)
+RUN pnpm install --frozen-lockfile
 
-# Set environment
+# Build the API and its dependencies
+RUN pnpm run --filter api build
+
+# Production stage
+FROM node:20-alpine AS production
+
+# Install bun for runtime
+RUN apk add --no-cache bash curl && \
+    curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:$PATH"
+
+WORKDIR /app
+
+# Copy built application
+COPY --from=builder /app/apps/api/dist ./dist
+COPY --from=builder /app/apps/api/package.json ./
+
+# Copy production dependencies from builder
+# We need to copy the entire node_modules because of workspace dependencies
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
+
+# Set production environment
 ENV NODE_ENV=production
 
-# Start the server
-CMD ["bun", "start"] 
+# Expose port
+EXPOSE 3000
+
+# Use bun to run the application
+CMD ["bun", "run", "dist/index.js"]

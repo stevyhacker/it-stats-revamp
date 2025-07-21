@@ -10,7 +10,10 @@
     "db:generate": "pnpm --filter db run generate",
     "db:migrate": "pnpm --filter db run migrate",
     "db:push": "pnpm --filter db run push",
-    "db:studio": "pnpm --filter db run studio"
+    "db:studio": "pnpm --filter db run studio",
+    "deploy:railway": "railway up",
+    "deploy:api": "railway up --service it-stats-api",
+    "deploy:web": "cd apps/web && railway up --service it-stats-web"
   },
   "devDependencies": {
     "@turbo/gen": "^1.13.3",

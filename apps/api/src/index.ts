@@ -215,7 +215,7 @@ appRoutes.get('/protected', (c) => {
 });
 
 // --- Server Start ---
-const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3004;
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const isDev = process.env.NODE_ENV !== 'production';
 
 console.log(`API server starting on port ${port} (${isDev ? 'development' : 'production'})`);

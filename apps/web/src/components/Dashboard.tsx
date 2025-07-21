@@ -322,11 +322,10 @@ export function Dashboard({
             <CardHeader>
               <CardTitle id="all-companies-heading">All Companies ({selectedYear})</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               <CompanyTable
                 selectedYearData={selectedYearData} 
                 onCompanySelect={handleCompanySelect} 
-                isDark={isDark} // Pass isDark prop
               />
             </CardContent>
           </Card>
