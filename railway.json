@@ -1,37 +1,12 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
-  "services": [
-    {
-      "name": "web",
-      "build": {
-        "builder": "NIXPACKS",
-        "buildCommand": "npm run build --workspace=web",
-        "watchPatterns": [
-          "/apps/web/**",
-          "/packages/db/**",
-          "/package-lock.json",
-          "/turbo.json"
-        ]
-      },
-      "startCommand": "npm run start --workspace=web"
-    },
-    {
-      "name": "api",
-      "build": {
-        "builder": "NIXPACKS",
-        "buildCommand": "npm run build --workspace=api",
-        "watchPatterns": [
-          "/apps/api/**",
-          "/packages/db/**",
-          "/package-lock.json",
-          "/turbo.json"
-        ]
-      },
-      "startCommand": "npm run start --workspace=api"
-    },
-    {
-      "name": "db",
-      "plugin": "postgresql"
-    }
-  ]
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "healthcheckPath": "/",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
 }
