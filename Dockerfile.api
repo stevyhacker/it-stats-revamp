@@ -35,6 +35,17 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/packages/db ./packages/db
 
+# --- DEBUG: List the contents of the final directories ---
+RUN echo "--- Listing /app contents ---"
+RUN ls -la /app
+RUN echo "--- Listing /app/apps contents ---"
+RUN ls -la /app/apps
+RUN echo "--- Listing /app/apps/api contents ---"
+RUN ls -la /app/apps/api
+RUN echo "--- Listing /app/apps/api/dist contents ---"
+RUN ls -la /app/apps/api/dist
+# --- END DEBUG ---
+
 WORKDIR /app/apps/api
 EXPOSE 3000
 
