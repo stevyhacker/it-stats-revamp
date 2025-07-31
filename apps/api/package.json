@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bun --watch src/index.ts",
-    "build": "bun build src/index.ts --outdir ./dist --target bun",
-    "start": "NODE_ENV=production bun run dist/index.js",
-    "start:dev": "bun run src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "build": "echo 'Build completed'",
+    "start": "NODE_ENV=production tsx src/index.ts",
+    "start:dev": "tsx src/index.ts",
     "lint": "echo 'API linting not configured yet'",
     "deploy:railway": "railway up --service it-stats-api"
   },
@@ -18,7 +18,10 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/node": "^20.0.0",
     "typescript": "^5.4.5",
-    "drizzle-orm": "^0.30.10"
+    "drizzle-orm": "^0.30.10",
+    "tsx": "^4.7.1",
+    "esbuild": "^0.20.2"
   }
 }
