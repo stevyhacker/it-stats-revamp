@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "echo 'Build completed'",
-    "start": "NODE_ENV=production tsx src/index.ts",
+    "build": "tsc",
+    "start": "NODE_ENV=production node dist/index.js",
     "start:dev": "tsx src/index.ts",
     "lint": "echo 'API linting not configured yet'",
     "deploy:railway": "railway up --service it-stats-api"
