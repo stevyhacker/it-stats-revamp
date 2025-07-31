@@ -22,17 +22,16 @@ RUN pnpm run build --filter=api
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-RUN corepack enable
 
-# Copy dependency manifests for production install
+# Copy essential files from the builder stage
 COPY --from=builder /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
 COPY --from=builder /app/apps/api/package.json ./apps/api/
 COPY --from=builder /app/packages/db/package.json ./packages/db/
 
-# Install only production dependencies
-RUN pnpm install --prod
+# Copy the node_modules from the builder stage
+COPY --from=builder /app/node_modules ./node_modules
 
-# Copy the built code and dependent packages from the builder stage
+# Copy the built code and dependent packages
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/packages/db ./packages/db
 
