@@ -220,10 +220,18 @@ const isDev = process.env.NODE_ENV !== 'production';
 
 console.log(`API server starting on port ${port} (${isDev ? 'development' : 'production'})`);
 
-import { serve } from 'bun';
+// Export for testing
+export default app;
 
-serve({
-  port: port,
-  hostname: isDev ? 'localhost' : '0.0.0.0', // Listen on all interfaces in production
-  fetch: app.fetch,
-});
+// Start server if this file is run directly
+if (require.main === module) {
+  const { serve } = require('@hono/node-server');
+  
+  serve({
+    fetch: app.fetch,
+    port: port,
+    hostname: isDev ? 'localhost' : '0.0.0.0',
+  });
+  
+  console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
+}

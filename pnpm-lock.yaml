@@ -33,6 +33,9 @@ importers:
       '@hono/clerk-auth':
         specifier: ^2.0.0
         version: 2.0.0(@clerk/backend@1.29.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(hono@4.7.7)
+      '@hono/node-server':
+        specifier: ^1.8.2
+        version: 1.14.1(hono@4.7.7)
       db:
         specifier: workspace:*
         version: link:../../packages/db
