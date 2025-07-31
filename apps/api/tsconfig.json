@@ -3,11 +3,11 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "Bundler", // Or NodeNext
+    "moduleResolution": "node",
     "jsx": "react-jsx",          // Required for Hono JSX middleware
     "jsxImportSource": "hono/jsx", // Required for Hono JSX middleware
     "lib": ["ESNext"],
-    "types": ["bun"],
+    "types": ["node"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

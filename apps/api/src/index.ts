@@ -220,18 +220,16 @@ const isDev = process.env.NODE_ENV !== 'production';
 
 console.log(`API server starting on port ${port} (${isDev ? 'development' : 'production'})`);
 
+// Use @hono/node-server for Node.js runtime
+import { serve } from '@hono/node-server';
+
+serve({
+  fetch: app.fetch,
+  port: port,
+  hostname: isDev ? 'localhost' : '0.0.0.0',
+});
+
+console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
+
 // Export for testing
 export default app;
-
-// Start server if this file is run directly
-if (require.main === module) {
-  const { serve } = require('@hono/node-server');
-  
-  serve({
-    fetch: app.fetch,
-    port: port,
-    hostname: isDev ? 'localhost' : '0.0.0.0',
-  });
-  
-  console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
-}
