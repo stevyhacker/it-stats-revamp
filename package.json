@@ -2,7 +2,7 @@
   "name": "it-stats-revamp-monorepo",
   "private": true,
   "scripts": {
-    "build": "turbo build",
+    "build": "turbo build --filter=api",
     "build:api": "turbo build --filter=api",
     "start": "pnpm --filter api run start",
     "dev": "turbo dev",
