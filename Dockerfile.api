@@ -21,7 +21,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build the application
-RUN pnpm run build
+RUN pnpm run build:api
 
 # Runtime stage
 FROM node:20-alpine AS runner

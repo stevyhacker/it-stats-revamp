@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
+    "build:api": "turbo build --filter=api",
     "start": "pnpm --filter api run start",
     "dev": "turbo dev",
     "lint": "turbo lint",
