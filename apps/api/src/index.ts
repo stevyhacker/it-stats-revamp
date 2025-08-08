@@ -3,7 +3,7 @@ import { logger } from 'hono/logger';
 // import { clerkMiddleware, getAuth } from '@hono/clerk-auth';
 import 'dotenv/config';
 import { db, years, companies, eq, desc, asc } from 'db';
-import * as schema from 'db/schema';
+import * as schema from 'db';
 
 // Define Company type using Drizzle inference
 type Company = typeof companies.$inferSelect;
@@ -226,7 +226,7 @@ import { serve } from '@hono/node-server';
 serve({
   fetch: app.fetch,
   port: port,
-  hostname: isDev ? 'localhost' : '0.0.0.0',
+  hostname: '0.0.0.0',
 });
 
 console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
