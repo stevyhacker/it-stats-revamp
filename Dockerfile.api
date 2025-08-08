@@ -16,7 +16,8 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build the api workspace
-RUN pnpm run build --filter=api
+# Build dependencies first, then the API
+RUN pnpm --filter db run build && pnpm --filter api run build
 
 # 2. Production Stage
 FROM node:20-alpine AS runner
@@ -30,6 +31,7 @@ COPY --from=builder /app/packages/db/package.json ./packages/db/
 
 # Copy the node_modules from the builder stage
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 
 # Copy the built code and dependent packages
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
@@ -49,5 +51,5 @@ RUN ls -la /app/apps/api/dist
 WORKDIR /app/apps/api
 EXPOSE 3000
 
-# Start the application directly with Node
+# Start the application with Node.js
 CMD ["node", "./dist/index.js"]

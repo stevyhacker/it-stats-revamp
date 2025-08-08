@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json", // Assuming a root tsconfig will be created later
   "compilerOptions": {
+    "noEmit": false,
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "node",

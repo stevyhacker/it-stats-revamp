@@ -2,9 +2,10 @@
   "name": "db",
   "version": "0.1.0",
   "private": true,
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "types": "./src/index.ts",
   "scripts": {
+    "build": "tsc -p tsconfig.json",
     "push": "drizzle-kit push:pg --config=drizzle.config.ts",
     "generate": "drizzle-kit generate:pg --config=drizzle.config.ts",
     "migrate": "pnpm run generate && pnpm run push",
