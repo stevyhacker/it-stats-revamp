@@ -19,9 +19,11 @@ interface CompanyTableProps {
   onCompanySelect: (companyName: string) => void;
   selectedCompanies?: string[];
   onToggleCompany?: (companyName: string) => void;
+  rpePercentileByName?: Map<string, number>;
+  profitMarginByName?: Map<string, number>;
 }
 
-const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompanySelect, selectedCompanies = [], onToggleCompany }) => {
+const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompanySelect, selectedCompanies = [], onToggleCompany, rpePercentileByName, profitMarginByName }) => {
   const [sortColumn, setSortColumn] = useState<SortableColumn>('totalIncome');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
@@ -147,7 +149,21 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
                   aria-label={`Select ${company.name} for comparison`}
                 />
               </TableCell>
-              <TableCell className="font-medium group-hover:text-foreground transition-colors duration-200 relative z-10">{company.name}</TableCell>
+              <TableCell className="font-medium group-hover:text-foreground transition-colors duration-200 relative z-10">
+                <div className="flex items-center gap-2">
+                  <span>{company.name}</span>
+                  {rpePercentileByName && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                      RPE P{rpePercentileByName.get(company.name) ?? 0}
+                    </span>
+                  )}
+                  {profitMarginByName && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-success/10 text-success">
+                      {(((profitMarginByName.get(company.name) ?? 0) * 100).toFixed(1))}%
+                    </span>
+                  )}
+                </div>
+              </TableCell>
               <TableCell className="group-hover:font-semibold transition-colors duration-200 relative z-10">
                 {numeral(company.totalIncome).format('0,0')}€
               </TableCell>

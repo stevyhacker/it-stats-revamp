@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ThemeToggle } from "./ThemeToggle";
 import { Filters, FiltersState } from "./Filters";
 import { useSearchParams, useRouter as useNextRouter } from 'next/navigation';
+import { Button } from "@/components/ui/button";
 
 interface Company {
   id: number;
@@ -174,6 +175,55 @@ export function Dashboard({
       // noop
     }
   }, [selectedYear, filters, nextRouter]);
+
+  // Compute per-company quality metrics for current year (percentiles & margin)
+  const qualityMetrics = React.useMemo(() => {
+    if (!selectedYearData?.companyList?.length) return { rpePercentile: new Map<string, number>(), profitMargin: new Map<string, number>() };
+    const list = selectedYearData.companyList;
+    const revenuePerEmployee: Array<{ name: string; value: number }> = list.map((c) => ({
+      name: c.name,
+      value: typeof c.incomePerEmployee === 'string' ? Number(c.incomePerEmployee) || 0 : (c.incomePerEmployee ?? 0)
+    }));
+    const sorted = [...revenuePerEmployee].sort((a, b) => a.value - b.value);
+    const rpePercentile = new Map<string, number>();
+    const profitMargin = new Map<string, number>();
+    const n = sorted.length;
+    const indexByName = new Map(sorted.map((item, idx) => [item.name, idx] as const));
+    list.forEach((c) => {
+      const idx = indexByName.get(c.name) ?? 0;
+      const pct = Math.round(((idx + 1) / n) * 100);
+      rpePercentile.set(c.name, pct);
+      const margin = (c.totalIncome && c.totalIncome !== 0) ? (c.profit ?? 0) / c.totalIncome : 0;
+      profitMargin.set(c.name, margin);
+    });
+    return { rpePercentile, profitMargin };
+  }, [selectedYearData]);
+
+  // Export CSV of filtered companies
+  const exportCsv = React.useCallback(() => {
+    if (!selectedYearData?.companyList) return;
+    const headers = [
+      'Company', 'Total Income', 'Profit', 'Employees', 'Avg Pay', 'Income/Employee', 'RPE Percentile', 'Profit Margin'
+    ];
+    const rows = selectedYearData.companyList.map((c) => [
+      c.name,
+      c.totalIncome ?? 0,
+      c.profit ?? 0,
+      c.employeeCount ?? 0,
+      c.averagePay ?? 0,
+      typeof c.incomePerEmployee === 'string' ? Number(c.incomePerEmployee) || 0 : (c.incomePerEmployee ?? 0),
+      qualityMetrics.rpePercentile.get(c.name) ?? 0,
+      (qualityMetrics.profitMargin.get(c.name) ?? 0).toFixed(4),
+    ]);
+    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `companies_${selectedYear}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, [selectedYearData, selectedYear, qualityMetrics]);
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 ease-in-out">
@@ -376,7 +426,12 @@ export function Dashboard({
         <section className="mb-12">
           <Card className="md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 animate-slide-up">
             <CardHeader>
-              <CardTitle>Market Trends</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Market Trends</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={exportCsv}>Export CSV</Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <TrendLineChart
@@ -399,6 +454,8 @@ export function Dashboard({
                 onCompanySelect={handleCompanySelect}
                 selectedCompanies={selectedCompanies}
                 onToggleCompany={handleToggleCompany}
+                rpePercentileByName={qualityMetrics.rpePercentile}
+                profitMarginByName={qualityMetrics.profitMargin}
               />
             </CardContent>
           </Card>
