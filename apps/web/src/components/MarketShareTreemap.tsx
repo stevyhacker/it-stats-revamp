@@ -1,9 +1,5 @@
 import React from 'react';
-import { 
-  Treemap, 
-  ResponsiveContainer, 
-  Tooltip 
-} from 'recharts';
+import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
 import { CompanyData } from '../types';
 import numeral from 'numeral';
 
