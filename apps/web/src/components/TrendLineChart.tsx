@@ -184,7 +184,7 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: T
                 color: 'hsl(var(--popover-foreground))'
               }}
             />
-            <Legend verticalAlign="bottom" height={36} />
+            <Legend verticalAlign="bottom" height={36} wrapperStyle={{ color: 'hsl(var(--muted-foreground))' }} />
             {companiesForChart.map((company, index) => (
               <Line 
                 key={company}

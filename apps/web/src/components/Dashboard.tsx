@@ -153,18 +153,26 @@ export function Dashboard({
     );
   };
 
-  // Sync state to URL
+  // Sync state to URL (client-only guard + no-op if unchanged)
   React.useEffect(() => {
-    const params = new URLSearchParams();
-    params.set('year', selectedYear);
-    if (filters.municipality) params.set('municipality', filters.municipality);
-    if (filters.activityCode) params.set('activity', filters.activityCode);
-    if (filters.minRevenue) params.set('minRevenue', filters.minRevenue);
-    if (filters.maxRevenue) params.set('maxRevenue', filters.maxRevenue);
-    if (filters.minEmployees) params.set('minEmployees', filters.minEmployees);
-    if (filters.maxEmployees) params.set('maxEmployees', filters.maxEmployees);
-    if (filters.profitOnly) params.set('profitOnly', '1');
-    nextRouter.replace(`/?${params.toString()}`);
+    try {
+      const params = new URLSearchParams();
+      params.set('year', selectedYear);
+      if (filters.municipality) params.set('municipality', filters.municipality);
+      if (filters.activityCode) params.set('activity', filters.activityCode);
+      if (filters.minRevenue) params.set('minRevenue', filters.minRevenue);
+      if (filters.maxRevenue) params.set('maxRevenue', filters.maxRevenue);
+      if (filters.minEmployees) params.set('minEmployees', filters.minEmployees);
+      if (filters.maxEmployees) params.set('maxEmployees', filters.maxEmployees);
+      if (filters.profitOnly) params.set('profitOnly', '1');
+      const nextHref = `/?${params.toString()}`;
+      const current = `${window.location.pathname}${window.location.search}`;
+      if (nextHref !== current) {
+        nextRouter.replace(nextHref);
+      }
+    } catch (e) {
+      // noop
+    }
   }, [selectedYear, filters, nextRouter]);
 
   return (
