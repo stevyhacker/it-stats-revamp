@@ -28,6 +28,7 @@ interface FiltersProps {
 }
 
 export function Filters({ companies, value, onChange, onClear }: FiltersProps) {
+  const ALL = "__all__";
   const municipalities = useMemo(() => {
     const set = new Set<string>();
     companies.forEach((c) => {
@@ -49,12 +50,12 @@ export function Filters({ companies, value, onChange, onClear }: FiltersProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground">Municipality</label>
-          <Select value={value.municipality ?? ""} onValueChange={(v) => onChange({ ...value, municipality: v || undefined })}>
+          <Select value={value.municipality ?? ALL} onValueChange={(v) => onChange({ ...value, municipality: v === ALL ? undefined : v })}>
             <SelectTrigger className="h-9">
               <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All</SelectItem>
+              <SelectItem value={ALL}>All</SelectItem>
               {municipalities.map((m) => (
                 <SelectItem key={m} value={m}>{m}</SelectItem>
               ))}
@@ -63,12 +64,12 @@ export function Filters({ companies, value, onChange, onClear }: FiltersProps) {
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground">Activity code</label>
-          <Select value={value.activityCode ?? ""} onValueChange={(v) => onChange({ ...value, activityCode: v || undefined })}>
+          <Select value={value.activityCode ?? ALL} onValueChange={(v) => onChange({ ...value, activityCode: v === ALL ? undefined : v })}>
             <SelectTrigger className="h-9">
               <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All</SelectItem>
+              <SelectItem value={ALL}>All</SelectItem>
               {activityCodes.map((a) => (
                 <SelectItem key={a} value={a}>{a}</SelectItem>
               ))}
