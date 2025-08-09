@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+// Note: Select imports removed since only range inputs remain
 import { Button } from "@/components/ui/button";
 
 export interface FiltersState {
@@ -9,7 +9,6 @@ export interface FiltersState {
   maxRevenue?: string;
   minEmployees?: string;
   maxEmployees?: string;
-  profitOnly?: boolean;
 }
 
 interface FiltersProps {
@@ -22,21 +21,7 @@ export function Filters({ value, onChange, onClear }: FiltersProps) {
 
   return (
     <div className="w-full glass-card border rounded-xl p-3 md:p-4 flex flex-col gap-3 md:gap-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">Profitability</label>
-          <div className="flex items-center gap-2 h-9">
-            <input
-              id="profitOnly"
-              type="checkbox"
-              checked={!!value.profitOnly}
-              onChange={(e) => onChange({ ...value, profitOnly: e.target.checked })}
-              className="h-4 w-4 accent-primary"
-            />
-            <label htmlFor="profitOnly" className="text-sm">Profit only</label>
-          </div>
-        </div>
-      </div>
+      {/* Profitability filter removed */}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="space-y-1">

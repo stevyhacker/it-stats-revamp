@@ -58,7 +58,6 @@ export function Dashboard({
     maxRevenue: searchParams.get('maxRevenue') || undefined,
     minEmployees: searchParams.get('minEmployees') || undefined,
     maxEmployees: searchParams.get('maxEmployees') || undefined,
-    profitOnly: searchParams.get('profitOnly') === '1' ? true : undefined,
   });
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
 
@@ -66,7 +65,6 @@ export function Dashboard({
   const selectedYearData = selectedYearDataRaw ? {
     ...selectedYearDataRaw,
     companyList: selectedYearDataRaw.companyList.filter((c) => {
-      if (filters.profitOnly && (c.profit ?? 0) < 0) return false;
       const rev = c.totalIncome ?? 0;
       const emp = c.employeeCount ?? 0;
       const minRev = filters.minRevenue ? Number(filters.minRevenue) : undefined;
@@ -159,7 +157,7 @@ export function Dashboard({
       if (filters.maxRevenue) params.set('maxRevenue', filters.maxRevenue);
       if (filters.minEmployees) params.set('minEmployees', filters.minEmployees);
       if (filters.maxEmployees) params.set('maxEmployees', filters.maxEmployees);
-      if (filters.profitOnly) params.set('profitOnly', '1');
+    // removed profitOnly
       const nextHref = `/?${params.toString()}`;
       const current = `${window.location.pathname}${window.location.search}`;
       if (nextHref !== current) {
