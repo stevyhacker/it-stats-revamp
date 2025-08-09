@@ -31,23 +31,17 @@ export const ThemeToggle = ({ variant = "default", className }: ThemeToggleProps
       title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
       <div className="relative w-5 h-5">
-        <Sun 
+        <Sun
           className={cn(
-            "w-5 h-5 absolute inset-0 transition-all duration-300",
-            // Light mode: show sun icon with warm color
-            isDark 
-              ? "rotate-90 scale-0 opacity-0" 
-              : "rotate-0 scale-100 opacity-100 text-amber-500 dark:text-amber-400"
-          )} 
+            "w-5 h-5 absolute inset-0 transition-all duration-300 text-current",
+            isDark ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
+          )}
         />
-        <Moon 
+        <Moon
           className={cn(
-            "w-5 h-5 absolute inset-0 transition-all duration-300",
-            // Dark mode: show moon icon with cool color
-            isDark 
-              ? "rotate-0 scale-100 opacity-100 text-blue-400 dark:text-blue-300" 
-              : "-rotate-90 scale-0 opacity-0"
-          )} 
+            "w-5 h-5 absolute inset-0 transition-all duration-300 text-current",
+            isDark ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
+          )}
         />
       </div>
     </Button>

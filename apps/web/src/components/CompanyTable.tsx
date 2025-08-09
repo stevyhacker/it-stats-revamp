@@ -80,47 +80,47 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
   };
 
   return (
-    <div className="w-full overflow-x-auto rounded-lg neu-inset bg-muted/20 backdrop-blur-sm">
+    <div className="w-full overflow-x-auto rounded-lg bg-card/60 backdrop-blur-sm border">
       <Table className="w-full">
-        <TableHeader className="sticky top-0 bg-gradient-to-r from-muted/80 via-background/90 to-muted/80 backdrop-blur-sm border-b-2 border-primary/20 shadow-sm">
+        <TableHeader className="sticky top-0 bg-background/80 backdrop-blur-sm border-b shadow-sm">
           <TableRow>
             <TableHead
-              className="cursor-pointer hover:bg-primary/10 hover:text-primary transition-all duration-300 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+              className="cursor-pointer hover:bg-accent/40 transition-all duration-200 font-semibold text-xs uppercase tracking-wider rounded-t-md"
               onClick={() => handleSort('name')}
             >
               Company Name
               {renderSortIcon('name')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-chart-1/10 hover:text-chart-1 transition-all duration-300 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+              className="cursor-pointer hover:bg-accent/40 transition-all duration-200 font-semibold text-xs uppercase tracking-wider rounded-t-md"
               onClick={() => handleSort('totalIncome')}
             >
               Total Income
               {renderSortIcon('totalIncome')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-chart-2/10 hover:text-chart-2 transition-all duration-300 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+              className="cursor-pointer hover:bg-accent/40 transition-all duration-200 font-semibold text-xs uppercase tracking-wider rounded-t-md"
               onClick={() => handleSort('profit')}
             >
               Profit
               {renderSortIcon('profit')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-chart-3/10 hover:text-chart-3 transition-all duration-300 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+              className="cursor-pointer hover:bg-accent/40 transition-all duration-200 font-semibold text-xs uppercase tracking-wider rounded-t-md"
               onClick={() => handleSort('averagePay')}
             >
               Avg Monthly Pay
               {renderSortIcon('averagePay')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-chart-4/10 hover:text-chart-4 transition-all duration-300 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+              className="cursor-pointer hover:bg-accent/40 transition-all duration-200 font-semibold text-xs uppercase tracking-wider rounded-t-md"
               onClick={() => handleSort('employeeCount')}
             >
               Employees
               {renderSortIcon('employeeCount')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-chart-5/10 hover:text-chart-5 transition-all duration-300 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+              className="cursor-pointer hover:bg-accent/40 transition-all duration-200 font-semibold text-xs uppercase tracking-wider rounded-t-md"
               onClick={() => handleSort('incomePerEmployee')}
             >
               Income/Employee
@@ -133,24 +133,24 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
             <TableRow
               key={company.name}
               onClick={() => onCompanySelect(company.name)}
-              className="cursor-pointer hover:bg-gradient-to-r hover:from-primary/5 hover:via-chart-1/3 hover:to-primary/5 hover:border-l-4 hover:border-l-primary/60 transition-all duration-300 group relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-primary/5 before:to-transparent before:translate-x-full hover:before:translate-x-0 before:transition-transform before:duration-500"
+              className="cursor-pointer hover:bg-accent/30 hover:border-l-4 hover:border-l-primary/50 transition-colors duration-200 group relative overflow-hidden"
             >
-              <TableCell className="font-medium group-hover:text-primary transition-all duration-300 relative z-10">{company.name}</TableCell>
-              <TableCell className="group-hover:text-chart-1 group-hover:font-semibold transition-all duration-300 relative z-10">
+              <TableCell className="font-medium group-hover:text-foreground transition-colors duration-200 relative z-10">{company.name}</TableCell>
+              <TableCell className="group-hover:font-semibold transition-colors duration-200 relative z-10">
                 {numeral(company.totalIncome).format('0,0')}€
               </TableCell>
-              <TableCell className="group-hover:font-semibold transition-all duration-300 relative z-10">
-                <span className={`${company.profit >= 0 ? 'group-hover:text-chart-2' : 'group-hover:text-destructive'}`}>
+              <TableCell className="group-hover:font-semibold transition-colors duration-200 relative z-10">
+                <span>
                   {numeral(company.profit).format('0,0')}€
                 </span>
               </TableCell>
-              <TableCell className="group-hover:text-chart-3 group-hover:font-semibold transition-all duration-300 relative z-10">
+              <TableCell className="group-hover:font-semibold transition-colors duration-200 relative z-10">
                 {numeral(company.averagePay).format('0,0')}€
               </TableCell>
-              <TableCell className="group-hover:text-chart-4 group-hover:font-semibold transition-all duration-300 relative z-10">
+              <TableCell className="group-hover:font-semibold transition-colors duration-200 relative z-10">
                 {company.employeeCount}
               </TableCell>
-              <TableCell className="group-hover:text-chart-5 group-hover:font-semibold transition-all duration-300 relative z-10">
+              <TableCell className="group-hover:font-semibold transition-colors duration-200 relative z-10">
                 {numeral(company.incomePerEmployee).format('0,0')}€
               </TableCell>
             </TableRow>
