@@ -54,8 +54,6 @@ export function Dashboard({
 
   const [selectedYear, setSelectedYear] = useState<string>(searchParams.get('year') || years[0] || "");
   const [filters, setFilters] = useState<FiltersState>({
-    municipality: searchParams.get('municipality') || undefined,
-    activityCode: searchParams.get('activity') || undefined,
     minRevenue: searchParams.get('minRevenue') || undefined,
     maxRevenue: searchParams.get('maxRevenue') || undefined,
     minEmployees: searchParams.get('minEmployees') || undefined,
@@ -68,8 +66,6 @@ export function Dashboard({
   const selectedYearData = selectedYearDataRaw ? {
     ...selectedYearDataRaw,
     companyList: selectedYearDataRaw.companyList.filter((c) => {
-      if (filters.municipality && c.municipality !== filters.municipality) return false;
-      if (filters.activityCode && c.activityCode !== filters.activityCode) return false;
       if (filters.profitOnly && (c.profit ?? 0) < 0) return false;
       const rev = c.totalIncome ?? 0;
       const emp = c.employeeCount ?? 0;
@@ -159,8 +155,6 @@ export function Dashboard({
     try {
       const params = new URLSearchParams();
       params.set('year', selectedYear);
-      if (filters.municipality) params.set('municipality', filters.municipality);
-      if (filters.activityCode) params.set('activity', filters.activityCode);
       if (filters.minRevenue) params.set('minRevenue', filters.minRevenue);
       if (filters.maxRevenue) params.set('maxRevenue', filters.maxRevenue);
       if (filters.minEmployees) params.set('minEmployees', filters.minEmployees);
@@ -277,7 +271,6 @@ export function Dashboard({
         {selectedYearDataRaw && (
           <div className="mb-8">
             <Filters
-              companies={selectedYearDataRaw.companyList}
               value={filters}
               onChange={setFilters}
               onClear={() => setFilters({})}

@@ -5,8 +5,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 
 export interface FiltersState {
-  municipality?: string;
-  activityCode?: string;
   minRevenue?: string; // use string for inputs to handle empty
   maxRevenue?: string;
   minEmployees?: string;
@@ -15,67 +13,16 @@ export interface FiltersState {
 }
 
 interface FiltersProps {
-  companies: Array<{
-    municipality: string | null;
-    activityCode: string | null;
-    totalIncome: number | null;
-    employeeCount: number | null;
-    profit: number | null;
-  }>;
   value: FiltersState;
   onChange: (next: FiltersState) => void;
   onClear: () => void;
 }
 
-export function Filters({ companies, value, onChange, onClear }: FiltersProps) {
-  const ALL = "__all__";
-  const municipalities = useMemo(() => {
-    const set = new Set<string>();
-    companies.forEach((c) => {
-      if (c.municipality) set.add(c.municipality);
-    });
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [companies]);
-
-  const activityCodes = useMemo(() => {
-    const set = new Set<string>();
-    companies.forEach((c) => {
-      if (c.activityCode) set.add(c.activityCode);
-    });
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [companies]);
+export function Filters({ value, onChange, onClear }: FiltersProps) {
 
   return (
     <div className="w-full glass-card border rounded-xl p-3 md:p-4 flex flex-col gap-3 md:gap-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">Municipality</label>
-          <Select value={value.municipality ?? ALL} onValueChange={(v) => onChange({ ...value, municipality: v === ALL ? undefined : v })}>
-            <SelectTrigger className="h-9">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>All</SelectItem>
-              {municipalities.map((m) => (
-                <SelectItem key={m} value={m}>{m}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">Activity code</label>
-          <Select value={value.activityCode ?? ALL} onValueChange={(v) => onChange({ ...value, activityCode: v === ALL ? undefined : v })}>
-            <SelectTrigger className="h-9">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>All</SelectItem>
-              {activityCodes.map((a) => (
-                <SelectItem key={a} value={a}>{a}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground">Profitability</label>
           <div className="flex items-center gap-2 h-9">
