@@ -92,9 +92,17 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: T
 
   }, [filteredData, companiesForChart, metricType]);
 
-  // Random color generator for lines
+  // Theme-aware color generator using CSS variables
   const getLineColor = (index: number) => {
-    const colors = ['#3B82F6', '#10B981', '#F97316', '#8B5CF6', '#EC4899', '#06B6D4', '#F59E0B'];
+    const colors = [
+      'hsl(var(--chart-1))',
+      'hsl(var(--chart-2))',
+      'hsl(var(--chart-3))',
+      'hsl(var(--chart-4))',
+      'hsl(var(--chart-5))',
+      'hsl(var(--primary))',
+      'hsl(var(--secondary))',
+    ];
     return colors[index % colors.length];
   };
 
@@ -149,15 +157,15 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: T
       <div className="h-[400px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 70 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <CartesianGrid strokeDasharray="3 3" stroke={`hsl(var(--muted-foreground) / 0.3)`} />
             <XAxis 
               dataKey="year" 
-              stroke="#9CA3AF" 
+              stroke={`hsl(var(--muted-foreground))`} 
               angle={0} 
               tickMargin={10}
             />
             <YAxis 
-              stroke="#9CA3AF" 
+              stroke={`hsl(var(--muted-foreground))`} 
               tickFormatter={(value) => {
                 if (metricType === 'employees') {
                   return value;
@@ -170,10 +178,10 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: T
             <Tooltip 
               formatter={(value: number, name: string) => [formatTooltipValue(value), name]}
               contentStyle={{ 
-                backgroundColor: 'rgba(17, 24, 39, 0.8)',
-                border: 'none',
-                borderRadius: '4px',
-                color: '#fff'
+                backgroundColor: 'hsl(var(--popover))',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '8px',
+                color: 'hsl(var(--popover-foreground))'
               }}
             />
             <Legend verticalAlign="bottom" height={36} />

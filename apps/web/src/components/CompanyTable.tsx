@@ -17,9 +17,11 @@ type SortDirection = 'asc' | 'desc';
 interface CompanyTableProps {
   selectedYearData: YearData | undefined;
   onCompanySelect: (companyName: string) => void;
+  selectedCompanies?: string[];
+  onToggleCompany?: (companyName: string) => void;
 }
 
-const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompanySelect }) => {
+const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompanySelect, selectedCompanies = [], onToggleCompany }) => {
   const [sortColumn, setSortColumn] = useState<SortableColumn>('totalIncome');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
@@ -84,6 +86,7 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
       <Table className="w-full">
         <TableHeader className="sticky top-0 bg-background/80 backdrop-blur-sm border-b shadow-sm">
           <TableRow>
+            <TableHead className="w-8"></TableHead>
             <TableHead
               className="cursor-pointer hover:bg-accent/40 transition-all duration-200 font-semibold text-xs uppercase tracking-wider rounded-t-md"
               onClick={() => handleSort('name')}
@@ -135,6 +138,15 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
               onClick={() => onCompanySelect(company.name)}
               className="cursor-pointer hover:bg-accent/30 hover:border-l-4 hover:border-l-primary/50 transition-colors duration-200 group relative overflow-hidden"
             >
+              <TableCell onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 accent-primary"
+                  checked={selectedCompanies.includes(company.name)}
+                  onChange={() => onToggleCompany && onToggleCompany(company.name)}
+                  aria-label={`Select ${company.name} for comparison`}
+                />
+              </TableCell>
               <TableCell className="font-medium group-hover:text-foreground transition-colors duration-200 relative z-10">{company.name}</TableCell>
               <TableCell className="group-hover:font-semibold transition-colors duration-200 relative z-10">
                 {numeral(company.totalIncome).format('0,0')}€

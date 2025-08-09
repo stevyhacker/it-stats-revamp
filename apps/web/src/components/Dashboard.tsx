@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { CompanyCard } from "./CompanyCard";
 import { TrendLineChart } from "./TrendLineChart";
@@ -16,6 +16,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"; 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ThemeToggle } from "./ThemeToggle";
+import { Filters, FiltersState } from "./Filters";
+import { useSearchParams, useRouter as useNextRouter } from 'next/navigation';
 
 interface Company {
   id: number;
@@ -46,10 +48,41 @@ export function Dashboard({
   data: YearData[];
 }) {
   const router = useRouter();
+  const nextRouter = useNextRouter();
+  const searchParams = useSearchParams();
 
-  const [selectedYear, setSelectedYear] = useState<string>(years[0] || "");
+  const [selectedYear, setSelectedYear] = useState<string>(searchParams.get('year') || years[0] || "");
+  const [filters, setFilters] = useState<FiltersState>({
+    municipality: searchParams.get('municipality') || undefined,
+    activityCode: searchParams.get('activity') || undefined,
+    minRevenue: searchParams.get('minRevenue') || undefined,
+    maxRevenue: searchParams.get('maxRevenue') || undefined,
+    minEmployees: searchParams.get('minEmployees') || undefined,
+    maxEmployees: searchParams.get('maxEmployees') || undefined,
+    profitOnly: searchParams.get('profitOnly') === '1' ? true : undefined,
+  });
+  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
 
-  const selectedYearData = data.find((d) => d.year === selectedYear);
+  const selectedYearDataRaw = data.find((d) => d.year === selectedYear);
+  const selectedYearData = selectedYearDataRaw ? {
+    ...selectedYearDataRaw,
+    companyList: selectedYearDataRaw.companyList.filter((c) => {
+      if (filters.municipality && c.municipality !== filters.municipality) return false;
+      if (filters.activityCode && c.activityCode !== filters.activityCode) return false;
+      if (filters.profitOnly && (c.profit ?? 0) < 0) return false;
+      const rev = c.totalIncome ?? 0;
+      const emp = c.employeeCount ?? 0;
+      const minRev = filters.minRevenue ? Number(filters.minRevenue) : undefined;
+      const maxRev = filters.maxRevenue ? Number(filters.maxRevenue) : undefined;
+      const minEmp = filters.minEmployees ? Number(filters.minEmployees) : undefined;
+      const maxEmp = filters.maxEmployees ? Number(filters.maxEmployees) : undefined;
+      if (minRev !== undefined && rev < minRev) return false;
+      if (maxRev !== undefined && rev > maxRev) return false;
+      if (minEmp !== undefined && emp < minEmp) return false;
+      if (maxEmp !== undefined && emp > maxEmp) return false;
+      return true;
+    })
+  } : undefined;
   const previousYearData = data.find(
     (d) => d.year === years[years.indexOf(selectedYear) + 1]
   );
@@ -113,6 +146,27 @@ export function Dashboard({
     router.push(`/company/${encodeURIComponent(companyName)}`);
   };
 
+  const handleToggleCompany = (companyName: string) => {
+    setSelectedCompanies((prev) => prev.includes(companyName)
+      ? prev.filter((n) => n !== companyName)
+      : [...prev, companyName]
+    );
+  };
+
+  // Sync state to URL
+  React.useEffect(() => {
+    const params = new URLSearchParams();
+    params.set('year', selectedYear);
+    if (filters.municipality) params.set('municipality', filters.municipality);
+    if (filters.activityCode) params.set('activity', filters.activityCode);
+    if (filters.minRevenue) params.set('minRevenue', filters.minRevenue);
+    if (filters.maxRevenue) params.set('maxRevenue', filters.maxRevenue);
+    if (filters.minEmployees) params.set('minEmployees', filters.minEmployees);
+    if (filters.maxEmployees) params.set('maxEmployees', filters.maxEmployees);
+    if (filters.profitOnly) params.set('profitOnly', '1');
+    nextRouter.replace(`/?${params.toString()}`);
+  }, [selectedYear, filters, nextRouter]);
+
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 ease-in-out">
       <div className="absolute inset-0 bg-gradient-to-br from-background via-surface-2 to-surface-3 -z-10" />
@@ -160,6 +214,18 @@ export function Dashboard({
             </Select>
           </div>
         </div>
+
+        {/* Filters */}
+        {selectedYearDataRaw && (
+          <div className="mb-8">
+            <Filters
+              companies={selectedYearDataRaw.companyList}
+              value={filters}
+              onChange={setFilters}
+              onClear={() => setFilters({})}
+            />
+          </div>
+        )}
 
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6">
@@ -306,8 +372,9 @@ export function Dashboard({
             </CardHeader>
             <CardContent>
               <TrendLineChart
-                data={data} // Pass the full data (containing all years)
-                selectedYear={selectedYear} // Pass the currently selected year
+                data={data}
+                selectedYear={selectedYear}
+                selectedCompanies={selectedCompanies}
               />
             </CardContent>
           </Card>
@@ -320,8 +387,10 @@ export function Dashboard({
             </CardHeader>
             <CardContent className="p-0">
               <CompanyTable
-                selectedYearData={selectedYearData} 
-                onCompanySelect={handleCompanySelect} 
+                selectedYearData={selectedYearData}
+                onCompanySelect={handleCompanySelect}
+                selectedCompanies={selectedCompanies}
+                onToggleCompany={handleToggleCompany}
               />
             </CardContent>
           </Card>
