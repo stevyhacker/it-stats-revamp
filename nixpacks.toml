@@ -1,0 +1,12 @@
+[phases.setup]
+nixpkgsArchive = "https://github.com/NixOS/nixpkgs/archive/3d4fe6d3d.tar.gz"
+
+[phases.install]
+nixPkgs = ["nodejs_20", "pnpm"]
+cmds = ["pnpm install --frozen-lockfile --strict-peer-deps"]
+
+[phases.build]
+cmds = ["pnpm run build"]
+
+[start]
+cmd = "pnpm run start"

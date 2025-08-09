@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json", // Assuming a root tsconfig will be created later
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

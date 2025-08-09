@@ -1,13 +1,43 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ],
   "compilerOptions": {
+    "target": "es2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "checkJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler", // Changed from node to bundler for modern tooling
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true, // Root config doesn't emit; packages control their own output
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "db": ["packages/db/src"],
+      "@/*": ["apps/web/src/*"] // Example path alias for web app
     }
-  }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "apps/*/next-env.d.ts", // Include Next.js env types from apps
+    "packages/db/src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "apps/api/dist",
+    "apps/web/.next",
+    "packages/db/dist"
+  ]
 }

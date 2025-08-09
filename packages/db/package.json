@@ -1,0 +1,25 @@
+{
+  "name": "db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "push": "drizzle-kit push:pg --config=drizzle.config.ts",
+    "generate": "drizzle-kit generate:pg --config=drizzle.config.ts",
+    "migrate": "pnpm run generate && pnpm run push",
+    "studio": "drizzle-kit studio --config=drizzle.config.ts",
+    "seed": "bun run ./scripts/seed.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "drizzle-orm": "^0.30.10",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.20.17",
+    "typescript": "^5.4.5"
+  }
+}
