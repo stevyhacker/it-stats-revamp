@@ -11,7 +11,6 @@ interface CompanyCardProps {
   averagePay?: number | string;
   onClick?: () => void;
   className?: string;
-  isDark?: boolean;
 }
 
 export const CompanyCard = ({
@@ -22,7 +21,6 @@ export const CompanyCard = ({
   averagePay,
   onClick,
   className,
-  isDark,
 }: CompanyCardProps) => {
   // Theme is now handled globally via ThemeProvider
 
@@ -31,7 +29,7 @@ export const CompanyCard = ({
       className={cn(
         "p-4 md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 group",
         "hover:scale-[1.02] animate-slide-up",
-        onClick ? "cursor-pointer" : "",
+        onClick ? "cursor-pointer" : undefined,
         className
       )}
       onClick={onClick}

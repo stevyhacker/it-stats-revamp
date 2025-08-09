@@ -164,7 +164,7 @@ const CompanyPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neu-base dark:bg-neu-dark-base text-neu-text dark:text-neu-dark-text p-4 sm:p-6 lg:p-8 transition-colors duration-200">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8 transition-colors duration-200">
       <div className="relative max-w-7xl mx-auto">
         {/* Back Button */}
         <Button

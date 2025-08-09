@@ -10,8 +10,8 @@ export const Charts = ({ growthData }: ChartsProps) => {
 
   return (
     <div className="space-y-8">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Top 10 Companies by Growth Rate</h2>
+      <div className="p-6 rounded-lg glass-card shadow-soft border">
+        <h2 className="text-xl font-semibold mb-4">Top 10 Companies by Growth Rate</h2>
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={topGrowth}>

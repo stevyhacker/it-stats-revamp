@@ -102,7 +102,7 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length > 0) {
     const data = payload[0].payload;
     return (
-      <div className="bg-gray-900 dark:bg-gray-900 bg-white text-gray-900 dark:text-white p-3 rounded shadow-lg border border-gray-200 dark:border-gray-700">
+      <div className="rounded-md border bg-popover text-popover-foreground p-3 shadow-md">
         <p className="font-bold">{data.name || ''}</p>
         <p>Revenue: {numeral(data.totalIncome || 0).format('0,0')}€</p>
         <p>Market Share: {data.percentage !== undefined ? `${data.percentage.toFixed(2)}%` : '0.00%'}</p>
@@ -130,7 +130,7 @@ export const MarketShareTreemap = ({ companies, height = 500, className = '' }: 
   ];
 
   return (
-    <div style={{ height }} className={`w-full bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 ${className}`}>
+    <div style={{ height }} className={`w-full p-4 rounded-lg glass-card border ${className}`}>
       <div className="mb-4 flex justify-end">
         <div className="flex items-center space-x-6">
           <div className="flex items-center">

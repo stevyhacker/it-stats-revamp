@@ -16,10 +16,9 @@ interface TrendLineChartProps {
   data: YearData[];
   selectedCompanies?: string[];
   selectedYear: string;
-  isDark?: boolean;
 }
 
-export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear, isDark }: TrendLineChartProps) => {
+export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: TrendLineChartProps) => {
   const [metricType, setMetricType] = useState<'revenue' | 'employees' | 'profit'>('revenue');
   
   // Filter data up to the selected year
@@ -108,9 +107,9 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear, isD
   };
 
   return (
-    <div className={`bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md ${isDark ? 'dark' : ''}`}>
+    <div className="p-6 rounded-lg glass-card shadow-soft">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+        <h2 className="text-xl font-semibold">
           {metricType === 'revenue' ? 'Revenue Trends' : metricType === 'employees' ? 'Employee Count Trends' : 'Profit Trends'}
         </h2>
         <div className="flex space-x-2">
@@ -118,8 +117,8 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear, isD
             onClick={() => setMetricType('revenue')}
             className={`px-3 py-1 text-sm rounded-md ${
               metricType === 'revenue' 
-                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' 
-                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                ? 'bg-primary/10 text-primary' 
+                : 'bg-muted text-muted-foreground'
             }`}
           >
             Revenue
@@ -128,8 +127,8 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear, isD
             onClick={() => setMetricType('employees')}
             className={`px-3 py-1 text-sm rounded-md ${
               metricType === 'employees' 
-                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' 
-                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                ? 'bg-primary/10 text-primary' 
+                : 'bg-muted text-muted-foreground'
             }`}
           >
             Employees
@@ -138,8 +137,8 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear, isD
             onClick={() => setMetricType('profit')}
             className={`px-3 py-1 text-sm rounded-md ${
               metricType === 'profit' 
-                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' 
-                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                ? 'bg-primary/10 text-primary' 
+                : 'bg-muted text-muted-foreground'
             }`}
           >
             Profit

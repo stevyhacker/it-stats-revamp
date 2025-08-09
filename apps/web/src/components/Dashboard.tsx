@@ -16,7 +16,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"; 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ThemeToggle } from "./ThemeToggle";
-import { useTheme } from "@/contexts/ThemeContext"; 
 
 interface Company {
   id: number;
@@ -48,7 +47,6 @@ export function Dashboard({
 }) {
   const router = useRouter();
 
-  const { isDark } = useTheme();
   const [selectedYear, setSelectedYear] = useState<string>(years[0] || "");
 
   const selectedYearData = data.find((d) => d.year === selectedYear);
@@ -296,7 +294,6 @@ export function Dashboard({
                 employeeCount={company.employeeCount}
                 averagePay={company.averagePay}
                 onClick={() => handleCompanySelect(company.name)}
-                isDark={isDark} // Pass isDark prop
               />
             ))}
           </div>
@@ -311,7 +308,6 @@ export function Dashboard({
               <TrendLineChart
                 data={data} // Pass the full data (containing all years)
                 selectedYear={selectedYear} // Pass the currently selected year
-                isDark={isDark} // Pass isDark prop
               />
             </CardContent>
           </Card>
