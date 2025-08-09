@@ -16,8 +16,8 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build the api workspace
-# Build dependencies first, then the API
-RUN pnpm --filter db run build && pnpm --filter api run build
+# Build the db package (API will run via tsx)
+RUN pnpm -C packages/db run build && ls -la packages/db/dist
 
 # 2. Production Stage
 FROM node:20-alpine AS runner
@@ -32,10 +32,13 @@ COPY --from=builder /app/packages/db/package.json ./packages/db/
 # Copy the node_modules from the builder stage
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=builder /app/packages/db/node_modules ./packages/db/node_modules
 
-# Copy the built code and dependent packages
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
-COPY --from=builder /app/packages/db ./packages/db
+# Copy source code for API and built DB outputs
+COPY --from=builder /app/apps/api/src ./apps/api/src
+COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
+COPY --from=builder /app/packages/db/dist ./packages/db/dist
+COPY --from=builder /app/packages/db/package.json ./packages/db/package.json
 
 # --- DEBUG: List the contents of the final directories ---
 RUN echo "--- Listing /app contents ---"
@@ -44,12 +47,11 @@ RUN echo "--- Listing /app/apps contents ---"
 RUN ls -la /app/apps
 RUN echo "--- Listing /app/apps/api contents ---"
 RUN ls -la /app/apps/api
-RUN echo "--- Listing /app/apps/api/dist contents ---"
-RUN ls -la /app/apps/api/dist
+# No dist since we run via tsx
 # --- END DEBUG ---
 
 WORKDIR /app/apps/api
 EXPOSE 3000
 
-# Start the application with Node.js
-CMD ["node", "./dist/index.js"]
+# Start the application with tsx via --import (Node 20)
+CMD ["node", "--import=tsx", "./src/index.ts"]

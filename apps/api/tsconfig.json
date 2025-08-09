@@ -1,13 +1,12 @@
 {
-  "extends": "../../tsconfig.json", // Assuming a root tsconfig will be created later
   "compilerOptions": {
     "noEmit": false,
-    "target": "ESNext",
-    "module": "ESNext",
+    "target": "ES2020",
+    "module": "ES2020",
     "moduleResolution": "node",
-    "jsx": "react-jsx",          // Required for Hono JSX middleware
-    "jsxImportSource": "hono/jsx", // Required for Hono JSX middleware
-    "lib": ["ESNext"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx",
+    "lib": ["ES2020"],
     "types": ["node"],
     "allowJs": false,
     "checkJs": false,
@@ -18,7 +17,10 @@
     "outDir": "dist",
     "rootDir": "src",
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "db": ["../../packages/db/dist/index.js"],
+      "db/*": ["../../packages/db/dist/*"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
