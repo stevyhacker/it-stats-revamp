@@ -109,39 +109,7 @@ const CompanyPage = () => {
     return items;
   }, [companyHistoricalData, sortConfig]);
 
-  // Sector & municipality averages series
-  const [showSectorAvg, setShowSectorAvg] = useState(false);
-  const [showMunicipalityAvg, setShowMunicipalityAvg] = useState(false);
-
-  const sectorSeries = useMemo(() => {
-    if (!decodedCompanyName) return null;
-    // Find the activity code of the company in latest year
-    const latestYear = data.find(y => y.companyList.some(c => c.name === decodedCompanyName));
-    const company = latestYear?.companyList.find(c => c.name === decodedCompanyName) as any;
-    const activity = (company?.activityCode ?? company?.activity) as string | undefined;
-    if (!activity) return null;
-    // Build per-year averages for that activity
-    return data.map(y => {
-      const comps = y.companyList.filter((c: any) => (c.activityCode ?? c.activity) === activity);
-      const total = comps.reduce((s: number, c: any) => s + (typeof c.totalIncome === 'number' ? c.totalIncome : Number(c.totalIncome) || 0), 0);
-      const avg = comps.length ? total / comps.length : 0;
-      return { year: parseInt(y.year, 10), sectorAvgRevenue: avg };
-    }).sort((a, b) => a.year - b.year);
-  }, [decodedCompanyName]);
-
-  const municipalitySeries = useMemo(() => {
-    if (!decodedCompanyName) return null;
-    const latestYear = data.find(y => y.companyList.some(c => c.name === decodedCompanyName));
-    const company = latestYear?.companyList.find(c => c.name === decodedCompanyName) as any;
-    const municipality = company?.municipality as string | undefined;
-    if (!municipality) return null;
-    return data.map(y => {
-      const comps = y.companyList.filter((c: any) => c.municipality === municipality);
-      const total = comps.reduce((s: number, c: any) => s + (typeof c.totalIncome === 'number' ? c.totalIncome : Number(c.totalIncome) || 0), 0);
-      const avg = comps.length ? total / comps.length : 0;
-      return { year: parseInt(y.year, 10), municipalityAvgRevenue: avg };
-    }).sort((a, b) => a.year - b.year);
-  }, [decodedCompanyName]);
+  // Overlays removed
 
   // Calculate key metrics for the latest year - use ?. for safety
   const latestYearData = companyHistoricalData[companyHistoricalData.length - 1]; // Might be undefined if no data
@@ -285,17 +253,7 @@ const CompanyPage = () => {
         {/* Performance Trends Chart */}
         <Card className="p-4 md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 animate-slide-up">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Financial Trends</CardTitle>
-              <div className="flex items-center gap-2">
-                <Button variant={"outline"} size="sm" onClick={() => setShowSectorAvg((s) => !s)}>
-                  {showSectorAvg ? 'Hide' : 'Show'} Sector Avg
-                </Button>
-                <Button variant={"outline"} size="sm" onClick={() => setShowMunicipalityAvg((s) => !s)}>
-                  {showMunicipalityAvg ? 'Hide' : 'Show'} Municipality Avg
-                </Button>
-              </div>
-            </div>
+            <CardTitle>Financial Trends</CardTitle>
           </CardHeader>
           <CardContent className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -311,12 +269,6 @@ const CompanyPage = () => {
                 <Line yAxisId="left" type="monotone" dataKey="totalIncome" stroke="#8884d8" strokeWidth={2} name="Total Income" dot={false} />
                 <Line yAxisId="left" type="monotone" dataKey="profit" stroke="#82ca9d" strokeWidth={2} name="Profit" dot={false} />
                 <Line yAxisId="right" type="monotone" dataKey="employeeCount" stroke="#ffc658" strokeWidth={2} name="Employees" dot={false} />
-                {showSectorAvg && sectorSeries && (
-                  <Line yAxisId="left" type="monotone" dataKey="sectorAvgRevenue" stroke="#64748b" strokeDasharray="5 5" name="Sector Avg Revenue" dot={false} />
-                )}
-                {showMunicipalityAvg && municipalitySeries && (
-                  <Line yAxisId="left" type="monotone" dataKey="municipalityAvgRevenue" stroke="#94a3b8" strokeDasharray="4 4" name="Municipality Avg Revenue" dot={false} />
-                )}
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
