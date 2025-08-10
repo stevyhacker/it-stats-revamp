@@ -445,7 +445,6 @@ export function Dashboard({
                 onCompanySelect={handleCompanySelect}
                 selectedCompanies={selectedCompanies}
                 onToggleCompany={handleToggleCompany}
-                rpePercentileByName={qualityMetrics.rpePercentile}
                 profitMarginByName={qualityMetrics.profitMargin}
               />
             </CardContent>
