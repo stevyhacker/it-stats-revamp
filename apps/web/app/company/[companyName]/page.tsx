@@ -87,27 +87,29 @@ const CompanyPage = () => {
 
   // Sort data based on current sort configuration
   const sortedData = useMemo(() => {
-    let sortableItems = [...companyHistoricalData];
-    if (sortConfig.key !== null) {
-      sortableItems.sort((a, b) => {
-        const aValue = a[sortConfig.key!];
-        const bValue = b[sortConfig.key!];
+    const items = [...companyHistoricalData];
+    if (sortConfig.key === null) return items;
 
-        // Ensure values are numbers for comparison, default to 0 if undefined/null
-        const numA = typeof aValue === 'number' ? aValue : 0;
-        const numB = typeof bValue === 'number' ? bValue : 0;
+    const getNumeric = (row: CompanyYearData) => {
+      if (sortConfig.key === 'year') {
+        return parseInt(row.year, 10) || 0;
+      }
+      const value = row[sortConfig.key];
+      if (typeof value === 'number') return value;
+      return value != null ? Number(value) || 0 : 0;
+    };
 
-        if (numA < numB) {
-          return sortConfig.direction === 'ascending' ? -1 : 1;
-        }
-        if (numA > numB) {
-          return sortConfig.direction === 'ascending' ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortableItems;
+    items.sort((a, b) => {
+      const aNum = getNumeric(a);
+      const bNum = getNumeric(b);
+      if (aNum < bNum) return sortConfig.direction === 'ascending' ? -1 : 1;
+      if (aNum > bNum) return sortConfig.direction === 'ascending' ? 1 : -1;
+      return 0;
+    });
+    return items;
   }, [companyHistoricalData, sortConfig]);
+
+  // Overlays removed
 
   // Calculate key metrics for the latest year - use ?. for safety
   const latestYearData = companyHistoricalData[companyHistoricalData.length - 1]; // Might be undefined if no data
@@ -282,7 +284,12 @@ const CompanyPage = () => {
               <TableHeader>
                 <TableRow>
                   {columns.map((column) => (
-                    <TableHead key={column.key} onClick={() => handleSort(column.key)} className="cursor-pointer hover:bg-primary/10 hover:text-primary transition-all duration-300 font-semibold text-xs uppercase tracking-wider rounded-t-md">
+                    <TableHead
+                      key={column.key}
+                      onClick={() => handleSort(column.key)}
+                      aria-sort={sortConfig.key === column.key ? (sortConfig.direction === 'ascending' ? 'ascending' : 'descending') : 'none'}
+                      className="cursor-pointer hover:bg-primary/10 hover:text-primary transition-all duration-300 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+                    >
                       {column.label}
                       {sortConfig.key === column.key ? (
                         sortConfig.direction === 'ascending' ? <ChevronUp className="inline ml-1 h-4 w-4" /> : <ChevronDown className="inline ml-1 h-4 w-4" />

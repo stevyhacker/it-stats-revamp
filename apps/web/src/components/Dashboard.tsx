@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { CompanyCard } from "./CompanyCard";
 import { TrendLineChart } from "./TrendLineChart";
@@ -16,6 +16,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"; 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ThemeToggle } from "./ThemeToggle";
+import { Filters, FiltersState } from "./Filters";
+import { useSearchParams, useRouter as useNextRouter } from 'next/navigation';
+import { Button } from "@/components/ui/button";
 
 interface Company {
   id: number;
@@ -46,10 +49,35 @@ export function Dashboard({
   data: YearData[];
 }) {
   const router = useRouter();
+  const nextRouter = useNextRouter();
+  const searchParams = useSearchParams();
 
-  const [selectedYear, setSelectedYear] = useState<string>(years[0] || "");
+  const [selectedYear, setSelectedYear] = useState<string>(searchParams.get('year') || years[0] || "");
+  const [filters, setFilters] = useState<FiltersState>({
+    minRevenue: searchParams.get('minRevenue') || undefined,
+    maxRevenue: searchParams.get('maxRevenue') || undefined,
+    minEmployees: searchParams.get('minEmployees') || undefined,
+    maxEmployees: searchParams.get('maxEmployees') || undefined,
+  });
+  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
 
-  const selectedYearData = data.find((d) => d.year === selectedYear);
+  const selectedYearDataRaw = data.find((d) => d.year === selectedYear);
+  const selectedYearData = selectedYearDataRaw ? {
+    ...selectedYearDataRaw,
+    companyList: selectedYearDataRaw.companyList.filter((c) => {
+      const rev = c.totalIncome ?? 0;
+      const emp = c.employeeCount ?? 0;
+      const minRev = filters.minRevenue ? Number(filters.minRevenue) : undefined;
+      const maxRev = filters.maxRevenue ? Number(filters.maxRevenue) : undefined;
+      const minEmp = filters.minEmployees ? Number(filters.minEmployees) : undefined;
+      const maxEmp = filters.maxEmployees ? Number(filters.maxEmployees) : undefined;
+      if (minRev !== undefined && rev < minRev) return false;
+      if (maxRev !== undefined && rev > maxRev) return false;
+      if (minEmp !== undefined && emp < minEmp) return false;
+      if (maxEmp !== undefined && emp > maxEmp) return false;
+      return true;
+    })
+  } : undefined;
   const previousYearData = data.find(
     (d) => d.year === years[years.indexOf(selectedYear) + 1]
   );
@@ -113,6 +141,82 @@ export function Dashboard({
     router.push(`/company/${encodeURIComponent(companyName)}`);
   };
 
+  const handleToggleCompany = (companyName: string) => {
+    setSelectedCompanies((prev) => prev.includes(companyName)
+      ? prev.filter((n) => n !== companyName)
+      : [...prev, companyName]
+    );
+  };
+
+  // Sync state to URL (client-only guard + no-op if unchanged)
+  React.useEffect(() => {
+    try {
+      const params = new URLSearchParams();
+      params.set('year', selectedYear);
+      if (filters.minRevenue) params.set('minRevenue', filters.minRevenue);
+      if (filters.maxRevenue) params.set('maxRevenue', filters.maxRevenue);
+      if (filters.minEmployees) params.set('minEmployees', filters.minEmployees);
+      if (filters.maxEmployees) params.set('maxEmployees', filters.maxEmployees);
+    // removed profitOnly
+      const nextHref = `/?${params.toString()}`;
+      const current = `${window.location.pathname}${window.location.search}`;
+      if (nextHref !== current) {
+        nextRouter.replace(nextHref);
+      }
+    } catch (e) {
+      // noop
+    }
+  }, [selectedYear, filters, nextRouter]);
+
+  // Compute per-company quality metrics for current year (percentiles & margin)
+  const qualityMetrics = React.useMemo(() => {
+    if (!selectedYearData?.companyList?.length) return { rpePercentile: new Map<string, number>(), profitMargin: new Map<string, number>() };
+    const list = selectedYearData.companyList;
+    const revenuePerEmployee: Array<{ name: string; value: number }> = list.map((c) => ({
+      name: c.name,
+      value: typeof c.incomePerEmployee === 'string' ? Number(c.incomePerEmployee) || 0 : (c.incomePerEmployee ?? 0)
+    }));
+    const sorted = [...revenuePerEmployee].sort((a, b) => a.value - b.value);
+    const rpePercentile = new Map<string, number>();
+    const profitMargin = new Map<string, number>();
+    const n = sorted.length;
+    const indexByName = new Map(sorted.map((item, idx) => [item.name, idx] as const));
+    list.forEach((c) => {
+      const idx = indexByName.get(c.name) ?? 0;
+      const pct = Math.round(((idx + 1) / n) * 100);
+      rpePercentile.set(c.name, pct);
+      const margin = (c.totalIncome && c.totalIncome !== 0) ? (c.profit ?? 0) / c.totalIncome : 0;
+      profitMargin.set(c.name, margin);
+    });
+    return { rpePercentile, profitMargin };
+  }, [selectedYearData]);
+
+  // Export CSV of filtered companies
+  const exportCsv = React.useCallback(() => {
+    if (!selectedYearData?.companyList) return;
+    const headers = [
+      'Company', 'Total Income', 'Profit', 'Employees', 'Avg Pay', 'Income/Employee', 'RPE Percentile', 'Profit Margin'
+    ];
+    const rows = selectedYearData.companyList.map((c) => [
+      c.name,
+      c.totalIncome ?? 0,
+      c.profit ?? 0,
+      c.employeeCount ?? 0,
+      c.averagePay ?? 0,
+      typeof c.incomePerEmployee === 'string' ? Number(c.incomePerEmployee) || 0 : (c.incomePerEmployee ?? 0),
+      qualityMetrics.rpePercentile.get(c.name) ?? 0,
+      (qualityMetrics.profitMargin.get(c.name) ?? 0).toFixed(4),
+    ]);
+    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `companies_${selectedYear}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, [selectedYearData, selectedYear, qualityMetrics]);
+
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 ease-in-out">
       <div className="absolute inset-0 bg-gradient-to-br from-background via-surface-2 to-surface-3 -z-10" />
@@ -160,6 +264,17 @@ export function Dashboard({
             </Select>
           </div>
         </div>
+
+        {/* Filters */}
+        {selectedYearDataRaw && (
+          <div className="mb-8">
+            <Filters
+              value={filters}
+              onChange={setFilters}
+              onClear={() => setFilters({})}
+            />
+          </div>
+        )}
 
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6">
@@ -302,12 +417,18 @@ export function Dashboard({
         <section className="mb-12">
           <Card className="md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 animate-slide-up">
             <CardHeader>
-              <CardTitle>Market Trends</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Market Trends</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={exportCsv}>Export CSV</Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <TrendLineChart
-                data={data} // Pass the full data (containing all years)
-                selectedYear={selectedYear} // Pass the currently selected year
+                data={data}
+                selectedYear={selectedYear}
+                selectedCompanies={selectedCompanies}
               />
             </CardContent>
           </Card>
@@ -320,8 +441,11 @@ export function Dashboard({
             </CardHeader>
             <CardContent className="p-0">
               <CompanyTable
-                selectedYearData={selectedYearData} 
-                onCompanySelect={handleCompanySelect} 
+                selectedYearData={selectedYearData}
+                onCompanySelect={handleCompanySelect}
+                selectedCompanies={selectedCompanies}
+                onToggleCompany={handleToggleCompany}
+                profitMarginByName={qualityMetrics.profitMargin}
               />
             </CardContent>
           </Card>
