@@ -11,7 +11,8 @@
     "generate": "drizzle-kit generate:pg --config=drizzle.config.ts",
     "migrate": "pnpm run generate && pnpm run push",
     "studio": "drizzle-kit studio --config=drizzle.config.ts",
-    "seed": "bun run ./scripts/seed.ts"
+    "seed": "bun run ./scripts/seed.ts",
+    "apply-indexes": "bun run ./scripts/apply-indexes.ts"
   },
   "dependencies": {
     "dotenv": "^16.5.0",

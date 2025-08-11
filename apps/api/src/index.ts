@@ -104,6 +104,8 @@ app.get('/companies/:pib', async (c) => {
 
 // Route to get all companies data, grouped by year
 app.get('/companies', async (c) => {
+  // Add cache headers for better performance
+  c.header('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
   try {
     // Fetch all companies JOINED with their corresponding year
     const allCompaniesWithYear = await db
@@ -160,6 +162,8 @@ app.get('/companies', async (c) => {
 
 // GET /years - Fetches all available years
 app.get('/years', async (c) => {
+  // Add cache headers for better performance
+  c.header('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
   try {
     console.log('Fetching years from DB...');
     const result = await db

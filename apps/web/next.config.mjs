@@ -11,6 +11,26 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
 
+  // Performance optimizations
+  compiler: {
+    // Remove console logs in production
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+
+  // Optimize images
+  images: {
+    formats: ['image/avif', 'image/webp'],
+  },
+
+  // Enable SWC minification for better performance
+  swcMinify: true,
+
+  // Optimize bundle size
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['recharts', 'numeral', 'lucide-react'],
+  },
+
   // You might need specific configurations depending on your libraries (e.g., Recharts)
   // Example: Experimental features if needed by dependencies
   // experimental: {

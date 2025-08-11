@@ -31,7 +31,11 @@ async function fetchData(): Promise<YearData[]> {
   console.log(`Fetching data from: ${apiBaseUrl}/companies`); // Add log
   try {
     const res = await fetch(`${apiBaseUrl}/companies`, {
-      // cache: 'no-store', // Ensures fresh data on each request for development
+      // Enable caching for 5 minutes with revalidation
+      next: { revalidate: 300 },
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
     if (!res.ok) {
       console.error("Failed to fetch companies:", res.status, res.statusText);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import React, { useCallback } from "react";
 // Note: Select imports removed since only range inputs remain
 import { Button } from "@/components/ui/button";
 
@@ -17,7 +17,22 @@ interface FiltersProps {
   onClear: () => void;
 }
 
-export function Filters({ value, onChange, onClear }: FiltersProps) {
+export const Filters = React.memo(({ value, onChange, onClear }: FiltersProps) => {
+  const handleMinRevenueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange({ ...value, minRevenue: e.target.value });
+  }, [value, onChange]);
+  
+  const handleMaxRevenueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange({ ...value, maxRevenue: e.target.value });
+  }, [value, onChange]);
+  
+  const handleMinEmployeesChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange({ ...value, minEmployees: e.target.value });
+  }, [value, onChange]);
+  
+  const handleMaxEmployeesChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange({ ...value, maxEmployees: e.target.value });
+  }, [value, onChange]);
 
   return (
     <div className="w-full glass-card border rounded-xl p-3 md:p-4 flex flex-col gap-3 md:gap-4">
@@ -32,7 +47,7 @@ export function Filters({ value, onChange, onClear }: FiltersProps) {
               inputMode="numeric"
               placeholder="Min"
               value={value.minRevenue ?? ""}
-              onChange={(e) => onChange({ ...value, minRevenue: e.target.value })}
+              onChange={handleMinRevenueChange}
               className="h-9 w-full rounded-md border bg-background px-3 text-sm"
             />
             <input
@@ -40,7 +55,7 @@ export function Filters({ value, onChange, onClear }: FiltersProps) {
               inputMode="numeric"
               placeholder="Max"
               value={value.maxRevenue ?? ""}
-              onChange={(e) => onChange({ ...value, maxRevenue: e.target.value })}
+              onChange={handleMaxRevenueChange}
               className="h-9 w-full rounded-md border bg-background px-3 text-sm"
             />
           </div>
@@ -53,7 +68,7 @@ export function Filters({ value, onChange, onClear }: FiltersProps) {
               inputMode="numeric"
               placeholder="Min"
               value={value.minEmployees ?? ""}
-              onChange={(e) => onChange({ ...value, minEmployees: e.target.value })}
+              onChange={handleMinEmployeesChange}
               className="h-9 w-full rounded-md border bg-background px-3 text-sm"
             />
             <input
@@ -61,7 +76,7 @@ export function Filters({ value, onChange, onClear }: FiltersProps) {
               inputMode="numeric"
               placeholder="Max"
               value={value.maxEmployees ?? ""}
-              onChange={(e) => onChange({ ...value, maxEmployees: e.target.value })}
+              onChange={handleMaxEmployeesChange}
               className="h-9 w-full rounded-md border bg-background px-3 text-sm"
             />
           </div>
@@ -72,4 +87,6 @@ export function Filters({ value, onChange, onClear }: FiltersProps) {
       </div>
     </div>
   );
-}
+});
+
+Filters.displayName = 'Filters';

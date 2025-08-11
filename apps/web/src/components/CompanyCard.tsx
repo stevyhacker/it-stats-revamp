@@ -1,3 +1,4 @@
+import React from "react";
 import { TrendingUp, Users, DollarSign, Building2 } from "lucide-react";
 import numeral from "numeral";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -13,7 +14,7 @@ interface CompanyCardProps {
   className?: string;
 }
 
-export const CompanyCard = ({
+export const CompanyCard = React.memo(({
   name,
   totalIncome,
   profit,
@@ -88,4 +89,6 @@ export const CompanyCard = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+CompanyCard.displayName = 'CompanyCard';

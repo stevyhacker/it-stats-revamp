@@ -22,7 +22,7 @@ interface CompanyTableProps {
   profitMarginByName?: Map<string, number>;
 }
 
-const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompanySelect, selectedCompanies = [], onToggleCompany, profitMarginByName }) => {
+const CompanyTable: React.FC<CompanyTableProps> = React.memo(({ selectedYearData, onCompanySelect, selectedCompanies = [], onToggleCompany, profitMarginByName }) => {
   const [sortColumn, setSortColumn] = useState<SortableColumn>('totalIncome');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
@@ -181,6 +181,8 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
       </Table>
     </div>
   );
-};
+});
+
+CompanyTable.displayName = 'CompanyTable';
 
 export default CompanyTable;

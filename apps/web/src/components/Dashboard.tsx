@@ -3,7 +3,12 @@
 import React, { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { CompanyCard } from "./CompanyCard";
-import { TrendLineChart } from "./TrendLineChart";
+import dynamic from 'next/dynamic';
+
+const TrendLineChart = dynamic(() => import('./TrendLineChart').then(mod => ({ default: mod.TrendLineChart })), {
+  loading: () => <div className="h-[400px] flex items-center justify-center">Loading chart...</div>,
+  ssr: false
+});
 import {
   TrendingUp,
   Users,
@@ -11,7 +16,10 @@ import {
   Briefcase,
 } from "lucide-react";
 import numeral from "numeral";
-import CompanyTable from "./CompanyTable";
+const CompanyTable = dynamic(() => import('./CompanyTable'), {
+  loading: () => <div className="h-96 flex items-center justify-center">Loading table...</div>,
+  ssr: false
+});
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"; 
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"; 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -82,12 +90,7 @@ export function Dashboard({
     (d) => d.year === years[years.indexOf(selectedYear) + 1]
   );
 
-  const calculateMarketStats = (): {
-    totalRevenue: number;
-    revenueGrowth: number;
-    totalEmployees: number;
-    employeeGrowth: number;
-  } => {
+  const marketStats = React.useMemo(() => {
     if (!selectedYearData)
       return { totalRevenue: 0, revenueGrowth: 0, totalEmployees: 0, employeeGrowth: 0 };
     const currentTotal = selectedYearData.companyList.reduce(
@@ -127,26 +130,26 @@ export function Dashboard({
         ? (currentEmployees === 0 ? 0 : Infinity)
         : ((currentEmployees - previousEmployees) / previousEmployees) * 100,
     };
-  };
+  }, [selectedYearData, previousYearData]);
 
-  const marketStats = calculateMarketStats();
+  const topCompanies = React.useMemo(() => {
+    return selectedYearData
+      ? [...selectedYearData.companyList]
+          .sort((a, b) => (b.totalIncome ?? -Infinity) - (a.totalIncome ?? -Infinity))
+          .slice(0, 6)
+      : [];
+  }, [selectedYearData]);
 
-  const topCompanies = selectedYearData
-    ? [...selectedYearData.companyList]
-        .sort((a, b) => (b.totalIncome ?? -Infinity) - (a.totalIncome ?? -Infinity))
-        .slice(0, 6)
-    : [];
-
-  const handleCompanySelect = (companyName: string) => {
+  const handleCompanySelect = React.useCallback((companyName: string) => {
     router.push(`/company/${encodeURIComponent(companyName)}`);
-  };
+  }, [router]);
 
-  const handleToggleCompany = (companyName: string) => {
+  const handleToggleCompany = React.useCallback((companyName: string) => {
     setSelectedCompanies((prev) => prev.includes(companyName)
       ? prev.filter((n) => n !== companyName)
       : [...prev, companyName]
     );
-  };
+  }, []);
 
   // Sync state to URL (client-only guard + no-op if unchanged)
   React.useEffect(() => {
@@ -425,11 +428,13 @@ export function Dashboard({
               </div>
             </CardHeader>
             <CardContent>
-              <TrendLineChart
-                data={data}
-                selectedYear={selectedYear}
-                selectedCompanies={selectedCompanies}
-              />
+              <React.Suspense fallback={<div className="h-[400px] flex items-center justify-center">Loading chart...</div>}>
+                <TrendLineChart
+                  data={data}
+                  selectedYear={selectedYear}
+                  selectedCompanies={selectedCompanies}
+                />
+              </React.Suspense>
             </CardContent>
           </Card>
         </section>
@@ -440,13 +445,15 @@ export function Dashboard({
               <CardTitle id="all-companies-heading">All Companies ({selectedYear})</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <CompanyTable
-                selectedYearData={selectedYearData}
-                onCompanySelect={handleCompanySelect}
-                selectedCompanies={selectedCompanies}
-                onToggleCompany={handleToggleCompany}
-                profitMarginByName={qualityMetrics.profitMargin}
-              />
+              <React.Suspense fallback={<div className="h-96 flex items-center justify-center">Loading table...</div>}>
+                <CompanyTable
+                  selectedYearData={selectedYearData}
+                  onCompanySelect={handleCompanySelect}
+                  selectedCompanies={selectedCompanies}
+                  onToggleCompany={handleToggleCompany}
+                  profitMarginByName={qualityMetrics.profitMargin}
+                />
+              </React.Suspense>
             </CardContent>
           </Card>
         </section>
