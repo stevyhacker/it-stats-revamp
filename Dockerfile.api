@@ -52,5 +52,5 @@ RUN ls -la /app/apps/api
 WORKDIR /app/apps/api
 EXPOSE 3000
 
-# Start the application with tsx
-CMD ["tsx", "src/index.ts"]
+# Start the application with Bun (native TypeScript support)
+CMD ["bun", "run", "src/index.ts"]
