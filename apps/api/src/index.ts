@@ -4,6 +4,9 @@ import 'dotenv/config';
 import { db, years, companies, eq, desc, asc } from 'db';
 import * as schema from 'db';
 
+// Detect Bun runtime so we can skip the Node fallback when possible
+const runningInBun = typeof Bun !== 'undefined' && typeof Bun.serve === 'function';
+
 // Define Company type using Drizzle inference
 type Company = typeof companies.$inferSelect;
 // Define type for the result of the join query
