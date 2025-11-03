@@ -1,17 +1,21 @@
 {
   "name": "it-stats-revamp-monorepo",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "build": "turbo build --filter=api",
     "build:api": "turbo build --filter=api",
-    "start": "pnpm --filter api run start",
+    "start": "bun --filter api run start",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "db:generate": "pnpm --filter db run generate",
-    "db:migrate": "pnpm --filter db run migrate",
-    "db:push": "pnpm --filter db run push",
-    "db:studio": "pnpm --filter db run studio",
+    "db:generate": "bun --filter db run generate",
+    "db:migrate": "bun --filter db run migrate",
+    "db:push": "bun --filter db run push",
+    "db:studio": "bun --filter db run studio",
     "deploy:railway": "railway up",
     "deploy:api": "railway up --service it-stats-api",
     "deploy:web": "cd apps/web && railway up --service it-stats-web"
@@ -20,9 +24,9 @@
     "@turbo/gen": "^1.13.3",
     "eslint": "^9.25.1",
     "prettier": "^3.2.5",
-    "turbo": "^1.13.3"
+    "turbo": "^2.6.0"
   },
-  "packageManager": "pnpm@10.13.1+sha512.37ebf1a5c7a30d5fabe0c5df44ee8da4c965ca0c5af3dbab28c3a1681b70a256218d05c81c9c0dcf767ef6b8551eb5b960042b9ed4300c59242336377e01cfad",
+  "packageManager": "bun@1.3.1",
   "dependencies": {
     "@types/pg": "^8.15.4",
     "pg": "^8.16.3"
