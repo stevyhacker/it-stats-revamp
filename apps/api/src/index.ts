@@ -215,30 +215,33 @@ appRoutes.get('/protected', (c) => {
 });
 
 // --- Server Start ---
-const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
-const isDev = process.env.NODE_ENV !== 'production';
+// Only start the server if this file is being run directly (not imported)
+if (import.meta.main) {
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+  const isDev = process.env.NODE_ENV !== 'production';
 
-console.log(`API server starting on port ${port} (${isDev ? 'development' : 'production'})`);
+  console.log(`API server starting on port ${port} (${isDev ? 'development' : 'production'})`);
 
-// Use Bun's native server if available, otherwise use @hono/node-server
-if (typeof Bun !== 'undefined') {
-  // Bun runtime - use native Bun.serve
-  Bun.serve({
-    fetch: app.fetch,
-    port: port,
-    hostname: '0.0.0.0',
-  });
-  console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
-} else {
-  // Node.js runtime - use @hono/node-server
-  const { serve } = await import('@hono/node-server');
-  serve({
-    fetch: app.fetch,
-    port: port,
-    hostname: '0.0.0.0',
-  });
-  console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
+  // Use Bun's native server if available, otherwise use @hono/node-server
+  if (typeof Bun !== 'undefined') {
+    // Bun runtime - use native Bun.serve
+    Bun.serve({
+      fetch: app.fetch,
+      port: port,
+      hostname: '0.0.0.0',
+    });
+    console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
+  } else {
+    // Node.js runtime - use @hono/node-server
+    const { serve } = await import('@hono/node-server');
+    serve({
+      fetch: app.fetch,
+      port: port,
+      hostname: '0.0.0.0',
+    });
+    console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
+  }
 }
 
-// Export for testing
+// Export for testing and imports
 export default app;
