@@ -15,8 +15,9 @@ RUN bun install --frozen-lockfile
 COPY . .
 
 # Build the db package
+# Ensure dependencies are available in the package directory
 WORKDIR /app/packages/db
-RUN bun run build && ls -la dist
+RUN bun install && bun run build && ls -la dist
 WORKDIR /app
 
 # 2. Production Stage
@@ -51,6 +52,7 @@ RUN ls -la /app/apps/api
 
 WORKDIR /app/apps/api
 EXPOSE 3000
+ENV PORT=3000
 
 # Start the application with Bun (native TypeScript support)
-CMD ["bun", "run", "src/index.ts"]
+CMD ["bun", "src/index.ts"]
