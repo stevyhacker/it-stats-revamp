@@ -20,54 +20,59 @@ interface FiltersProps {
 export function Filters({ value, onChange, onClear }: FiltersProps) {
 
   return (
-    <div className="w-full glass-card border rounded-xl p-3 md:p-4 flex flex-col gap-3 md:gap-4">
-      {/* Profitability filter removed */}
+    <div className="w-full border-2 border-border bg-card p-4">
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-primary font-mono font-bold">$</span>
+        <span className="text-xs font-mono text-muted-foreground uppercase">filter_data</span>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">Revenue range (€)</label>
+        <div className="space-y-2">
+          <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase">revenue_range (€)</label>
           <div className="flex items-center gap-2">
             <input
               type="number"
               inputMode="numeric"
-              placeholder="Min"
+              placeholder="min"
               value={value.minRevenue ?? ""}
               onChange={(e) => onChange({ ...value, minRevenue: e.target.value })}
-              className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+              className="h-10 w-full border-2 border-border bg-background px-3 text-sm font-mono focus:border-primary focus:outline-none transition-colors"
             />
             <input
               type="number"
               inputMode="numeric"
-              placeholder="Max"
+              placeholder="max"
               value={value.maxRevenue ?? ""}
               onChange={(e) => onChange({ ...value, maxRevenue: e.target.value })}
-              className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+              className="h-10 w-full border-2 border-border bg-background px-3 text-sm font-mono focus:border-primary focus:outline-none transition-colors"
             />
           </div>
         </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">Employees range</label>
+        <div className="space-y-2">
+          <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase">employees_range</label>
           <div className="flex items-center gap-2">
             <input
               type="number"
               inputMode="numeric"
-              placeholder="Min"
+              placeholder="min"
               value={value.minEmployees ?? ""}
               onChange={(e) => onChange({ ...value, minEmployees: e.target.value })}
-              className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+              className="h-10 w-full border-2 border-border bg-background px-3 text-sm font-mono focus:border-primary focus:outline-none transition-colors"
             />
             <input
               type="number"
               inputMode="numeric"
-              placeholder="Max"
+              placeholder="max"
               value={value.maxEmployees ?? ""}
               onChange={(e) => onChange({ ...value, maxEmployees: e.target.value })}
-              className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+              className="h-10 w-full border-2 border-border bg-background px-3 text-sm font-mono focus:border-primary focus:outline-none transition-colors"
             />
           </div>
         </div>
         <div className="flex items-end gap-2">
-          <Button variant="outline" onClick={onClear} className="w-full">Clear</Button>
+          <Button variant="outline" onClick={onClear} className="w-full">
+            <span>clear_filters</span>
+          </Button>
         </div>
       </div>
     </div>

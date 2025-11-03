@@ -9,6 +9,10 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
+      fontFamily: {
+        mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
+        'space-mono': ['var(--font-space-mono)', 'Space Mono', 'monospace'],
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
@@ -68,6 +72,9 @@ module.exports = {
           '2': 'hsl(var(--surface-2))',
           '3': 'hsl(var(--surface-3))'
         },
+        'terminal-green': 'hsl(var(--terminal-green))',
+        'terminal-blue': 'hsl(var(--terminal-blue))',
+        'terminal-cyan': 'hsl(var(--terminal-cyan))',
       },
       boxShadow: {
         'soft': '0 2px 8px -2px rgb(0 0 0 / 0.1), 0 4px 16px -8px rgb(0 0 0 / 0.1)',

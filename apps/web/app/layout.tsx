@@ -1,10 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { JetBrains_Mono, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ThemeScript } from "@/components/ThemeScript";
 
-const inter = Inter({ subsets: ["latin"] });
+const jetbrainsMono = JetBrains_Mono({ 
+  subsets: ["latin"],
+  variable: '--font-mono',
+  display: 'swap',
+});
+
+const spaceMono = Space_Mono({ 
+  subsets: ["latin"],
+  weight: ['400', '700'],
+  variable: '--font-space-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: "Montenegro IT Company Statistics | Salary, Profit & Employee Data",
@@ -50,7 +61,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
         <ThemeScript />
       </head>
-      <body className={inter.className}>
+      <body className={`${jetbrainsMono.variable} ${spaceMono.variable} font-mono`}>
         <ThemeProvider>
           {children}
         </ThemeProvider>

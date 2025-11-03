@@ -218,50 +218,59 @@ export function Dashboard({
   }, [selectedYearData, selectedYear, qualityMetrics]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 ease-in-out">
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-surface-2 to-surface-3 -z-10" />
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <main className="relative max-w-7xl mx-auto px-4 py-8">
         <ThemeToggle variant="floating" />
 
-        {/* Year Selection - Conditional Rendering */}
+        {/* Year Selection */}
         <div className="mb-8">
-          {/* Tabs for Medium and Up */}
-          <Tabs
-            value={selectedYear}
-            onValueChange={setSelectedYear}
-            className="hidden md:block" // Hide on small screens
-          >
-            <TabsList className="overflow-x-auto h-auto p-1 md:overflow-x-visible justify-start rounded-lg bg-muted/30 backdrop-blur-sm">
-              {years.map((year) => (
-                <TabsTrigger
-                  key={year}
-                  value={year}
-                  className="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ease-in-out relative text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-soft hover:bg-background/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                >
-                  {year}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-
-          {/* Select Dropdown for Small Screens */}
-          <div className="block md:hidden">
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-full rounded-lg bg-card/80 backdrop-blur-sm border shadow-soft px-4 py-2 text-sm font-medium">
-                <SelectValue placeholder="Select Year" />
-              </SelectTrigger>
-              <SelectContent className="rounded-lg bg-popover/95 backdrop-blur-sm border shadow-medium">
+          <div className="border-2 border-border bg-card p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-primary font-mono font-bold">$</span>
+              <span className="text-xs font-mono text-muted-foreground uppercase">select year</span>
+            </div>
+            
+            {/* Tabs for Medium and Up */}
+            <Tabs
+              value={selectedYear}
+              onValueChange={setSelectedYear}
+              className="hidden md:block"
+            >
+              <TabsList className="h-auto p-1 bg-muted/30 border-2 border-border">
                 {years.map((year) => (
-                  <SelectItem
+                  <TabsTrigger
                     key={year}
                     value={year}
-                    className="cursor-pointer px-4 py-2 hover:bg-accent/50 data-[state=checked]:bg-accent"
+                    className="px-4 py-2 text-sm font-mono font-bold transition-all duration-150 
+                               data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
+                               data-[state=active]:border-2 data-[state=active]:border-primary
+                               hover:bg-primary/10"
                   >
                     {year}
-                  </SelectItem>
+                  </TabsTrigger>
                 ))}
-              </SelectContent>
-            </Select>
+              </TabsList>
+            </Tabs>
+
+            {/* Select Dropdown for Small Screens */}
+            <div className="block md:hidden">
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="w-full border-2 border-border bg-background font-mono">
+                  <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent className="border-2 border-border bg-card">
+                  {years.map((year) => (
+                    <SelectItem
+                      key={year}
+                      value={year}
+                      className="font-mono cursor-pointer hover:bg-primary/10 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                    >
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
@@ -277,87 +286,89 @@ export function Dashboard({
         )}
 
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">
-            Market Overview ({selectedYear})
+          <h2 className="text-xl font-bold mb-6 font-mono flex items-center gap-2">
+            <span className="text-primary">{'>'}</span>
+            <span>market_overview</span>
+            <span className="text-muted-foreground text-sm">({selectedYear})</span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-            <Card className="p-4 md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 hover:scale-[1.02] animate-slide-up">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="transition-all duration-200 hover:border-primary hover:scale-[1.01]">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Market Revenue
+                <CardTitle className="text-[10px] uppercase text-muted-foreground">
+                  total_revenue
                 </CardTitle>
-                <Building2 className="h-4 w-4 text-muted-foreground" />
+                <Building2 className="h-3.5 w-3.5 text-terminal-green" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold font-mono">
                   {numeral(marketStats.totalRevenue).format("0,0")}€
                 </div>
                 <p
-                  className={`text-xs mt-1 ${
+                  className={`text-xs mt-1 font-mono flex items-center ${
                     marketStats.revenueGrowth >= 0
-                      ? "text-green-500"
-                      : "text-red-500"
-                  } flex items-center`}
+                      ? "text-success"
+                      : "text-destructive"
+                  }`}
                 >
                   {marketStats.revenueGrowth >= 0 ? (
-                    <TrendingUp size={14} className="mr-1" />
+                    <TrendingUp size={12} className="mr-1" />
                   ) : (
                     <TrendingUp
-                      size={14}
+                      size={12}
                       className="mr-1 transform rotate-180 scale-x-[-1]"
                     />
                   )}
                   {isFinite(marketStats.revenueGrowth)
                     ? marketStats.revenueGrowth.toFixed(2)
                     : "N/A"}
-                  % vs PY
+                  % vs_py
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="p-4 md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 hover:scale-[1.02] animate-slide-up">
+            <Card className="transition-all duration-200 hover:border-primary hover:scale-[1.01]">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Employees
+                <CardTitle className="text-[10px] uppercase text-muted-foreground">
+                  total_employees
                 </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-3.5 w-3.5 text-terminal-blue" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold font-mono">
                   {numeral(marketStats.totalEmployees).format("0,0")}
                 </div>
                 <p
-                  className={`text-xs mt-1 ${
+                  className={`text-xs mt-1 font-mono flex items-center ${
                     marketStats.employeeGrowth >= 0
-                      ? "text-green-500"
-                      : "text-red-500"
-                  } flex items-center`}
+                      ? "text-success"
+                      : "text-destructive"
+                  }`}
                 >
                   {marketStats.employeeGrowth >= 0 ? (
-                    <TrendingUp size={14} className="mr-1" />
+                    <TrendingUp size={12} className="mr-1" />
                   ) : (
                     <TrendingUp
-                      size={14}
+                      size={12}
                       className="mr-1 transform rotate-180 scale-x-[-1]"
                     />
                   )}
                   {isFinite(marketStats.employeeGrowth)
                     ? marketStats.employeeGrowth.toFixed(2)
                     : "N/A"}
-                  % vs PY
+                  % vs_py
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="p-4 md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 hover:scale-[1.02] animate-slide-up">
+            <Card className="transition-all duration-200 hover:border-primary hover:scale-[1.01]">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Average Company Revenue
+                <CardTitle className="text-[10px] uppercase text-muted-foreground">
+                  avg_revenue
                 </CardTitle>
-                <Briefcase className="h-4 w-4 text-muted-foreground" />
+                <Briefcase className="h-3.5 w-3.5 text-terminal-cyan" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold font-mono">
                   {selectedYearData?.companyList.length
                     ? numeral(
                         marketStats.totalRevenue / selectedYearData.companyList.length
@@ -365,21 +376,21 @@ export function Dashboard({
                     : 0}
                   €
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  per company
+                <p className="text-xs text-muted-foreground mt-1 font-mono">
+                  per_company
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="p-4 md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 hover:scale-[1.02] animate-slide-up">
+            <Card className="transition-all duration-200 hover:border-primary hover:scale-[1.01]">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Average Team Size
+                <CardTitle className="text-[10px] uppercase text-muted-foreground">
+                  avg_team_size
                 </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-3.5 w-3.5 text-warning" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold font-mono">
                   {selectedYearData?.companyList.length
                     ? Math.round(
                         marketStats.totalEmployees /
@@ -387,8 +398,8 @@ export function Dashboard({
                       )
                     : 0}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  employees per company
+                <p className="text-xs text-muted-foreground mt-1 font-mono">
+                  employees_per_company
                 </p>
               </CardContent>
             </Card>
@@ -396,10 +407,12 @@ export function Dashboard({
         </section>
 
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">
-            Top Companies ({selectedYear})
+          <h2 className="text-xl font-bold mb-6 font-mono flex items-center gap-2">
+            <span className="text-primary">{'>'}</span>
+            <span>top_companies</span>
+            <span className="text-muted-foreground text-sm">({selectedYear})</span>
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {topCompanies.map((company) => (
               <CompanyCard
                 key={company.pib}
@@ -415,12 +428,25 @@ export function Dashboard({
         </section>
 
         <section className="mb-12">
-          <Card className="md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 animate-slide-up">
+          <Card className="transition-all duration-200 hover:border-primary">
+            <div className="terminal-header">
+              <div className="flex items-center gap-2">
+                <div className="terminal-dots" />
+              </div>
+              <div className="text-[10px] text-muted-foreground font-mono">
+                market_trends.chart
+              </div>
+            </div>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Market Trends</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-primary">{'>'}</span>
+                  <span>market_trends</span>
+                </CardTitle>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={exportCsv}>Export CSV</Button>
+                  <Button variant="outline" size="sm" onClick={exportCsv}>
+                    <span>export_csv</span>
+                  </Button>
                 </div>
               </div>
             </CardHeader>
@@ -435,9 +461,21 @@ export function Dashboard({
         </section>
 
         <section aria-labelledby="all-companies-heading">
-          <Card className="md:p-6 rounded-xl glass-card shadow-soft hover:shadow-medium border transition-all duration-300 animate-slide-up">
+          <Card className="transition-all duration-200 hover:border-primary">
+            <div className="terminal-header">
+              <div className="flex items-center gap-2">
+                <div className="terminal-dots" />
+              </div>
+              <div className="text-[10px] text-muted-foreground font-mono">
+                companies.db
+              </div>
+            </div>
             <CardHeader>
-              <CardTitle id="all-companies-heading">All Companies ({selectedYear})</CardTitle>
+              <CardTitle id="all-companies-heading" className="flex items-center gap-2">
+                <span className="text-primary">{'>'}</span>
+                <span>all_companies</span>
+                <span className="text-muted-foreground text-sm">({selectedYear})</span>
+              </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <CompanyTable
