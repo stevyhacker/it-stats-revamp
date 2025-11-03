@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
-// import { clerkMiddleware, getAuth } from '@hono/clerk-auth';
 import 'dotenv/config';
 import { db, years, companies, eq, desc, asc } from 'db';
 import * as schema from 'db';
@@ -17,7 +16,7 @@ interface YearData {
   // Add other year-specific properties if needed
 }
 
-const app = new Hono();
+export const app = new Hono();
 
 // Middleware
 app.use(logger());
@@ -182,14 +181,6 @@ app.get('/years', async (c) => {
   }
 });
 
-// --- Clerk Authentication ---
-// Initialize Clerk middleware (ensure env vars are set)
-// Note: Adjust publishableKey and secretKey based on your needs if loaded differently
-// const clerk = clerkMiddleware({
-//   secretKey: process.env.CLERK_SECRET_KEY,
-//   publishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
-// });
-
 // Example public route
 app.get('/', (c) => {
   return c.json({ message: 'Hello from IT Stats API!' });
@@ -199,16 +190,7 @@ app.get('/', (c) => {
 // Group routes that require authentication
 const appRoutes = app.basePath('/api'); // Example base path
 
-// Apply Clerk middleware to this group
-// appRoutes.use(clerk);
-
 appRoutes.get('/protected', (c) => {
-  // const auth = getAuth(c);
-
-  // if (!auth?.userId) {
-  //   return c.json({ error: 'Unauthorized' }, 401);
-  // }
-
   // Access user data if needed: auth.userId, auth.sessionClaims, etc.
   // return c.json({ message: 'This is a protected route', userId: auth.userId });
   return c.json({ message: 'This is a protected route' });
@@ -219,7 +201,6 @@ appRoutes.get('/protected', (c) => {
 if (import.meta.main) {
   const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
   const isDev = process.env.NODE_ENV !== 'production';
-  const runningInBun = typeof Bun !== 'undefined' && typeof Bun.serve === 'function';
 
   console.log(`API server starting on port ${port} (${isDev ? 'development' : 'production'})`);
 
@@ -247,6 +228,3 @@ if (import.meta.main) {
     });
   }
 }
-
-// Export for testing and imports
-export default app;
