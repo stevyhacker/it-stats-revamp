@@ -17,7 +17,10 @@ COPY . .
 # Build the db package
 # Ensure dependencies are available in the package directory
 WORKDIR /app/packages/db
-RUN bun install && bun run build && ls -la dist
+RUN rm -f tsconfig.tsbuildinfo \
+    && bun install \
+    && bun run build \
+    && ls -la dist
 WORKDIR /app
 
 # 2. Production Stage
