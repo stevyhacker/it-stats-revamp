@@ -14,8 +14,10 @@ RUN bun install --frozen-lockfile
 # Copy all source code
 COPY . .
 
-# Build the db package (API will run via tsx)
-RUN bun --filter db run build && ls -la packages/db/dist
+# Build the db package
+WORKDIR /app/packages/db
+RUN bun run build && ls -la dist
+WORKDIR /app
 
 # 2. Production Stage
 FROM oven/bun:1.3-alpine AS runner
