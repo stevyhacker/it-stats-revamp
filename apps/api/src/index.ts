@@ -232,14 +232,19 @@ if (import.meta.main) {
     console.log('Bun runtime detected; relying on automatic Bun server binding.');
     console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
   } else {
-    // Node.js runtime - use @hono/node-server
-    const { serve } = await import('@hono/node-server');
-    serve({
-      fetch: app.fetch,
-      port: port,
-      hostname: '0.0.0.0',
+    // Node.js runtime - use @hono/node-server without top-level await
+    (async () => {
+      const { serve } = await import('@hono/node-server');
+      serve({
+        fetch: app.fetch,
+        port: port,
+        hostname: '0.0.0.0',
+      });
+      console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
+    })().catch((error) => {
+      console.error('Failed to start server:', error);
+      process.exit(1);
     });
-    console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
   }
 }
 
