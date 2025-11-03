@@ -6,8 +6,9 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo build --filter=api",
+    "build": "turbo build",
     "build:api": "turbo build --filter=api",
+    "build:web": "turbo build --filter=web",
     "start": "bun --filter api run start",
     "dev": "turbo dev",
     "lint": "turbo lint",
