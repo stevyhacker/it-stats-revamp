@@ -1,31 +1,29 @@
 # 1. Build Stage
-FROM node:20-alpine AS builder
+FROM oven/bun:1.3-alpine AS builder
 WORKDIR /app
-RUN corepack enable
 
 # Copy dependency manifests for all workspaces
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json bun.lock ./
 COPY apps/api/package.json ./apps/api/
 COPY apps/web/package.json ./apps/web/
 COPY packages/db/package.json ./packages/db/
 
 # Install all dependencies needed for building
-RUN pnpm install --frozen-lockfile
+RUN bun install --frozen-lockfile
 
 # Copy all source code
 COPY . .
 
-# Build the api workspace
 # Build the db package (API will run via tsx)
-RUN pnpm -C packages/db run build && ls -la packages/db/dist
+RUN bun --filter db run build && ls -la packages/db/dist
 
 # 2. Production Stage
-FROM node:20-alpine AS runner
+FROM oven/bun:1.3-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
 # Copy essential files from the builder stage
-COPY --from=builder /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/package.json /app/bun.lock ./
 COPY --from=builder /app/apps/api/package.json ./apps/api/
 COPY --from=builder /app/packages/db/package.json ./packages/db/
 
@@ -47,11 +45,10 @@ RUN echo "--- Listing /app/apps contents ---"
 RUN ls -la /app/apps
 RUN echo "--- Listing /app/apps/api contents ---"
 RUN ls -la /app/apps/api
-# No dist since we run via tsx
 # --- END DEBUG ---
 
 WORKDIR /app/apps/api
 EXPOSE 3000
 
-# Start the application with tsx via --import (Node 20)
-CMD ["node", "--import=tsx", "./src/index.ts"]
+# Start the application with tsx
+CMD ["tsx", "src/index.ts"]
