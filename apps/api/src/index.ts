@@ -219,17 +219,17 @@ appRoutes.get('/protected', (c) => {
 if (import.meta.main) {
   const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
   const isDev = process.env.NODE_ENV !== 'production';
+  const runningInBun = typeof Bun !== 'undefined' && typeof Bun.serve === 'function';
 
   console.log(`API server starting on port ${port} (${isDev ? 'development' : 'production'})`);
 
-  // Use Bun's native server if available, otherwise use @hono/node-server
-  if (typeof Bun !== 'undefined') {
-    // Bun runtime - use native Bun.serve
-    Bun.serve({
-      fetch: app.fetch,
-      port: port,
-      hostname: '0.0.0.0',
-    });
+  // Ensure downstream consumers see the resolved port value
+  if (!process.env.PORT) {
+    process.env.PORT = String(port);
+  }
+
+  if (runningInBun) {
+    console.log('Bun runtime detected; relying on automatic Bun server binding.');
     console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
   } else {
     // Node.js runtime - use @hono/node-server
