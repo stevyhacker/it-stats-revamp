@@ -18,7 +18,7 @@
     "rootDir": "src",
     "baseUrl": ".",
     "paths": {
-      "db": ["../../packages/db/dist/index.js"],
+      "db": ["../../packages/db/dist"],
       "db/*": ["../../packages/db/dist/*"]
     }
   },

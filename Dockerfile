@@ -1,26 +1,24 @@
-# Use Node.js base image
-FROM node:20-alpine AS base
+# Use Bun base image
+FROM oven/bun:1.3-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 
-# Install Bun
-RUN npm install -g bun
-
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+# Install dependencies using Bun
+COPY package.json bun.lock ./
 COPY apps/web/package.json ./apps/web/
 COPY apps/api/package.json ./apps/api/
 COPY packages/db/package.json ./packages/db/
 
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
+RUN bun install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM base AS builder
-RUN npm install -g bun pnpm turbo
+# Install turbo globally
+RUN bun add -g turbo
 
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -30,13 +28,12 @@ COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
 COPY . .
 
 # Build all apps
-RUN pnpm turbo run build
+RUN bun run build
 
 # Production image for API
 FROM base AS api-runner
-RUN npm install -g bun
-
 WORKDIR /app
+
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/package.json ./apps/api/
 COPY --from=builder /app/packages/db ./packages/db
@@ -45,10 +42,10 @@ COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 
 WORKDIR /app/apps/api
 EXPOSE 3000
-CMD ["bun", "run", "dist/index.js"]
+CMD ["bun", "run", "start"]
 
 # Production image for Web
-FROM base AS web-runner
+FROM node:20-alpine AS web-runner
 WORKDIR /app
 
 ENV NODE_ENV=production

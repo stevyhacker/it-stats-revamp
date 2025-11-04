@@ -263,8 +263,8 @@ const CompanyPage = () => {
                 <YAxis yAxisId="left" tickFormatter={(value) => numeral(value).format('0a')} />
                 <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => numeral(value).format('0,0')} />
                 <Tooltip formatter={(value: number, name) => [
-                  name === 'employeeCount' ? numeral(value).format('0,0') : numeral(value).format('0,0a'),
-                  name === 'totalIncome' ? 'Total Income' : name === 'profit' ? 'Profit' : 'Employees'
+                  name === 'Employees' ? numeral(value).format('0,0') : numeral(value).format('0,0') + '€',
+                  name
                   ]} />
                 <Line yAxisId="left" type="monotone" dataKey="totalIncome" stroke="#8884d8" strokeWidth={2} name="Total Income" dot={false} />
                 <Line yAxisId="left" type="monotone" dataKey="profit" stroke="#82ca9d" strokeWidth={2} name="Profit" dot={false} />

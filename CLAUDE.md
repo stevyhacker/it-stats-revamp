@@ -19,28 +19,28 @@ ITStats.me is a comprehensive dashboard for analyzing Montenegrin tech companies
 - **Backend**: Hono web framework with Clerk authentication middleware
 - **Database**: PostgreSQL with Drizzle ORM, hosted on Supabase
 - **Visualization**: Recharts for charts and data presentation
-- **Build System**: Turborepo with pnpm workspaces
+- **Build System**: Turborepo with Bun workspaces
 
 ## Development Commands
 
 ### Root Level Commands (run from project root)
-- `pnpm dev` - Start both frontend and backend development servers
-- `pnpm build` - Build all apps for production
-- `pnpm lint` - Lint the entire codebase
-- `pnpm format` - Format code with Prettier
+- `bun dev` - Start both frontend and backend development servers
+- `bun run build` - Build all apps for production
+- `bun run lint` - Lint the entire codebase
+- `bun run format` - Format code with Prettier
 
 ### Database Commands
-- `pnpm db:generate` - Generate Drizzle migrations
-- `pnpm db:migrate` - Generate and push database migrations
-- `pnpm db:push` - Push schema changes to database
-- `pnpm db:studio` - Open Drizzle Studio for database inspection
-- `pnpm --filter db run seed` - Seed database with initial data
+- `bun db:generate` - Generate Drizzle migrations
+- `bun db:migrate` - Generate and push database migrations
+- `bun db:push` - Push schema changes to database
+- `bun db:studio` - Open Drizzle Studio for database inspection
+- `bun --filter db run seed` - Seed database with initial data
 
 ### Individual App Commands
-- `pnpm --filter web run dev` - Start only the frontend (Next.js)
-- `pnpm --filter api run dev` - Start only the backend (Hono/Bun)
-- `pnpm --filter web run build` - Build frontend only
-- `pnpm --filter api run build` - Build API only
+- `bun --filter web run dev` - Start only the frontend (Next.js)
+- `bun --filter api run dev` - Start only the backend (Hono/Bun)
+- `bun --filter web run build` - Build frontend only
+- `bun --filter api run build` - Build API only
 
 ## Database Schema
 
@@ -92,10 +92,10 @@ ITStats.me is a comprehensive dashboard for analyzing Montenegrin tech companies
 - **packages/db/.env**: `DATABASE_URL` for PostgreSQL connection
 
 ### Development Workflow
-1. Clone repository and run `pnpm install`
+1. Clone repository and run `bun install`
 2. Set up database environment variables
-3. Run `pnpm db:seed` to populate initial data
-4. Use `pnpm dev` to start both frontend and backend
+3. Run `bun db:seed` to populate initial data
+4. Use `bun dev` to start both frontend and backend
 5. Frontend runs on `http://localhost:5173`, API on `http://localhost:3000`
 
 ## Code Conventions
@@ -109,7 +109,7 @@ ITStats.me is a comprehensive dashboard for analyzing Montenegrin tech companies
 
 ## Testing and Building
 
-The project uses Turborepo's pipeline for coordinated builds. Always run `pnpm build` from root to ensure proper dependency resolution between packages. The database package is a dependency for the API, creating a build-time dependency chain.
+The project uses Turborepo's pipeline for coordinated builds. Always run `bun run build` from root to ensure proper dependency resolution between packages. The database package is a dependency for the API, creating a build-time dependency chain.
 
 ## Data Source
 

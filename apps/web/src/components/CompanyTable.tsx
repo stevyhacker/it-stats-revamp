@@ -42,7 +42,7 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
         const numB = parseFloat(String(bValue)) || 0; // Convert to number, default to 0 if NaN
         return sortDirection === 'asc' ? numA - numB : numB - numA;
       }
-      
+
       // Handle sorting for string columns (like 'name')
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
@@ -75,104 +75,97 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
     if (sortColumn !== column) {
       return null;
     }
-    return sortDirection === 'asc' ? (
-      <ChevronUpIcon className="h-4 w-4 inline-block ml-1" />
-    ) : (
-      <ChevronDownIcon className="h-4 w-4 inline-block ml-1" />
+
+    const Icon = sortDirection === 'asc' ? ChevronUpIcon : ChevronDownIcon;
+
+    return (
+      <Icon className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
     );
   };
 
   return (
-    <div className="w-full overflow-x-auto rounded-lg bg-card/60 backdrop-blur-sm border">
-      <Table className="w-full">
-        <TableHeader className="sticky top-0 bg-background/80 backdrop-blur-sm border-b shadow-sm">
-          <TableRow>
-            <TableHead className="w-8"></TableHead>
+    <div className="w-full overflow-x-auto">
+      <Table className="data-table">
+        <TableHeader>
+          <TableRow className="border-b border-border bg-muted/20">
+            <TableHead className="w-[50px]"></TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-accent/40 transition-all duration-200 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-left"
               onClick={() => handleSort('name')}
             >
-              Company Name
+              <span className="block">Company</span>
               {renderSortIcon('name')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-accent/40 transition-all duration-200 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
               onClick={() => handleSort('totalIncome')}
             >
-              Total Income
+              <span className="block">Revenue</span>
               {renderSortIcon('totalIncome')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-accent/40 transition-all duration-200 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
               onClick={() => handleSort('profit')}
             >
-              Profit
+              <span className="block">Profit</span>
               {renderSortIcon('profit')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-accent/40 transition-all duration-200 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
               onClick={() => handleSort('averagePay')}
             >
-              Avg Monthly Pay
+              <span className="block">Avg Net Salary</span>
               {renderSortIcon('averagePay')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-accent/40 transition-all duration-200 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
               onClick={() => handleSort('employeeCount')}
             >
-              Employees
+              <span className="block">Employees</span>
               {renderSortIcon('employeeCount')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-accent/40 transition-all duration-200 font-semibold text-xs uppercase tracking-wider rounded-t-md"
+              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
               onClick={() => handleSort('incomePerEmployee')}
             >
-              Income/Employee
+              <span className="block">Revenue/Employee</span>
               {renderSortIcon('incomePerEmployee')}
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedCompanyList.map((company: CompanyData) => (
+          {sortedCompanyList.map((company: CompanyData, idx: number) => (
             <TableRow
               key={company.name}
               onClick={() => onCompanySelect(company.name)}
-              className="cursor-pointer hover:bg-accent/30 hover:border-l-4 hover:border-l-primary/50 transition-colors duration-200 group relative overflow-hidden"
+              className={`cursor-pointer hover:bg-muted/30 border-b border-border/50 group transition-colors ${idx % 2 === 1 ? 'bg-muted/10' : ''}`}
             >
-              <TableCell onClick={(e) => e.stopPropagation()}>
-                <input
+
+              <TableCell className="font-semibold text-left group-hover:text-primary transition-colors">
+                {/*<input
                   type="checkbox"
-                  className="h-4 w-4 accent-primary"
+                  className="h-4 w-4 mr-2 accent-primary"
                   checked={selectedCompanies.includes(company.name)}
                   onChange={() => onToggleCompany && onToggleCompany(company.name)}
                   aria-label={`Select ${company.name} for comparison`}
-                />
+                />*/}
+                {company.name}
               </TableCell>
-              <TableCell className="font-medium group-hover:text-foreground transition-colors duration-200 relative z-10">
-                <div className="flex items-center gap-2">
-                  <span>{company.name}</span>
-                  {profitMarginByName && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-success/10 text-success">
-                      {(((profitMarginByName.get(company.name) ?? 0) * 100).toFixed(1))}%
-                    </span>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell className="group-hover:font-semibold transition-colors duration-200 relative z-10">
+              <TableCell className="tabular-nums text-right pr-8">
                 {numeral(company.totalIncome).format('0,0')}€
               </TableCell>
-              <TableCell className="group-hover:font-semibold transition-colors duration-200 relative z-10">
-                <span>
-                  {numeral(company.profit).format('0,0')}€
-                </span>
+              <TableCell className={`tabular-nums text-right pr-8 ${
+                (company.profit ?? 0) >= 0 ? 'text-success' : 'text-destructive'
+              }`}>
+                {numeral(company.profit).format('0,0')}€
               </TableCell>
-              <TableCell className="group-hover:font-semibold transition-colors duration-200 relative z-10">
+              <TableCell className="tabular-nums text-right pr-8">
                 {numeral(company.averagePay).format('0,0')}€
               </TableCell>
-              <TableCell className="group-hover:font-semibold transition-colors duration-200 relative z-10">
+              <TableCell className="tabular-nums text-right pr-8">
                 {company.employeeCount}
               </TableCell>
-              <TableCell className="group-hover:font-semibold transition-colors duration-200 relative z-10">
+              <TableCell className="tabular-nums text-right pr-8">
                 {numeral(company.incomePerEmployee).format('0,0')}€
               </TableCell>
             </TableRow>

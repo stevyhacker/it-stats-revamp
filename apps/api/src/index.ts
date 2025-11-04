@@ -1,9 +1,11 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
-// import { clerkMiddleware, getAuth } from '@hono/clerk-auth';
 import 'dotenv/config';
 import { db, years, companies, eq, desc, asc } from 'db';
 import * as schema from 'db';
+
+// Detect Bun runtime so we can skip the Node fallback when possible
+const runningInBun = typeof Bun !== 'undefined' && typeof Bun.serve === 'function';
 
 // Define Company type using Drizzle inference
 type Company = typeof companies.$inferSelect;
@@ -17,7 +19,7 @@ interface YearData {
   // Add other year-specific properties if needed
 }
 
-const app = new Hono();
+export const app = new Hono();
 
 // Middleware
 app.use(logger());
@@ -182,14 +184,6 @@ app.get('/years', async (c) => {
   }
 });
 
-// --- Clerk Authentication ---
-// Initialize Clerk middleware (ensure env vars are set)
-// Note: Adjust publishableKey and secretKey based on your needs if loaded differently
-// const clerk = clerkMiddleware({
-//   secretKey: process.env.CLERK_SECRET_KEY,
-//   publishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
-// });
-
 // Example public route
 app.get('/', (c) => {
   return c.json({ message: 'Hello from IT Stats API!' });
@@ -199,20 +193,12 @@ app.get('/', (c) => {
 // Group routes that require authentication
 const appRoutes = app.basePath('/api'); // Example base path
 
-// Apply Clerk middleware to this group
-// appRoutes.use(clerk);
-
 appRoutes.get('/protected', (c) => {
-  // const auth = getAuth(c);
-
-  // if (!auth?.userId) {
-  //   return c.json({ error: 'Unauthorized' }, 401);
-  // }
-
   // Access user data if needed: auth.userId, auth.sessionClaims, etc.
   // return c.json({ message: 'This is a protected route', userId: auth.userId });
   return c.json({ message: 'This is a protected route' });
 });
+
 
 // --- Server Start ---
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -220,16 +206,19 @@ const isDev = process.env.NODE_ENV !== 'production';
 
 console.log(`API server starting on port ${port} (${isDev ? 'development' : 'production'})`);
 
-// Use @hono/node-server for Node.js runtime
-import { serve } from '@hono/node-server';
-
-serve({
-  fetch: app.fetch,
-  port: port,
-  hostname: '0.0.0.0',
-});
-
-console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
-
 // Export for testing
 export default app;
+
+// Start server if this file is run directly in a Node environment.
+// Bun already auto-starts when the default export exposes a fetch handler.
+if (!runningInBun && typeof require !== 'undefined' && require.main === module) {
+  const { serve } = require('@hono/node-server');
+
+  serve({
+    fetch: app.fetch,
+    port: port,
+    hostname: isDev ? 'localhost' : '0.0.0.0',
+  });
+
+  console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
+}

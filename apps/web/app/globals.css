@@ -4,86 +4,84 @@
 
 @layer base {
   :root {
-    /* Improved light mode colors for better contrast and readability */
-    --background: 0 0% 98%;
-    --foreground: 222.2 84% 4.9%;
+    /* New York theme - Light mode */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 94%;
-    --accent-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 240 10% 3.9%;
+    
+    /* Slate primary */
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;
+    --destructive-foreground: 0 0% 98%;
     
-    /* Enhanced chart colors with better accessibility */
-    --chart-1: 221.2 83.2% 53.3%;
-    --chart-2: 142.1 76.2% 36.3%;
-    --chart-3: 38.4 92.0% 50.0%;
-    --chart-4: 271.5 81.3% 55.9%;
-    --chart-5: 346.8 77.2% 49.8%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
     
-    /* Success and warning colors */
-    --success: 142.1 76.2% 36.3%;
-    --success-foreground: 355.7 100% 97.3%;
-    --warning: 38.4 92.0% 50.0%;
-    --warning-foreground: 48 96% 89%;
+    /* Cool neutral chart colors */
+    --chart-1: 221 83% 53%;
+    --chart-2: 212 95% 68%;
+    --chart-3: 216 92% 60%;
+    --chart-4: 210 98% 78%;
+    --chart-5: 205 93% 65%;
     
-    /* Surface variations */
-    --surface-1: 0 0% 100%;
-    --surface-2: 0 0% 98%;
-    --surface-3: 210 40% 96%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 240 10% 3.9%;
   }
 
   .dark {
-    /* Softer dark mode with eye-friendly grey tones */
-    --background: 220 13% 18%;
-    --foreground: 210 40% 95%;
-    --card: 220 13% 20%;
-    --card-foreground: 210 40% 95%;
-    --popover: 220 13% 20%;
-    --popover-foreground: 210 40% 95%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 220 13% 18%;
-    --secondary: 215 25% 27%;
-    --secondary-foreground: 210 40% 95%;
-    --muted: 215 25% 27%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 215 25% 27%;
-    --accent-foreground: 210 40% 95%;
-    --destructive: 0 62.8% 50.6%;
-    --destructive-foreground: 210 40% 95%;
-    --border: 215 25% 27%;
-    --input: 215 25% 27%;
-    --ring: 224.3 76.3% 48.0%;
+    /* New York theme - Dark mode */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
     
-    /* Enhanced dark mode chart colors - slightly brighter for better visibility */
-    --chart-1: 217.2 91.2% 65.8%;
-    --chart-2: 142.1 70.6% 55.3%;
-    --chart-3: 38.4 92.0% 60.0%;
-    --chart-4: 271.5 81.3% 70.9%;
-    --chart-5: 346.8 77.2% 65.8%;
+    /* Bright slate accent */
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
     
-    /* Dark mode success and warning colors - more vibrant */
-    --success: 142.1 70.6% 55.3%;
-    --success-foreground: 138.5 76.5% 96.7%;
-    --warning: 38.4 92.0% 60.0%;
-    --warning-foreground: 48 96% 89%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
     
-    /* Softer surface variations */
-    --surface-1: 220 13% 22%;
-    --surface-2: 215 25% 27%;
-    --surface-3: 215 25% 24%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    
+    /* Brighter chart colors for dark mode */
+    --chart-1: 221 83% 53%;
+    --chart-2: 212 95% 68%;
+    --chart-3: 216 92% 60%;
+    --chart-4: 210 98% 78%;
+    --chart-5: 205 93% 65%;
+    
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 240 10% 3.9%;
   }
 }
 
@@ -94,129 +92,147 @@
   
   html {
     scroll-behavior: smooth;
+    font-size: 16px;
   }
   
   body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "liga" 1, "calt" 1;
+    letter-spacing: -0.011em;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.6;
   }
   
-  /* Improved focus styles */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+  
+  h2 {
+    font-size: 2rem;
+    line-height: 1.3;
+  }
+  
+  h3 {
+    font-size: 1.75rem;
+    line-height: 1.4;
+  }
+  
+  h4 {
+    font-size: 1.5rem;
+    line-height: 1.4;
+  }
+  
+  h5 {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+  
+  h6 {
+    font-size: 1.125rem;
+    line-height: 1.5;
+  }
+  
+  p {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.6;
+  }
+  
   *:focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
   }
   
-  /* Better selection colors */
   ::selection {
     @apply bg-primary/20 text-foreground;
   }
   
-  .dark ::selection {
-    @apply bg-primary/30 text-foreground;
-  }
-  
-  /* Scrollbar styling */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 12px;
+    height: 12px;
   }
   
   ::-webkit-scrollbar-track {
-    @apply bg-muted/20;
+    @apply bg-muted;
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/40 rounded-full;
+    @apply bg-primary/30 rounded-full;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/60;
+    @apply bg-primary/50;
   }
   
-  /* Dark mode scrollbar adjustments */
-  .dark ::-webkit-scrollbar-track {
-    @apply bg-muted/30;
-  }
-  
-  .dark ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/50 rounded-full;
-  }
-  
-  .dark ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/70;
-  }
-  
-  /* Loading and transition improvements */
-  .transition-all {
-    transition-duration: 200ms;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  ::-webkit-scrollbar-corner {
+    @apply bg-muted;
   }
 }
 
 @layer components {
-  /* Reusable component classes */
-  .glass-card {
-    @apply backdrop-blur-sm bg-background/80 border border-border/50;
+  .professional-card {
+    @apply border border-border bg-card rounded-lg shadow-lg relative;
+    box-shadow: 
+      0 1px 3px 0 rgb(0 0 0 / 0.1),
+      0 1px 2px -1px rgb(0 0 0 / 0.1);
   }
   
-  .dark .glass-card {
-    @apply backdrop-blur-sm bg-card/85 border border-border/40;
+  .dark .professional-card {
+    box-shadow: 
+      0 1px 3px 0 rgb(0 0 0 / 0.3),
+      0 1px 2px -1px rgb(0 0 0 / 0.2);
   }
   
-  .gradient-primary {
-    @apply bg-gradient-to-br from-primary to-primary/80;
+  .card-header {
+    @apply border-b border-border bg-muted/30 px-6 py-4 flex items-center gap-3 rounded-t-lg;
   }
   
-  .gradient-surface {
-    @apply bg-gradient-to-br from-surface-1 to-surface-2;
+  .status-indicator {
+    @apply inline-flex items-center gap-2;
   }
   
-  .shadow-soft {
-    box-shadow: 0 2px 8px -2px rgb(0 0 0 / 0.1), 0 4px 16px -8px rgb(0 0 0 / 0.1);
-  }
-  
-  .shadow-medium {
-    box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.15), 0 8px 24px -8px rgb(0 0 0 / 0.1);
-  }
-  
-  .shadow-strong {
-    box-shadow: 0 8px 24px -4px rgb(0 0 0 / 0.2), 0 16px 32px -8px rgb(0 0 0 / 0.15);
-  }
-  
-  .neu-button {
-    @apply shadow-[2px_2px_6px_rgba(0,0,0,0.1),-2px_-2px_6px_rgba(255,255,255,0.9)] 
-           dark:shadow-[2px_2px_6px_rgba(0,0,0,0.25),-2px_-2px_6px_rgba(255,255,255,0.08)]
-           active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.1),inset_-2px_-2px_6px_rgba(255,255,255,0.9)]
-           dark:active:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.25),inset_-2px_-2px_6px_rgba(255,255,255,0.08)];
-  }
-  
-  .neu-card {
-    @apply shadow-[4px_4px_12px_rgba(0,0,0,0.08),-4px_-4px_12px_rgba(255,255,255,0.9)]
-           dark:shadow-[4px_4px_12px_rgba(0,0,0,0.3),-4px_-4px_12px_rgba(255,255,255,0.06)];
-  }
-  
-  .neu-inset {
-    @apply shadow-[inset_4px_4px_12px_rgba(0,0,0,0.08),inset_-4px_-4px_12px_rgba(255,255,255,0.9)]
-           dark:shadow-[inset_4px_4px_12px_rgba(0,0,0,0.3),inset_-4px_-4px_12px_rgba(255,255,255,0.06)];
-  }
-  
-  /* Table row highlight animations */
-  .table-row-highlight {
-    @apply relative overflow-hidden;
-  }
-  
-  .table-row-highlight::before {
+  .status-indicator::before {
     content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-primary/8 to-transparent 
-           translate-x-full transition-transform duration-500 ease-out;
+    @apply w-2 h-2 rounded-full bg-success;
   }
   
-  .table-row-highlight:hover::before {
-    @apply translate-x-0;
+  .data-table {
+    @apply w-full border border-border rounded-lg overflow-hidden;
   }
   
-  /* Staggered cell animations */
-  .table-cell-stagger {
-    animation-delay: calc(var(--cell-index, 0) * 50ms);
+  .data-table thead {
+    @apply bg-muted/40 border-b border-border;
+  }
+  
+  .data-table th {
+    @apply px-6 py-3 text-base font-bold uppercase tracking-wide;
+  }
+  
+  .data-table td {
+    @apply px-6 py-4 border-t border-border text-base font-medium;
+  }
+  
+  .data-table tbody tr {
+    @apply hover:bg-primary/5 transition-colors relative;
+  }
+  
+  .data-table tbody tr::before {
+    content: '';
+    @apply absolute left-0 top-0 bottom-0 w-1 bg-primary opacity-0 transition-opacity rounded-l;
+  }
+  
+  .data-table tbody tr:hover::before {
+    @apply opacity-100;
+  }
+  
+  .loading-dots::after {
+    content: '...';
+    @apply inline-block animate-pulse;
   }
 }
