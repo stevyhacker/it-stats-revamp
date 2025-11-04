@@ -199,35 +199,26 @@ appRoutes.get('/protected', (c) => {
   return c.json({ message: 'This is a protected route' });
 });
 
+
 // --- Server Start ---
-// Only start the server if this file is being run directly (not imported)
-if (import.meta.main) {
-  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
-  const isDev = process.env.NODE_ENV !== 'production';
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+const isDev = process.env.NODE_ENV !== 'production';
 
-  console.log(`API server starting on port ${port} (${isDev ? 'development' : 'production'})`);
+console.log(`API server starting on port ${port} (${isDev ? 'development' : 'production'})`);
 
-  // Ensure downstream consumers see the resolved port value
-  if (!process.env.PORT) {
-    process.env.PORT = String(port);
-  }
+// Export for testing
+export default app;
 
-  if (runningInBun) {
-    console.log('Bun runtime detected; relying on automatic Bun server binding.');
-    console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
-  } else {
-    // Node.js runtime - use @hono/node-server without top-level await
-    (async () => {
-      const { serve } = await import('@hono/node-server');
-      serve({
-        fetch: app.fetch,
-        port: port,
-        hostname: '0.0.0.0',
-      });
-      console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
-    })().catch((error) => {
-      console.error('Failed to start server:', error);
-      process.exit(1);
-    });
-  }
+// Start server if this file is run directly in a Node environment.
+// Bun already auto-starts when the default export exposes a fetch handler.
+if (!runningInBun && typeof require !== 'undefined' && require.main === module) {
+  const { serve } = require('@hono/node-server');
+
+  serve({
+    fetch: app.fetch,
+    port: port,
+    hostname: isDev ? 'localhost' : '0.0.0.0',
+  });
+
+  console.log(`Server is running on http://${isDev ? 'localhost' : '0.0.0.0'}:${port}`);
 }
