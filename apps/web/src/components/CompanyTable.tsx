@@ -87,44 +87,44 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
       <Table className="data-table">
         <TableHeader>
           <TableRow className="border-b-2 border-border bg-muted/30">
-            <TableHead className="w-8 font-mono"></TableHead>
+            <TableHead className="w-8 font-sans"></TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-primary/10 transition-all duration-150 font-mono font-bold text-[10px] uppercase tracking-wider"
+              className="cursor-pointer hover:bg-primary/10 transition-all duration-150 font-sans font-bold text-xs uppercase tracking-wider"
               onClick={() => handleSort('name')}
             >
               <span className="text-primary">{'>'}</span> company_name
               {renderSortIcon('name')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-primary/10 transition-all duration-150 font-mono font-bold text-[10px] uppercase tracking-wider"
+              className="cursor-pointer hover:bg-primary/10 transition-all duration-150 font-sans font-bold text-xs uppercase tracking-wider"
               onClick={() => handleSort('totalIncome')}
             >
               total_income
               {renderSortIcon('totalIncome')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-primary/10 transition-all duration-150 font-mono font-bold text-[10px] uppercase tracking-wider"
+              className="cursor-pointer hover:bg-primary/10 transition-all duration-150 font-sans font-bold text-xs uppercase tracking-wider"
               onClick={() => handleSort('profit')}
             >
               profit
               {renderSortIcon('profit')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-primary/10 transition-all duration-150 font-mono font-bold text-[10px] uppercase tracking-wider"
+              className="cursor-pointer hover:bg-primary/10 transition-all duration-150 font-sans font-bold text-xs uppercase tracking-wider"
               onClick={() => handleSort('averagePay')}
             >
               avg_pay
               {renderSortIcon('averagePay')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-primary/10 transition-all duration-150 font-mono font-bold text-[10px] uppercase tracking-wider"
+              className="cursor-pointer hover:bg-primary/10 transition-all duration-150 font-sans font-bold text-xs uppercase tracking-wider"
               onClick={() => handleSort('employeeCount')}
             >
               employees
               {renderSortIcon('employeeCount')}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:bg-primary/10 transition-all duration-150 font-mono font-bold text-[10px] uppercase tracking-wider"
+              className="cursor-pointer hover:bg-primary/10 transition-all duration-150 font-sans font-bold text-xs uppercase tracking-wider"
               onClick={() => handleSort('incomePerEmployee')}
             >
               income_per_emp
@@ -139,7 +139,7 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
               onClick={() => onCompanySelect(company.name)}
               className="cursor-pointer hover:bg-primary/5 border-t border-border group relative transition-colors duration-150"
             >
-              <TableCell onClick={(e) => e.stopPropagation()} className="font-mono text-xs">
+              <TableCell onClick={(e) => e.stopPropagation()} className="font-sans text-xs">
                 <input
                   type="checkbox"
                   className="h-4 w-4 accent-primary border-2 border-primary"
@@ -148,32 +148,32 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
                   aria-label={`Select ${company.name} for comparison`}
                 />
               </TableCell>
-              <TableCell className="font-mono font-medium group-hover:text-primary transition-colors duration-150">
+              <TableCell className="font-sans font-medium group-hover:text-primary transition-colors duration-150">
                 <div className="flex items-center gap-2">
                   <span className="text-primary opacity-0 group-hover:opacity-100 transition-opacity">{'>'}</span>
                   <span>{company.name}</span>
                   {profitMarginByName && (
-                    <span className="text-[9px] px-1.5 py-0.5 border border-success/40 bg-success/10 text-success font-mono">
+                    <span className="text-[10px] px-1.5 py-0.5 border border-success/40 bg-success/10 text-success font-sans">
                       {(((profitMarginByName.get(company.name) ?? 0) * 100).toFixed(1))}%
                     </span>
                   )}
                 </div>
               </TableCell>
-              <TableCell className="font-mono group-hover:font-bold transition-all duration-150">
+              <TableCell className="font-sans group-hover:font-bold transition-all duration-150">
                 {numeral(company.totalIncome).format('0,0')}€
               </TableCell>
-              <TableCell className={`font-mono group-hover:font-bold transition-all duration-150 ${
+              <TableCell className={`font-sans group-hover:font-bold transition-all duration-150 ${
                 (company.profit ?? 0) >= 0 ? 'text-success' : 'text-destructive'
               }`}>
                 {numeral(company.profit).format('0,0')}€
               </TableCell>
-              <TableCell className="font-mono group-hover:font-bold transition-all duration-150">
+              <TableCell className="font-sans group-hover:font-bold transition-all duration-150">
                 {numeral(company.averagePay).format('0,0')}€
               </TableCell>
-              <TableCell className="font-mono group-hover:font-bold transition-all duration-150">
+              <TableCell className="font-sans group-hover:font-bold transition-all duration-150">
                 {company.employeeCount}
               </TableCell>
-              <TableCell className="font-mono group-hover:font-bold transition-all duration-150">
+              <TableCell className="font-sans group-hover:font-bold transition-all duration-150">
                 {numeral(company.incomePerEmployee).format('0,0')}€
               </TableCell>
             </TableRow>

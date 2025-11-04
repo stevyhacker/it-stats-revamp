@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Space_Mono } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ThemeScript } from "@/components/ThemeScript";
 
-const jetbrainsMono = JetBrains_Mono({ 
+const inter = Inter({ 
   subsets: ["latin"],
-  variable: '--font-mono',
+  variable: '--font-sans',
   display: 'swap',
 });
 
-const spaceMono = Space_Mono({ 
+const poppins = Poppins({ 
   subsets: ["latin"],
-  weight: ['400', '700'],
-  variable: '--font-space-mono',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-display',
   display: 'swap',
 });
 
@@ -61,7 +61,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
         <ThemeScript />
       </head>
-      <body className={`${jetbrainsMono.variable} ${spaceMono.variable} font-mono`}>
+      <body className={`${inter.variable} ${poppins.variable} font-sans`}>
         <ThemeProvider>
           {children}
         </ThemeProvider>

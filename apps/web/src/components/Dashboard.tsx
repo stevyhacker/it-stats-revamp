@@ -9,6 +9,8 @@ import {
   Users,
   Building2,
   Briefcase,
+  Calendar,
+  BarChart3,
 } from "lucide-react";
 import numeral from "numeral";
 import CompanyTable from "./CompanyTable";
@@ -224,10 +226,10 @@ export function Dashboard({
 
         {/* Year Selection */}
         <div className="mb-8">
-          <div className="border-2 border-border bg-card p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-primary font-mono font-bold">$</span>
-              <span className="text-xs font-mono text-muted-foreground uppercase">select year</span>
+          <div className="border border-border bg-card rounded-lg p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar className="h-4 w-4 text-primary" />
+              <span className="text-sm font-display font-semibold text-foreground">Select Year</span>
             </div>
             
             {/* Tabs for Medium and Up */}
@@ -241,7 +243,7 @@ export function Dashboard({
                   <TabsTrigger
                     key={year}
                     value={year}
-                    className="px-4 py-2 text-sm font-mono font-bold transition-all duration-150 
+                    className="px-4 py-2 text-sm font-sans font-bold transition-all duration-150 
                                data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
                                data-[state=active]:border-2 data-[state=active]:border-primary
                                hover:bg-primary/10"
@@ -255,7 +257,7 @@ export function Dashboard({
             {/* Select Dropdown for Small Screens */}
             <div className="block md:hidden">
               <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-full border-2 border-border bg-background font-mono">
+                <SelectTrigger className="w-full border-2 border-border bg-background font-sans">
                   <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
                 <SelectContent className="border-2 border-border bg-card">
@@ -263,7 +265,7 @@ export function Dashboard({
                     <SelectItem
                       key={year}
                       value={year}
-                      className="font-mono cursor-pointer hover:bg-primary/10 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                      className="font-sans cursor-pointer hover:bg-primary/10 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                     >
                       {year}
                     </SelectItem>
@@ -286,25 +288,25 @@ export function Dashboard({
         )}
 
         <section className="mb-12">
-          <h2 className="text-xl font-bold mb-6 font-mono flex items-center gap-2">
-            <span className="text-primary">{'>'}</span>
-            <span>market_overview</span>
+          <h2 className="text-xl font-bold mb-6 font-sans flex items-center gap-2">
+            
+            <span>Market Overview</span>
             <span className="text-muted-foreground text-sm">({selectedYear})</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="transition-all duration-200 hover:border-primary hover:scale-[1.01]">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-[10px] uppercase text-muted-foreground">
-                  total_revenue
+                <CardTitle className="text-xs uppercase text-muted-foreground">
+                  Total Revenue
                 </CardTitle>
-                <Building2 className="h-3.5 w-3.5 text-terminal-green" />
+                <Building2 className="h-3.5 w-3.5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-mono">
+                <div className="text-2xl font-bold font-sans">
                   {numeral(marketStats.totalRevenue).format("0,0")}€
                 </div>
                 <p
-                  className={`text-xs mt-1 font-mono flex items-center ${
+                  className={`text-xs mt-1 font-sans flex items-center ${
                     marketStats.revenueGrowth >= 0
                       ? "text-success"
                       : "text-destructive"
@@ -328,17 +330,17 @@ export function Dashboard({
 
             <Card className="transition-all duration-200 hover:border-primary hover:scale-[1.01]">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-[10px] uppercase text-muted-foreground">
-                  total_employees
+                <CardTitle className="text-xs uppercase text-muted-foreground">
+                  Total Employees
                 </CardTitle>
-                <Users className="h-3.5 w-3.5 text-terminal-blue" />
+                <Users className="h-3.5 w-3.5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-mono">
+                <div className="text-2xl font-display font-semibold">
                   {numeral(marketStats.totalEmployees).format("0,0")}
                 </div>
                 <p
-                  className={`text-xs mt-1 font-mono flex items-center ${
+                  className={`text-xs mt-1 font-sans flex items-center ${
                     marketStats.employeeGrowth >= 0
                       ? "text-success"
                       : "text-destructive"
@@ -362,13 +364,13 @@ export function Dashboard({
 
             <Card className="transition-all duration-200 hover:border-primary hover:scale-[1.01]">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-[10px] uppercase text-muted-foreground">
+                <CardTitle className="text-xs uppercase text-muted-foreground">
                   avg_revenue
                 </CardTitle>
-                <Briefcase className="h-3.5 w-3.5 text-terminal-cyan" />
+                <Briefcase className="h-3.5 w-3.5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-mono">
+                <div className="text-2xl font-bold font-sans">
                   {selectedYearData?.companyList.length
                     ? numeral(
                         marketStats.totalRevenue / selectedYearData.companyList.length
@@ -376,7 +378,7 @@ export function Dashboard({
                     : 0}
                   €
                 </div>
-                <p className="text-xs text-muted-foreground mt-1 font-mono">
+                <p className="text-xs text-muted-foreground mt-1 font-sans">
                   per_company
                 </p>
               </CardContent>
@@ -384,13 +386,13 @@ export function Dashboard({
 
             <Card className="transition-all duration-200 hover:border-primary hover:scale-[1.01]">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-[10px] uppercase text-muted-foreground">
+                <CardTitle className="text-xs uppercase text-muted-foreground">
                   avg_team_size
                 </CardTitle>
                 <Users className="h-3.5 w-3.5 text-warning" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold font-mono">
+                <div className="text-2xl font-bold font-sans">
                   {selectedYearData?.companyList.length
                     ? Math.round(
                         marketStats.totalEmployees /
@@ -398,8 +400,8 @@ export function Dashboard({
                       )
                     : 0}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1 font-mono">
-                  employees_per_company
+                <p className="text-xs text-muted-foreground mt-1 font-sans">
+                  Employees Per Company
                 </p>
               </CardContent>
             </Card>
@@ -407,9 +409,9 @@ export function Dashboard({
         </section>
 
         <section className="mb-12">
-          <h2 className="text-xl font-bold mb-6 font-mono flex items-center gap-2">
-            <span className="text-primary">{'>'}</span>
-            <span>top_companies</span>
+          <h2 className="text-xl font-bold mb-6 font-sans flex items-center gap-2">
+            
+            <span>Top Companies</span>
             <span className="text-muted-foreground text-sm">({selectedYear})</span>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -428,24 +430,16 @@ export function Dashboard({
         </section>
 
         <section className="mb-12">
-          <Card className="transition-all duration-200 hover:border-primary">
-            <div className="terminal-header">
-              <div className="flex items-center gap-2">
-                <div className="terminal-dots" />
-              </div>
-              <div className="text-[10px] text-muted-foreground font-mono">
-                market_trends.chart
-              </div>
-            </div>
-            <CardHeader>
+          <Card className="transition-all duration-200 hover:border-primary/50">
+            <CardHeader className="border-b border-border">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
-                  <span className="text-primary">{'>'}</span>
-                  <span>market_trends</span>
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <span>Market Trends</span>
                 </CardTitle>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={exportCsv}>
-                    <span>export_csv</span>
+                    Export CSV
                   </Button>
                 </div>
               </div>
@@ -461,18 +455,10 @@ export function Dashboard({
         </section>
 
         <section aria-labelledby="all-companies-heading">
-          <Card className="transition-all duration-200 hover:border-primary">
-            <div className="terminal-header">
-              <div className="flex items-center gap-2">
-                <div className="terminal-dots" />
-              </div>
-              <div className="text-[10px] text-muted-foreground font-mono">
-                companies.db
-              </div>
-            </div>
+          <Card className="transition-all duration-200 hover:border-primary/50">
             <CardHeader>
               <CardTitle id="all-companies-heading" className="flex items-center gap-2">
-                <span className="text-primary">{'>'}</span>
+                
                 <span>all_companies</span>
                 <span className="text-muted-foreground text-sm">({selectedYear})</span>
               </CardTitle>

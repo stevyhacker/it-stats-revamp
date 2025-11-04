@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-// Note: Select imports removed since only range inputs remain
+import { Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export interface FiltersState {
-  minRevenue?: string; // use string for inputs to handle empty
+  minRevenue?: string;
   maxRevenue?: string;
   minEmployees?: string;
   maxEmployees?: string;
@@ -20,58 +20,58 @@ interface FiltersProps {
 export function Filters({ value, onChange, onClear }: FiltersProps) {
 
   return (
-    <div className="w-full border-2 border-border bg-card p-4">
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-primary font-mono font-bold">$</span>
-        <span className="text-xs font-mono text-muted-foreground uppercase">filter_data</span>
+    <div className="w-full border border-border bg-card rounded-lg p-6 shadow-sm">
+      <div className="flex items-center gap-2 mb-6">
+        <Filter className="h-4 w-4 text-primary" />
+        <span className="text-sm font-display font-semibold text-foreground">Filter Data</span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase">revenue_range (€)</label>
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Revenue Range (€)</label>
           <div className="flex items-center gap-2">
             <input
               type="number"
               inputMode="numeric"
-              placeholder="min"
+              placeholder="Min"
               value={value.minRevenue ?? ""}
               onChange={(e) => onChange({ ...value, minRevenue: e.target.value })}
-              className="h-10 w-full border-2 border-border bg-background px-3 text-sm font-mono focus:border-primary focus:outline-none transition-colors"
+              className="h-10 w-full border border-border rounded-lg bg-background px-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors"
             />
             <input
               type="number"
               inputMode="numeric"
-              placeholder="max"
+              placeholder="Max"
               value={value.maxRevenue ?? ""}
               onChange={(e) => onChange({ ...value, maxRevenue: e.target.value })}
-              className="h-10 w-full border-2 border-border bg-background px-3 text-sm font-mono focus:border-primary focus:outline-none transition-colors"
+              className="h-10 w-full border border-border rounded-lg bg-background px-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors"
             />
           </div>
         </div>
         <div className="space-y-2">
-          <label className="text-[10px] font-mono font-bold text-muted-foreground uppercase">employees_range</label>
+          <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Employees Range</label>
           <div className="flex items-center gap-2">
             <input
               type="number"
               inputMode="numeric"
-              placeholder="min"
+              placeholder="Min"
               value={value.minEmployees ?? ""}
               onChange={(e) => onChange({ ...value, minEmployees: e.target.value })}
-              className="h-10 w-full border-2 border-border bg-background px-3 text-sm font-mono focus:border-primary focus:outline-none transition-colors"
+              className="h-10 w-full border border-border rounded-lg bg-background px-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors"
             />
             <input
               type="number"
               inputMode="numeric"
-              placeholder="max"
+              placeholder="Max"
               value={value.maxEmployees ?? ""}
               onChange={(e) => onChange({ ...value, maxEmployees: e.target.value })}
-              className="h-10 w-full border-2 border-border bg-background px-3 text-sm font-mono focus:border-primary focus:outline-none transition-colors"
+              className="h-10 w-full border border-border rounded-lg bg-background px-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-colors"
             />
           </div>
         </div>
         <div className="flex items-end gap-2">
           <Button variant="outline" onClick={onClear} className="w-full">
-            <span>clear_filters</span>
+            Clear Filters
           </Button>
         </div>
       </div>

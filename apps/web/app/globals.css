@@ -4,92 +4,84 @@
 
 @layer base {
   :root {
-    /* Terminal-inspired light mode with high contrast */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 5%;
-    --card: 0 0% 98%;
-    --card-foreground: 0 0% 5%;
-    --popover: 0 0% 98%;
-    --popover-foreground: 0 0% 5%;
+    /* Warm professional light mode */
+    --background: 30 20% 98%;
+    --foreground: 25 25% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 25% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 25% 15%;
     
-    /* Green terminal accent */
-    --primary: 142 76% 36%;
+    /* Warm terracotta primary */
+    --primary: 16 65% 52%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 0 0% 90%;
-    --secondary-foreground: 0 0% 5%;
-    --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 142 76% 94%;
-    --accent-foreground: 142 76% 20%;
+    --secondary: 30 25% 92%;
+    --secondary-foreground: 25 25% 15%;
+    --muted: 30 20% 95%;
+    --muted-foreground: 25 15% 45%;
+    --accent: 35 85% 95%;
+    --accent-foreground: 25 50% 30%;
     
-    --destructive: 0 84% 60%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 0 0% 85%;
-    --input: 0 0% 85%;
-    --ring: 142 76% 36%;
-    --radius: 0.25rem;
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
+    --ring: 16 65% 52%;
+    --radius: 0.5rem;
     
-    /* Terminal chart colors */
-    --chart-1: 142 76% 36%;
-    --chart-2: 217 91% 60%;
-    --chart-3: 38 92% 50%;
-    --chart-4: 271 81% 56%;
-    --chart-5: 347 77% 50%;
+    /* Warm chart colors */
+    --chart-1: 16 65% 52%;
+    --chart-2: 35 85% 55%;
+    --chart-3: 280 50% 55%;
+    --chart-4: 200 70% 50%;
+    --chart-5: 340 65% 52%;
     
-    --success: 142 76% 36%;
+    --success: 140 50% 45%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-    
-    --terminal-green: 142 76% 36%;
-    --terminal-blue: 217 91% 60%;
-    --terminal-cyan: 187 71% 45%;
+    --warning: 35 85% 55%;
+    --warning-foreground: 25 25% 15%;
   }
 
   .dark {
-    /* Dark terminal mode - classic CRT aesthetic */
-    --background: 0 0% 8%;
-    --foreground: 142 76% 70%;
-    --card: 0 0% 10%;
-    --card-foreground: 142 76% 70%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 142 76% 70%;
+    /* Warm professional dark mode */
+    --background: 25 20% 12%;
+    --foreground: 30 15% 90%;
+    --card: 25 18% 16%;
+    --card-foreground: 30 15% 90%;
+    --popover: 25 18% 16%;
+    --popover-foreground: 30 15% 90%;
     
-    /* Bright terminal green */
-    --primary: 142 76% 55%;
-    --primary-foreground: 0 0% 8%;
+    /* Bright warm accent */
+    --primary: 16 70% 58%;
+    --primary-foreground: 0 0% 100%;
     
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 142 76% 70%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 142 76% 15%;
-    --accent-foreground: 142 76% 70%;
+    --secondary: 25 15% 22%;
+    --secondary-foreground: 30 15% 90%;
+    --muted: 25 15% 20%;
+    --muted-foreground: 30 10% 65%;
+    --accent: 25 20% 24%;
+    --accent-foreground: 30 15% 90%;
     
-    --destructive: 0 84% 60%;
+    --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 142 76% 55%;
+    --border: 25 15% 25%;
+    --input: 25 15% 25%;
+    --ring: 16 70% 58%;
     
-    /* Brighter terminal colors for dark mode */
-    --chart-1: 142 76% 55%;
-    --chart-2: 217 91% 70%;
-    --chart-3: 38 92% 60%;
-    --chart-4: 271 81% 66%;
-    --chart-5: 347 77% 60%;
+    /* Warmer chart colors for dark mode */
+    --chart-1: 16 70% 60%;
+    --chart-2: 35 90% 65%;
+    --chart-3: 280 55% 65%;
+    --chart-4: 200 75% 60%;
+    --chart-5: 340 70% 60%;
     
-    --success: 142 76% 55%;
-    --success-foreground: 0 0% 8%;
-    --warning: 38 92% 60%;
-    --warning-foreground: 0 0% 8%;
-    
-    --terminal-green: 142 76% 55%;
-    --terminal-blue: 217 91% 70%;
-    --terminal-cyan: 187 71% 65%;
+    --success: 140 55% 55%;
+    --success-foreground: 0 0% 100%;
+    --warning: 35 90% 65%;
+    --warning-foreground: 25 20% 12%;
   }
 }
 
@@ -104,57 +96,8 @@
   
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "liga" 1, "calt" 1, "zero" 1;
-    letter-spacing: 0.02em;
-  }
-  
-  /* Terminal grid pattern background */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    opacity: 0.03;
-    background-image: 
-      linear-gradient(hsl(var(--foreground)) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px);
-    background-size: 20px 20px;
-    pointer-events: none;
-  }
-  
-  .dark body::before {
-    opacity: 0.05;
-  }
-  
-  /* Subtle scanline effect */
-  body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    opacity: 0.02;
-    background: linear-gradient(
-      transparent 50%,
-      hsl(var(--foreground)) 50%
-    );
-    background-size: 100% 4px;
-    pointer-events: none;
-    animation: scanline 8s linear infinite;
-  }
-  
-  @keyframes scanline {
-    0% {
-      transform: translateY(0);
-    }
-    100% {
-      transform: translateY(4px);
-    }
+    font-feature-settings: "liga" 1, "calt" 1;
+    letter-spacing: -0.011em;
   }
   
   *:focus-visible {
@@ -162,165 +105,72 @@
   }
   
   ::selection {
-    @apply bg-terminal-green/30 text-foreground;
+    @apply bg-primary/20 text-foreground;
   }
   
-  /* Terminal-style scrollbar */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
   }
   
   ::-webkit-scrollbar-track {
-    @apply bg-background border-l border-border;
+    @apply bg-muted;
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply bg-primary/40 border border-primary/60;
+    @apply bg-primary/30 rounded-full;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-primary/60;
+    @apply bg-primary/50;
   }
   
   ::-webkit-scrollbar-corner {
-    @apply bg-background;
+    @apply bg-muted;
   }
 }
 
 @layer components {
-  /* Terminal window card */
-  .terminal-card {
-    @apply border-2 border-border bg-card relative;
+  .professional-card {
+    @apply border border-border bg-card rounded-lg shadow-lg relative;
     box-shadow: 
-      0 0 0 1px hsl(var(--border)),
-      0 4px 6px -1px rgb(0 0 0 / 0.1),
-      0 2px 4px -2px rgb(0 0 0 / 0.1);
+      0 1px 3px 0 rgb(0 0 0 / 0.1),
+      0 1px 2px -1px rgb(0 0 0 / 0.1);
   }
   
-  .dark .terminal-card {
+  .dark .professional-card {
     box-shadow: 
-      0 0 0 1px hsl(var(--border)),
-      0 4px 6px -1px rgb(0 0 0 / 0.3),
-      0 2px 4px -2px rgb(0 0 0 / 0.2),
-      0 0 20px -5px hsl(var(--primary) / 0.1);
+      0 1px 3px 0 rgb(0 0 0 / 0.3),
+      0 1px 2px -1px rgb(0 0 0 / 0.2);
   }
   
-  /* Terminal window header */
-  .terminal-header {
-    @apply border-b-2 border-border bg-muted/50 px-4 py-2 flex items-center gap-2;
+  .card-header {
+    @apply border-b border-border bg-muted/30 px-6 py-4 flex items-center gap-3 rounded-t-lg;
   }
   
-  .terminal-dots::before {
-    content: '';
-    @apply w-3 h-3 rounded-full bg-destructive inline-block;
-  }
-  
-  .terminal-dots::after {
-    content: '';
-    @apply w-3 h-3 rounded-full bg-warning ml-2 inline-block;
-  }
-  
-  /* Terminal prompt */
-  .terminal-prompt::before {
-    content: '>';
-    @apply text-primary font-bold mr-2;
-  }
-  
-  /* Command line style */
-  .command-line {
-    @apply font-mono text-sm bg-muted/30 border border-border px-3 py-2 rounded;
-  }
-  
-  /* Status indicator */
   .status-indicator {
     @apply inline-flex items-center gap-2;
   }
   
   .status-indicator::before {
     content: '';
-    @apply w-2 h-2 rounded-full bg-success animate-pulse;
+    @apply w-2 h-2 rounded-full bg-success;
   }
   
-  /* Blink cursor animation */
-  .cursor-blink::after {
-    content: '▊';
-    @apply text-primary animate-pulse ml-1;
-  }
-  
-  /* Glitch effect for headers */
-  .glitch {
-    position: relative;
-  }
-  
-  .glitch::before,
-  .glitch::after {
-    content: attr(data-text);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-  }
-  
-  .glitch:hover::before {
-    animation: glitch-1 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-    color: hsl(var(--terminal-cyan));
-    z-index: -1;
-  }
-  
-  .glitch:hover::after {
-    animation: glitch-2 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-    color: hsl(var(--destructive));
-    z-index: -1;
-  }
-  
-  @keyframes glitch-1 {
-    0%, 100% {
-      transform: translate(0);
-      opacity: 0;
-    }
-    33% {
-      transform: translate(-2px, 2px);
-      opacity: 0.8;
-    }
-    66% {
-      transform: translate(2px, -2px);
-      opacity: 0.8;
-    }
-  }
-  
-  @keyframes glitch-2 {
-    0%, 100% {
-      transform: translate(0);
-      opacity: 0;
-    }
-    33% {
-      transform: translate(2px, -2px);
-      opacity: 0.8;
-    }
-    66% {
-      transform: translate(-2px, 2px);
-      opacity: 0.8;
-    }
-  }
-  
-  /* Data table terminal style */
   .data-table {
-    @apply w-full border-2 border-border;
+    @apply w-full border border-border rounded-lg overflow-hidden;
   }
   
   .data-table thead {
-    @apply bg-muted/50 border-b-2 border-border;
+    @apply bg-muted/40 border-b border-border;
   }
   
   .data-table th {
-    @apply px-4 py-3 text-left text-xs font-bold uppercase tracking-wider;
+    @apply px-6 py-3 text-left text-sm font-semibold uppercase tracking-wide;
   }
   
   .data-table td {
-    @apply px-4 py-3 border-t border-border;
+    @apply px-6 py-4 border-t border-border;
   }
   
   .data-table tbody tr {
@@ -329,85 +179,15 @@
   
   .data-table tbody tr::before {
     content: '';
-    @apply absolute left-0 top-0 bottom-0 w-1 bg-primary opacity-0 transition-opacity;
+    @apply absolute left-0 top-0 bottom-0 w-1 bg-primary opacity-0 transition-opacity rounded-l;
   }
   
   .data-table tbody tr:hover::before {
     @apply opacity-100;
   }
   
-  /* ASCII art style borders */
-  .ascii-border {
-    @apply border-2 border-border relative;
-  }
-  
-  .ascii-border::before {
-    content: '┌' attr(data-title) '┐';
-    @apply absolute -top-3 left-2 bg-background px-2 text-xs font-mono text-muted-foreground;
-  }
-  
-  /* Neon glow effect */
-  .neon-text {
-    color: hsl(var(--primary));
-    text-shadow: 
-      0 0 5px hsl(var(--primary) / 0.5),
-      0 0 10px hsl(var(--primary) / 0.3),
-      0 0 15px hsl(var(--primary) / 0.2);
-  }
-  
-  .dark .neon-text {
-    text-shadow: 
-      0 0 5px hsl(var(--primary)),
-      0 0 10px hsl(var(--primary) / 0.8),
-      0 0 15px hsl(var(--primary) / 0.6),
-      0 0 20px hsl(var(--primary) / 0.4);
-  }
-  
-  /* Terminal button */
-  .terminal-button {
-    @apply border-2 border-primary bg-background text-primary font-mono font-bold px-4 py-2 
-           hover:bg-primary hover:text-primary-foreground transition-all duration-200
-           relative overflow-hidden;
-  }
-  
-  .terminal-button::before {
-    content: '';
-    @apply absolute inset-0 bg-primary translate-x-full transition-transform duration-300;
-  }
-  
-  .terminal-button:hover::before {
-    @apply translate-x-0;
-  }
-  
-  .terminal-button span {
-    @apply relative z-10;
-  }
-  
-  /* Matrix rain effect background (optional, subtle) */
-  .matrix-bg::after {
-    content: '01001000 01100101 01101100 01101100 01101111';
-    @apply absolute inset-0 text-[8px] text-primary/5 overflow-hidden pointer-events-none;
-    word-break: break-all;
-    line-height: 1.2;
-  }
-  
-  /* Loading animation */
   .loading-dots::after {
     content: '...';
     @apply inline-block animate-pulse;
-  }
-  
-  /* Retro CRT glow */
-  .crt-glow {
-    text-shadow: 
-      0 0 2px hsl(var(--foreground) / 0.8),
-      0 0 4px hsl(var(--foreground) / 0.6);
-  }
-  
-  .dark .crt-glow {
-    text-shadow: 
-      0 0 2px hsl(var(--foreground)),
-      0 0 4px hsl(var(--primary) / 0.6),
-      0 0 6px hsl(var(--primary) / 0.4);
   }
 }
