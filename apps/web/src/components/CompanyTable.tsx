@@ -138,7 +138,7 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
             <TableRow
               key={company.name}
               onClick={() => onCompanySelect(company.name)}
-              className="cursor-pointer hover:bg-muted/30 border-b border-border/50 group transition-colors"
+              className={`cursor-pointer hover:bg-muted/30 border-b border-border/50 group transition-colors ${idx % 2 === 1 ? 'bg-muted/10' : ''}`}
             >
 
               <TableCell className="font-semibold text-left group-hover:text-primary transition-colors">
