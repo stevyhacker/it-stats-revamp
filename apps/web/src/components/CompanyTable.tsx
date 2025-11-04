@@ -42,7 +42,7 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
         const numB = parseFloat(String(bValue)) || 0; // Convert to number, default to 0 if NaN
         return sortDirection === 'asc' ? numA - numB : numB - numA;
       }
-      
+
       // Handle sorting for string columns (like 'name')
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
@@ -93,42 +93,42 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
               className="relative cursor-pointer hover:bg-muted/50 transition-colors text-left"
               onClick={() => handleSort('name')}
             >
-              <span className="block">COMPANY</span>
+              <span className="block">Company</span>
               {renderSortIcon('name')}
             </TableHead>
             <TableHead
               className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
               onClick={() => handleSort('totalIncome')}
             >
-              <span className="block">REVENUE</span>
+              <span className="block">Revenue</span>
               {renderSortIcon('totalIncome')}
             </TableHead>
             <TableHead
               className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
               onClick={() => handleSort('profit')}
             >
-              <span className="block">PROFIT</span>
+              <span className="block">Profit</span>
               {renderSortIcon('profit')}
             </TableHead>
             <TableHead
               className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
               onClick={() => handleSort('averagePay')}
             >
-              <span className="block">AVG SALARY</span>
+              <span className="block">Avg Net Salary</span>
               {renderSortIcon('averagePay')}
             </TableHead>
             <TableHead
               className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
               onClick={() => handleSort('employeeCount')}
             >
-              <span className="block">EMPLOYEES</span>
+              <span className="block">Employees</span>
               {renderSortIcon('employeeCount')}
             </TableHead>
             <TableHead
               className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
               onClick={() => handleSort('incomePerEmployee')}
             >
-              <span className="block">REVENUE/EMPLOYEE</span>
+              <span className="block">Revenue/Employee</span>
               {renderSortIcon('incomePerEmployee')}
             </TableHead>
           </TableRow>
@@ -140,16 +140,15 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
               onClick={() => onCompanySelect(company.name)}
               className="cursor-pointer hover:bg-muted/30 border-b border-border/50 group transition-colors"
             >
-              <TableCell onClick={(e) => e.stopPropagation()} className="w-[50px]">
-                <input
+
+              <TableCell className="font-semibold text-left group-hover:text-primary transition-colors">
+                {/*<input
                   type="checkbox"
-                  className="h-4 w-4 accent-primary"
+                  className="h-4 w-4 mr-2 accent-primary"
                   checked={selectedCompanies.includes(company.name)}
                   onChange={() => onToggleCompany && onToggleCompany(company.name)}
                   aria-label={`Select ${company.name} for comparison`}
-                />
-              </TableCell>
-              <TableCell className="font-semibold text-left group-hover:text-primary transition-colors">
+                />*/}
                 {company.name}
               </TableCell>
               <TableCell className="tabular-nums text-right pr-8">
