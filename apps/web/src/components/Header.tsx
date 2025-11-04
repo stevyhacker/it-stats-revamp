@@ -4,7 +4,7 @@ import { ThemeToggle } from './ThemeToggle';
 
 export const Header = () => {
   return (
-    <header className="relative border-b border-border bg-card shadow-sm">
+    <header className="relative border-b border-border bg-accent shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
