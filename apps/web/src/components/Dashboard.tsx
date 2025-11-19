@@ -271,7 +271,7 @@ export function Dashboard({
               variant="outline"
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
-              className="gap-2"
+              className="gap-2 w-full sm:w-auto justify-center"
             >
               <BarChart3 className="h-4 w-4" />
               Filters
@@ -297,9 +297,9 @@ export function Dashboard({
           </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <Card className="border-border">
-              <CardContent className="pt-4 pb-4">
+              <CardContent className="pt-4 pb-4 px-4">
                 <div className="text-xs text-muted-foreground mb-1">Total Revenue</div>
-                <div className="text-2xl font-bold">
+                <div className="text-xl sm:text-2xl font-bold break-words">
                   {numeral(marketStats.totalRevenue).format("0,0")}€
                 </div>
                 <div
@@ -326,9 +326,9 @@ export function Dashboard({
             </Card>
 
             <Card className="border-border">
-              <CardContent className="pt-4 pb-4">
+              <CardContent className="pt-4 pb-4 px-4">
                 <div className="text-xs text-muted-foreground mb-1">Total Employees</div>
-                <div className="text-2xl font-bold">
+                <div className="text-xl sm:text-2xl font-bold break-words">
                   {numeral(marketStats.totalEmployees).format("0,0")}
                 </div>
                 <div
@@ -355,9 +355,9 @@ export function Dashboard({
             </Card>
 
             <Card className="border-border">
-              <CardContent className="pt-4 pb-4">
+              <CardContent className="pt-4 pb-4 px-4">
                 <div className="text-xs text-muted-foreground mb-1">Avg Revenue</div>
-                <div className="text-2xl font-bold">
+                <div className="text-xl sm:text-2xl font-bold break-words">
                   {selectedYearData?.companyList.length
                     ? numeral(
                         marketStats.totalRevenue / selectedYearData.companyList.length
@@ -372,9 +372,9 @@ export function Dashboard({
             </Card>
 
             <Card className="border-border">
-              <CardContent className="pt-4 pb-4">
+              <CardContent className="pt-4 pb-4 px-4">
                 <div className="text-xs text-muted-foreground mb-1">Avg Team Size</div>
-                <div className="text-2xl font-bold">
+                <div className="text-xl sm:text-2xl font-bold break-words">
                   {selectedYearData?.companyList.length
                     ? Math.round(
                         marketStats.totalEmployees /
@@ -411,14 +411,7 @@ export function Dashboard({
 
         <section className="mb-8">
           <Card className="border-border">
-            <CardHeader className="border-b border-border pb-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold text-muted-foreground">
-                  Market Trends
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <TrendLineChart
                 data={data}
                 selectedYear={selectedYear}

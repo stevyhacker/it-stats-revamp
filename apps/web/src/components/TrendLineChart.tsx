@@ -115,38 +115,38 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: T
   };
 
   return (
-    <div className="p-6 rounded-lg glass-card shadow-soft">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">
+    <div className="w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h2 className="text-lg sm:text-xl font-semibold">
           {metricType === 'revenue' ? 'Revenue Trends' : metricType === 'employees' ? 'Employee Count Trends' : 'Profit Trends'}
         </h2>
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setMetricType('revenue')}
-            className={`px-3 py-1 text-sm rounded-md ${
+            className={`px-3 py-1.5 text-xs sm:text-sm rounded-md transition-colors ${
               metricType === 'revenue' 
-                ? 'bg-primary/10 text-primary' 
-                : 'bg-muted text-muted-foreground'
+                ? 'bg-primary/10 text-primary font-medium' 
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
           >
             Revenue
           </button>
           <button
             onClick={() => setMetricType('employees')}
-            className={`px-3 py-1 text-sm rounded-md ${
+            className={`px-3 py-1.5 text-xs sm:text-sm rounded-md transition-colors ${
               metricType === 'employees' 
-                ? 'bg-primary/10 text-primary' 
-                : 'bg-muted text-muted-foreground'
+                ? 'bg-primary/10 text-primary font-medium' 
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
           >
             Employees
           </button>
           <button
             onClick={() => setMetricType('profit')}
-            className={`px-3 py-1 text-sm rounded-md ${
+            className={`px-3 py-1.5 text-xs sm:text-sm rounded-md transition-colors ${
               metricType === 'profit' 
-                ? 'bg-primary/10 text-primary' 
-                : 'bg-muted text-muted-foreground'
+                ? 'bg-primary/10 text-primary font-medium' 
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
           >
             Profit
@@ -154,7 +154,7 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: T
         </div>
       </div>
       
-      <div className="h-[400px]">
+      <div className="h-[300px] sm:h-[400px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 70 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={`hsl(var(--muted-foreground) / 0.3)`} />

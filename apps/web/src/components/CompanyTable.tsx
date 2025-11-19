@@ -85,7 +85,7 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
 
   return (
     <div className="w-full overflow-x-auto">
-      <Table className="data-table">
+      <Table className="data-table whitespace-nowrap">
         <TableHeader>
           <TableRow className="border-b border-border bg-muted/20">
             <TableHead className="w-[50px]"></TableHead>
@@ -97,35 +97,35 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
               {renderSortIcon('name')}
             </TableHead>
             <TableHead
-              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
+              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-4 sm:pr-8"
               onClick={() => handleSort('totalIncome')}
             >
               <span className="block">Revenue</span>
               {renderSortIcon('totalIncome')}
             </TableHead>
             <TableHead
-              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
+              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-4 sm:pr-8"
               onClick={() => handleSort('profit')}
             >
               <span className="block">Profit</span>
               {renderSortIcon('profit')}
             </TableHead>
             <TableHead
-              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
+              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-4 sm:pr-8"
               onClick={() => handleSort('averagePay')}
             >
               <span className="block">Avg Net Salary</span>
               {renderSortIcon('averagePay')}
             </TableHead>
             <TableHead
-              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
+              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-4 sm:pr-8"
               onClick={() => handleSort('employeeCount')}
             >
               <span className="block">Employees</span>
               {renderSortIcon('employeeCount')}
             </TableHead>
             <TableHead
-              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-8"
+              className="relative cursor-pointer hover:bg-muted/50 transition-colors text-right pr-4 sm:pr-8"
               onClick={() => handleSort('incomePerEmployee')}
             >
               <span className="block">Revenue/Employee</span>
@@ -151,21 +151,21 @@ const CompanyTable: React.FC<CompanyTableProps> = ({ selectedYearData, onCompany
                 />*/}
                 {company.name}
               </TableCell>
-              <TableCell className="tabular-nums text-right pr-8">
+              <TableCell className="tabular-nums text-right pr-4 sm:pr-8">
                 {numeral(company.totalIncome).format('0,0')}€
               </TableCell>
-              <TableCell className={`tabular-nums text-right pr-8 ${
+              <TableCell className={`tabular-nums text-right pr-4 sm:pr-8 ${
                 (company.profit ?? 0) >= 0 ? 'text-success' : 'text-destructive'
               }`}>
                 {numeral(company.profit).format('0,0')}€
               </TableCell>
-              <TableCell className="tabular-nums text-right pr-8">
+              <TableCell className="tabular-nums text-right pr-4 sm:pr-8">
                 {numeral(company.averagePay).format('0,0')}€
               </TableCell>
-              <TableCell className="tabular-nums text-right pr-8">
+              <TableCell className="tabular-nums text-right pr-4 sm:pr-8">
                 {company.employeeCount}
               </TableCell>
-              <TableCell className="tabular-nums text-right pr-8">
+              <TableCell className="tabular-nums text-right pr-4 sm:pr-8">
                 {numeral(company.incomePerEmployee).format('0,0')}€
               </TableCell>
             </TableRow>
