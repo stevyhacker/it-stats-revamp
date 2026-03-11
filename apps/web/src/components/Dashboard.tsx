@@ -13,7 +13,6 @@ import CompanyTable from "./CompanyTable";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"; 
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"; 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ThemeToggle } from "./ThemeToggle";
 import { Filters, FiltersState } from "./Filters";
 import { useSearchParams, useRouter as useNextRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
@@ -221,7 +220,6 @@ export function Dashboard({
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <main className="relative max-w-7xl mx-auto px-4 py-6">
-        <ThemeToggle variant="floating" />
 
         {/* Compact Year Selection + Filter Toggle */}
         <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
