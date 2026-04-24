@@ -1,19 +1,26 @@
 import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Cormorant_Garamond, IBM_Plex_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ThemeScript } from "@/components/ThemeScript";
 
-const inter = Inter({ 
+const outfit = Outfit({
   subsets: ["latin"],
   variable: '--font-sans',
   display: 'swap',
 });
 
-const poppins = Poppins({ 
+const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-display',
+  weight: ['400', '500', '600'],
+  variable: '--font-mono',
+  display: 'swap',
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ['600', '700'],
+  variable: '--font-serif',
   display: 'swap',
 });
 
@@ -61,7 +68,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
         <ThemeScript />
       </head>
-      <body className={`${inter.variable} ${poppins.variable} font-sans`}>
+      <body className={`${outfit.variable} ${plexMono.variable} ${cormorant.variable} font-sans`}>
         <ThemeProvider>
           {children}
         </ThemeProvider>

@@ -3,6 +3,8 @@ export interface CompanyData {
   totalIncome: number;
   profit: number;
   employeeCount: number;
+  municipality?: string | null;
+  activityName?: string | null;
   netPayCosts?: number;
   averagePay?: number | string;
   incomePerEmployee: number | string;
