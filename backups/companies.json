@@ -143,6 +143,20 @@
         "updatedAt": "2026-04-24T11:32:38.931Z"
       },
       {
+        "id": 613,
+        "name": "Clicker Team",
+        "pib": "03648257",
+        "totalIncome": 1650578,
+        "profit": 354036,
+        "employeeCount": 13,
+        "netPayCosts": 803859,
+        "averagePay": 5153,
+        "incomePerEmployee": 126967,
+        "yearId": 11,
+        "createdAt": "2026-04-24T11:32:38.931Z",
+        "updatedAt": "2026-04-24T11:32:38.931Z"
+      },
+      {
         "id": 587,
         "name": "Codemine",
         "pib": "03403912",
@@ -619,6 +633,20 @@
         "netPayCosts": 179653,
         "averagePay": 1361,
         "incomePerEmployee": 27988,
+        "yearId": 1,
+        "createdAt": "2025-04-22T12:09:45.025Z",
+        "updatedAt": "2025-04-22T12:09:45.025Z"
+      },
+      {
+        "id": 614,
+        "name": "Clicker Team",
+        "pib": "03648257",
+        "totalIncome": 836485,
+        "profit": 326009,
+        "employeeCount": 8,
+        "netPayCosts": 296445,
+        "averagePay": 3088,
+        "incomePerEmployee": 104560,
         "yearId": 1,
         "createdAt": "2025-04-22T12:09:45.025Z",
         "updatedAt": "2025-04-22T12:09:45.025Z"
