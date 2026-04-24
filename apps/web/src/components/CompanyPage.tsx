@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, type CSSProperties } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Building2, TrendingUp, Users, Wallet, ArrowUpRight, ArrowDownRight, ChevronUp, ChevronDown, ArrowLeft } from "lucide-react";
 import numeral from "numeral";
@@ -27,8 +27,6 @@ interface SortConfig {
 }
 
 export function CompanyPage({ companyName }: { companyName: string }) {
-  const router = useRouter();
-
   const companyHistoricalData: CompanyYearData[] = useMemo(
     () =>
       companyData
@@ -132,8 +130,10 @@ export function CompanyPage({ companyName }: { companyName: string }) {
   if (companyHistoricalData.length === 0) {
     return (
       <div className="min-h-screen bg-background p-8 text-foreground">
-        <Button variant="ghost" size="icon" onClick={() => router.back()} className="absolute top-6 left-6 z-10">
-          <ArrowLeft className="h-5 w-5" />
+        <Button variant="ghost" size="icon" asChild className="absolute top-6 left-6 z-10" aria-label="Back to homepage">
+          <Link href="/">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
         </Button>
         <p>No data available for {companyName}.</p>
       </div>
@@ -143,8 +143,10 @@ export function CompanyPage({ companyName }: { companyName: string }) {
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8 transition-colors duration-200">
       <div className="relative max-w-7xl mx-auto">
-        <Button variant="ghost" size="icon" onClick={() => router.back()} className="absolute top-0 left-0 z-10">
-          <ArrowLeft className="h-5 w-5" />
+        <Button variant="ghost" size="icon" asChild className="absolute top-0 left-0 z-10" aria-label="Back to homepage">
+          <Link href="/">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
         </Button>
 
         <div className="text-center mb-12 pt-8">
