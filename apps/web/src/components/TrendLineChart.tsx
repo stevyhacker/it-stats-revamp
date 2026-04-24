@@ -113,40 +113,56 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: T
     }
     return numeral(value).format('0,0') + '€';
   };
+  const metricLabel =
+    metricType === 'revenue'
+      ? 'Market revenue trend'
+      : metricType === 'employees'
+        ? 'Employee count trend'
+        : 'Profit trend';
 
   return (
     <div className="w-full">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h2 className="text-lg sm:text-xl font-semibold">
-          {metricType === 'revenue' ? 'Revenue Trends' : metricType === 'employees' ? 'Employee Count Trends' : 'Profit Trends'}
-        </h2>
-        <div className="flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
+        <div>
+          <h2
+            id="trend-heading"
+            className="font-display text-xl font-bold uppercase leading-none"
+          >
+            {metricLabel}
+          </h2>
+          <p className="mt-2 max-w-2xl text-xs leading-5 text-muted-foreground">
+            {selectedCompanies.length > 0
+              ? `${selectedCompanies.length} selected companies compared across available years.`
+              : 'Showing the highest-ranked companies for the selected metric.'}
+          </p>
+        </div>
+        <div className="inline-flex w-full rounded-md border border-border/80 bg-background/70 p-1 sm:w-auto">
           <button
             onClick={() => setMetricType('revenue')}
-            className={`px-3 py-1.5 text-xs sm:text-sm rounded-md transition-colors ${
+            className={`h-8 flex-1 rounded-sm px-3 text-xs font-semibold transition-colors sm:flex-none ${
               metricType === 'revenue' 
-                ? 'bg-primary/10 text-primary font-medium' 
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                ? 'bg-foreground text-background'
+                : 'text-muted-foreground hover:bg-primary/10 hover:text-foreground'
             }`}
           >
             Revenue
           </button>
           <button
             onClick={() => setMetricType('employees')}
-            className={`px-3 py-1.5 text-xs sm:text-sm rounded-md transition-colors ${
+            className={`h-8 flex-1 rounded-sm px-3 text-xs font-semibold transition-colors sm:flex-none ${
               metricType === 'employees' 
-                ? 'bg-primary/10 text-primary font-medium' 
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                ? 'bg-foreground text-background'
+                : 'text-muted-foreground hover:bg-primary/10 hover:text-foreground'
             }`}
           >
             Employees
           </button>
           <button
             onClick={() => setMetricType('profit')}
-            className={`px-3 py-1.5 text-xs sm:text-sm rounded-md transition-colors ${
+            className={`h-8 flex-1 rounded-sm px-3 text-xs font-semibold transition-colors sm:flex-none ${
               metricType === 'profit' 
-                ? 'bg-primary/10 text-primary font-medium' 
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                ? 'bg-foreground text-background'
+                : 'text-muted-foreground hover:bg-primary/10 hover:text-foreground'
             }`}
           >
             Profit
@@ -154,18 +170,20 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: T
         </div>
       </div>
       
-      <div className="h-[300px] sm:h-[400px] w-full">
+      <div className="h-[20rem] w-full rounded-md border border-border/70 bg-background/35 p-2 sm:h-[22rem] sm:p-3">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 70 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={`hsl(var(--muted-foreground) / 0.3)`} />
+          <LineChart data={chartData} margin={{ top: 12, right: 18, left: 0, bottom: 54 }}>
+            <CartesianGrid strokeDasharray="1 5" stroke={`hsl(var(--border))`} />
             <XAxis 
               dataKey="year" 
               stroke={`hsl(var(--muted-foreground))`} 
               angle={0} 
               tickMargin={10}
+              tick={{ fontSize: 10, fontFamily: 'var(--font-mono)' }}
             />
             <YAxis 
               stroke={`hsl(var(--muted-foreground))`} 
+              tick={{ fontSize: 10, fontFamily: 'var(--font-mono)' }}
               tickFormatter={(value) => {
                 if (metricType === 'employees') {
                   return value;
@@ -181,18 +199,30 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: T
                 backgroundColor: 'hsl(var(--popover))',
                 border: '1px solid hsl(var(--border))',
                 borderRadius: '8px',
-                color: 'hsl(var(--popover-foreground))'
+                color: 'hsl(var(--popover-foreground))',
+                boxShadow: '0 18px 40px -28px hsl(var(--foreground) / 0.45)'
+              }}
+              labelStyle={{ color: 'hsl(var(--muted-foreground))' }}
+            />
+            <Legend
+              verticalAlign="bottom"
+              height={42}
+              wrapperStyle={{
+                color: 'hsl(var(--muted-foreground))',
+                fontSize: 10,
+                fontFamily: 'var(--font-mono)',
+                paddingTop: 18,
               }}
             />
-            <Legend verticalAlign="bottom" height={36} wrapperStyle={{ color: 'hsl(var(--muted-foreground))' }} />
             {companiesForChart.map((company, index) => (
               <Line 
                 key={company}
                 type="monotone" 
                 dataKey={company} 
                 stroke={getLineColor(index)} 
-                activeDot={{ r: 8 }}
-                strokeWidth={2}
+                activeDot={{ r: 5, strokeWidth: 0 }}
+                dot={{ r: 2, strokeWidth: 0 }}
+                strokeWidth={2.5}
               />
             ))}
           </LineChart>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
+import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
@@ -31,13 +31,13 @@ export const ThemeToggle = ({ variant = "default", className }: ThemeToggleProps
       title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
       <div className="relative w-5 h-5">
-        <Sun
+        <SunIcon
           className={cn(
             "w-5 h-5 absolute inset-0 transition-all duration-300 text-current",
             isDark ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
           )}
         />
-        <Moon
+        <MoonIcon
           className={cn(
             "w-5 h-5 absolute inset-0 transition-all duration-300 text-current",
             isDark ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
