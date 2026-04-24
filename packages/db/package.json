@@ -14,12 +14,12 @@
     "seed": "bun run ./scripts/seed.ts"
   },
   "dependencies": {
-    "dotenv": "^16.6.1",
-    "drizzle-orm": "^0.30.10",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
     "postgres": "^3.4.9"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.20.18",
-    "typescript": "^5.9.3"
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^6.0.3"
   }
 }

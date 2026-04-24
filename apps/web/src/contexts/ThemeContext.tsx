@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useSyncExternalStore, ReactNode } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -11,6 +11,16 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const subscribeToClient = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+const getSystemTheme = (): Theme =>
+  window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
+const getStoredTheme = (): Theme | null => {
+  const stored = localStorage.getItem('theme');
+  return stored === 'dark' || stored === 'light' ? stored : null;
+};
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);
@@ -26,29 +36,18 @@ interface ThemeProviderProps {
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Check system preference first, then localStorage, fallback to light
     if (typeof window === 'undefined') {
       return 'light'; // SSR fallback
     }
-    
-    const stored = localStorage.getItem('theme');
-    if (stored === 'dark' || stored === 'light') {
-      return stored as Theme;
-    }
-    
-    // Check system preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    
-    return 'light';
+
+    return getStoredTheme() ?? getSystemTheme();
   });
 
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    subscribeToClient,
+    getClientSnapshot,
+    getServerSnapshot
+  );
 
   useEffect(() => {
     if (!mounted) return;
@@ -60,9 +59,6 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     
     // Add the current theme class
     root.classList.add(theme);
-    
-    // Store in localStorage
-    localStorage.setItem('theme', theme);
     
     // Update meta theme-color for mobile browsers
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
@@ -78,8 +74,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
       // Only auto-switch if user hasn't manually set a preference
-      const stored = localStorage.getItem('theme');
-      if (!stored) {
+      if (!getStoredTheme()) {
         setTheme(e.matches ? 'dark' : 'light');
       }
     };
@@ -89,7 +84,11 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   }, [mounted]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    setTheme((prevTheme) => {
+      const nextTheme = prevTheme === 'light' ? 'dark' : 'light';
+      localStorage.setItem('theme', nextTheme);
+      return nextTheme;
+    });
   };
 
   // Prevent hydration mismatch by not rendering until mounted

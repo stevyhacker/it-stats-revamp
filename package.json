@@ -22,8 +22,8 @@
     "deploy:web": "cd apps/web && railway up --service it-stats-web"
   },
   "devDependencies": {
-    "@turbo/gen": "^1.13.4",
-    "eslint": "^9.39.4",
+    "@turbo/gen": "^2.9.6",
+    "eslint": "^10.2.1",
     "prettier": "^3.8.3",
     "turbo": "^2.9.6"
   },
