@@ -220,14 +220,9 @@
     @apply bg-primary/10;
   }
 
-  .data-table tbody tr::before {
-    content: '';
-    @apply absolute bottom-0 left-0 top-0 w-1 rounded-l bg-primary opacity-0 transition-opacity;
-  }
-
-  .data-table tbody tr:hover::before,
-  .data-table tbody tr[data-selected="true"]::before {
-    @apply opacity-100;
+  .data-table tbody tr:hover,
+  .data-table tbody tr[data-selected="true"] {
+    box-shadow: inset 4px 0 0 hsl(var(--primary));
   }
 
   .loading-dots::after {

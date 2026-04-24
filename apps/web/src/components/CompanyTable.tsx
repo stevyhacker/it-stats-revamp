@@ -26,7 +26,6 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
   selectedYearData,
   onCompanySelect,
   selectedCompanies = [],
-  onToggleCompany,
   profitMarginByName,
 }) => {
   const [sortColumn, setSortColumn] = useState<SortableColumn>('totalIncome');
@@ -91,11 +90,20 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
 
   return (
     <div className="w-full overflow-x-auto">
-      <Table className="data-table min-w-[1220px] whitespace-nowrap">
+      <Table className="data-table min-w-[1000px] table-fixed whitespace-nowrap">
+        <colgroup>
+          <col className="w-[52px]" />
+          <col className="w-[260px]" />
+          <col className="w-[92px]" />
+          <col className="w-[138px]" />
+          <col className="w-[138px]" />
+          <col className="w-[94px]" />
+          <col className="w-[138px]" />
+          <col className="w-[159px]" />
+        </colgroup>
         <TableHeader>
           <TableRow className="border-b border-border/80 bg-muted/40 hover:bg-muted/40">
-            <TableHead className="w-[44px] text-center"></TableHead>
-            <TableHead className="w-[48px] text-right">#</TableHead>
+            <TableHead className="text-right">#</TableHead>
             <TableHead
               className="relative cursor-pointer select-none text-left transition-colors hover:bg-primary/10"
               onClick={() => handleSort('name')}
@@ -103,8 +111,6 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
               <span className="block">Company</span>
               {renderSortIcon('name')}
             </TableHead>
-            <TableHead className="text-left">Municipality</TableHead>
-            <TableHead className="text-left">Activity</TableHead>
             <TableHead
               className={sortableHeaderClass}
               onClick={() => handleSort('employeeCount')}
@@ -158,28 +164,11 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
                 data-selected={selected}
                 className={`${index % 2 === 1 ? 'bg-muted/10' : ''} cursor-pointer border-b border-border/60 group`}
               >
-                <TableCell className="text-center">
-                  <input
-                    type="checkbox"
-                    checked={selected}
-                    disabled={!onToggleCompany}
-                    onClick={(event) => event.stopPropagation()}
-                    onChange={() => onToggleCompany?.(company.name)}
-                    aria-label={`Compare ${company.name}`}
-                    className="h-4 w-4 rounded border-border accent-primary"
-                  />
-                </TableCell>
                 <TableCell className="text-right font-mono tabular-nums text-muted-foreground">
                   {index + 1}
                 </TableCell>
                 <TableCell className="max-w-[18rem] truncate font-semibold text-left group-hover:text-primary">
                   {company.name}
-                </TableCell>
-                <TableCell className="max-w-[9rem] truncate text-left">
-                  {company.municipality ?? "-"}
-                </TableCell>
-                <TableCell className="max-w-[16rem] truncate text-left text-muted-foreground">
-                  {company.activityName ?? "-"}
                 </TableCell>
                 <TableCell className="text-right font-mono tabular-nums">
                   {company.employeeCount}
