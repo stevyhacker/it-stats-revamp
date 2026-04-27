@@ -409,20 +409,6 @@
         "updatedAt": "2026-04-24T11:32:38.931Z"
       },
       {
-        "id": 604,
-        "name": "Ooblee",
-        "pib": "03216446",
-        "totalIncome": 0,
-        "profit": -418256,
-        "employeeCount": 11,
-        "netPayCosts": 416664,
-        "averagePay": 3157,
-        "incomePerEmployee": 0,
-        "yearId": 11,
-        "createdAt": "2026-04-24T11:32:38.931Z",
-        "updatedAt": "2026-04-24T11:32:38.931Z"
-      },
-      {
         "id": 605,
         "name": "Playrix",
         "pib": "03489159",
