@@ -283,6 +283,20 @@
         "updatedAt": "2026-04-24T11:32:38.931Z"
       },
       {
+        "id": 615,
+        "name": "ECLEPT",
+        "pib": "03723941",
+        "totalIncome": 329178,
+        "profit": 117588,
+        "employeeCount": 2,
+        "netPayCosts": 22701,
+        "averagePay": 946,
+        "incomePerEmployee": 164589,
+        "yearId": 11,
+        "createdAt": "2026-04-24T11:32:38.931Z",
+        "updatedAt": "2026-04-24T11:32:38.931Z"
+      },
+      {
         "id": 596,
         "name": "EPAM",
         "pib": "03381447",
