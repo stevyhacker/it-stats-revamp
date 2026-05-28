@@ -31,7 +31,7 @@ export const years = pgTable('years', {
 
 export const companies = pgTable('companies', {
   id: serial('id').primaryKey(),
-  name: varchar('name', { length: 256 }).notNull(),
+  name: text('name').notNull(),
   pib: varchar('pib', { length: 50 }).notNull(), // PIB is required, but uniqueness handled below
   reportId: text('report_id'),
   legalStatus: text('legal_status'),

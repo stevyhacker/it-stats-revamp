@@ -6,6 +6,42 @@
 
 **Architecture:** Stop shipping the full dataset and hundreds of thousands of static detail pages to the browser. Keep a small precomputed homepage snapshot for first paint, move large tables/search/profile history behind indexed database-backed API endpoints, and cache API responses at the edge/browser layer.
 
+## Implementation Status
+
+Updated: 2026-05-28
+
+Implemented on `dev`:
+
+- Extended the existing `companies` table with broad-company metadata (`report_id`, `legal_status`, `municipality`, `activity_code`, `activity_name`, `sector`, `parse_status`) and widened money fields to `bigint`.
+- Added indexes for year/metric sorting, PIB history lookup, filters, and trigram name search in `packages/db/drizzle/0002_new_zeigeist.sql`.
+- Added `scripts/import-irms-processed.ts` for processed JSONL or legacy grouped JSON imports with batched upserts on `(pib, year_id)`.
+- Replaced the API with database-backed `/summary`, `/companies`, `/companies/:pib`, `/trends`, `/export.csv`, and `/years` endpoints.
+- Moved dashboard table, filters, sort, pagination, trends, and CSV export to API-backed queries instead of full JSON client-side processing.
+- Removed static company profile generation; profile routes now fetch one PIB history on demand.
+- Fixed follow-up review issues: CSV export includes all matching rows, descending metric sorts use `NULLS LAST`, and dashboard search filtering respects debounce before API fetches.
+- Ran a full-dataset performance check against a temporary local Postgres loaded from the BalkanLens Montenegro IRMS warehouse export.
+- Widened `companies.name` from `varchar(256)` to `text` after the full import found 94 legal names longer than 256 characters.
+
+Full-dataset benchmark notes:
+
+- Source export: 291,003 Montenegro annual-financial rows from `balkanlens.duckdb.pre-me-irms-processed-20260525T1336Z.bak`.
+- Imported rows after app filters: 283,032 rows, 50,028 unique PIBs, 18 years.
+- Largest benchmarked years: 2024 has 35,272 rows; 2025 has 33,531 rows.
+- `/summary?year=2024`: 23.3 ms median.
+- `/companies?year=2024&page=1&pageSize=50&sort=totalIncome&dir=desc`: 10.5 ms median.
+- `/companies?year=2024&page=100&pageSize=50&sort=totalIncome&dir=desc`: 14.2 ms median.
+- `/companies?year=2024&page=1&pageSize=50&q=podgorica`: 14.6 ms median, 11,547 matches.
+- `/trends?year=2024&metric=totalIncome`: 5.7 ms median.
+- `/companies/02440261`: 0.4 ms median, 12 history rows.
+- `/export.csv?year=2024&sort=totalIncome&dir=desc`: 101.6 ms median, 35,273 CSV rows including header, 4.9 MB response.
+- Worst-case spot checks: final 2024 page was 41.3 ms, `pageSize=200` was 12.6 ms, no-result search was 15.1 ms, filtered summary for `q=podgorica` was 54.0 ms, and 2025 full CSV export was 106.6 ms.
+
+Not implemented yet:
+
+- Optional `/companies/:pib/summary` endpoint.
+- SWR/TanStack Query integration; current frontend uses direct typed fetch helpers.
+- Materialized summary tables or measured CDN/edge cache rollout.
+
 **Current observed bottlenecks:**
 - `backups/companies.json` is already 42.3 MiB for 6 years, 71,871 year/company rows, 30,579 unique companies.
 - `apps/web/out` is 1.9 GiB with 262,137 files after static export.

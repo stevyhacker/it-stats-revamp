@@ -1,5 +1,6 @@
 DROP INDEX IF EXISTS "company_year_unique_idx";--> statement-breakpoint
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";--> statement-breakpoint
+ALTER TABLE "companies" ALTER COLUMN "name" SET DATA TYPE text;--> statement-breakpoint
 ALTER TABLE "companies" ALTER COLUMN "total_income" SET DATA TYPE bigint;--> statement-breakpoint
 ALTER TABLE "companies" ALTER COLUMN "profit" SET DATA TYPE bigint;--> statement-breakpoint
 ALTER TABLE "companies" ALTER COLUMN "net_pay_costs" SET DATA TYPE bigint;--> statement-breakpoint
