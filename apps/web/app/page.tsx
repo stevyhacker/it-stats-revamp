@@ -1,51 +1,82 @@
 import { Suspense } from "react";
 import { Header } from "../src/components/Header";
 import { Dashboard } from "../src/components/Dashboard";
-import { companyData } from "@/lib/company-data";
+import {
+  buildCompanyParams,
+  fetchApi,
+  type CompaniesResponse,
+  type SummaryResponse,
+  type TrendResponse,
+} from "@/lib/api";
 
-export default function HomePage() {
-  const data = companyData;
+export const dynamic = "force-dynamic";
 
-  const years = data.map((d) => d.year);
+async function loadInitialDashboard() {
+  const summary = await fetchApi<SummaryResponse>(
+    "/summary",
+    undefined,
+    { next: { revalidate: 300 } },
+  );
+  const initialYear = summary.year;
+  const [companies, trends] = await Promise.all([
+    fetchApi<CompaniesResponse>(
+      "/companies",
+      buildCompanyParams({
+        year: initialYear,
+        page: 1,
+        pageSize: 50,
+        sort: "totalIncome",
+        dir: "desc",
+      }),
+      { next: { revalidate: 300 } },
+    ),
+    fetchApi<TrendResponse>(
+      "/trends",
+      buildCompanyParams({
+        year: initialYear,
+        sort: "totalIncome",
+        dir: "desc",
+      }),
+      { next: { revalidate: 300 } },
+    ),
+  ]);
 
-  if (data.length === 0) {
-    return <main className="p-4">Failed to load company data.</main>;
+  return { summary, companies, trends };
+}
+
+export default async function HomePage() {
+  let initialData: Awaited<ReturnType<typeof loadInitialDashboard>>;
+
+  try {
+    initialData = await loadInitialDashboard();
+  } catch (error) {
+    console.error("Failed to load dashboard data:", error);
+    return (
+      <main className="min-h-screen bg-background p-4 text-foreground">
+        Failed to load company data.
+      </main>
+    );
   }
 
-  const latestYearData = data[0];
-  const totalRevenue = latestYearData.companyList.reduce(
-    (sum, company) => sum + (company.totalIncome ?? 0),
-    0
-  );
-  const totalEmployees = latestYearData.companyList.reduce(
-    (sum, company) => sum + (company.employeeCount ?? 0),
-    0
-  );
-  const companiesByRevenue = [...latestYearData.companyList].sort(
-    (a, b) => (b.totalIncome ?? 0) - (a.totalIncome ?? 0)
-  );
-  const concentrationStats = [5, 10, 20].map((count) => ({
-    label: `Top ${count} companies`,
-    value: totalRevenue
-      ? companiesByRevenue
-          .slice(0, count)
-          .reduce((sum, company) => sum + (company.totalIncome ?? 0), 0) /
-        totalRevenue
-      : 0,
-  }));
+  const { summary } = initialData;
 
   return (
     <>
       <Header
-        latestYear={latestYearData.year}
-        companyCount={latestYearData.companyList.length}
-        totalRevenue={totalRevenue}
-        totalEmployees={totalEmployees}
-        concentrationStats={concentrationStats}
+        latestYear={summary.year}
+        companyCount={summary.companyCount}
+        totalRevenue={summary.totalRevenue}
+        totalEmployees={summary.totalEmployees}
+        concentrationStats={summary.concentrationStats}
       />
       <main>
         <Suspense fallback={<div className="p-4">Loading dashboard...</div>}>
-          <Dashboard years={years} data={data} />
+          <Dashboard
+            years={summary.availableYears}
+            initialSummary={summary}
+            initialCompanies={initialData.companies}
+            initialTrends={initialData.trends}
+          />
         </Suspense>
       </main>
     </>

@@ -1,11 +1,8 @@
 import { CompanyPage } from "@/components/CompanyPage";
-import { companyNames } from "@/lib/company-data";
+import { fetchApi } from "@/lib/api";
+import type { CompanyData } from "@/types";
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return companyNames.map((companyName) => ({ companyName }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function Page({
   params,
@@ -13,6 +10,15 @@ export default async function Page({
   params: Promise<{ companyName: string }>;
 }) {
   const { companyName } = await params;
+  const companyPib = decodeURIComponent(companyName);
+  const history = await fetchApi<CompanyData[]>(
+    `/companies/${encodeURIComponent(companyPib)}`,
+    undefined,
+    { next: { revalidate: 300 } },
+  ).catch((error) => {
+    console.error(`Failed to load company ${companyPib}:`, error);
+    return [];
+  });
 
-  return <CompanyPage companyName={decodeURIComponent(companyName)} />;
+  return <CompanyPage companyPib={companyPib} initialHistory={history} />;
 }

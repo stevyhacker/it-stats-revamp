@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from 'next/navigation';
+import React from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { TrendLineChart } from "./TrendLineChart";
 import {
   AdjustmentsHorizontalIcon,
@@ -10,261 +10,281 @@ import {
 } from "@heroicons/react/24/outline";
 import numeral from "numeral";
 import CompanyTable from "./CompanyTable";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"; 
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"; 
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filters, FiltersState } from "./Filters";
-import { useSearchParams, useRouter as useNextRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
+import type { CompanyData, YearData } from "@/types";
+import {
+  buildCompanyParams,
+  buildExportUrl,
+  fetchApi,
+  type CompaniesResponse,
+  type CompanySortKey,
+  type SortDirection,
+  type SummaryResponse,
+  type TrendResponse,
+} from "@/lib/api";
 
-interface Company {
-  id: number;
-  pib: string;
-  maticniBroj: string;
-  name: string;
-  address: string | null;
-  municipality: string | null;
-  activityCode: string | null;
-  activityName: string | null;
-  employeeCount: number | null;
-  averagePay: number | null;
-  yearId: number;
-  totalIncome: number | null;
-  profit: number | null;
-  incomePerEmployee: number | null;
+const PAGE_SIZE = 50;
+type ChartMetric = "revenue" | "employees" | "profit";
+
+function useDebouncedValue<T>(value: T, delayMs: number) {
+  const [debounced, setDebounced] = React.useState(value);
+
+  React.useEffect(() => {
+    const timeout = window.setTimeout(() => setDebounced(value), delayMs);
+    return () => window.clearTimeout(timeout);
+  }, [value, delayMs]);
+
+  return debounced;
 }
-interface YearData {
-  year: string;
-  companyList: Company[];
+
+function parseSort(value: string | null): CompanySortKey {
+  const allowed = ["name", "totalIncome", "profit", "employeeCount", "averagePay", "incomePerEmployee"];
+  return allowed.includes(value ?? "") ? (value as CompanySortKey) : "totalIncome";
+}
+
+function parseDirection(value: string | null): SortDirection {
+  return value === "asc" ? "asc" : "desc";
+}
+
+function chartMetricToSort(metric: ChartMetric): CompanySortKey {
+  if (metric === "employees") return "employeeCount";
+  if (metric === "profit") return "profit";
+  return "totalIncome";
+}
+
+function growth(current: number, previous?: number) {
+  if (!previous) return current ? Infinity : 0;
+  return ((current - previous) / previous) * 100;
 }
 
 export function Dashboard({
   years,
-  data,
+  initialSummary,
+  initialCompanies,
+  initialTrends,
 }: {
   years: string[];
-  data: YearData[];
+  initialSummary: SummaryResponse;
+  initialCompanies: CompaniesResponse;
+  initialTrends: TrendResponse;
 }) {
   const router = useRouter();
-  const nextRouter = useNextRouter();
   const searchParams = useSearchParams();
-
-  const [selectedYear, setSelectedYear] = useState<string>(searchParams.get('year') || years[0] || "");
-  const [filters, setFilters] = useState<FiltersState>({
-    minRevenue: searchParams.get('minRevenue') || undefined,
-    maxRevenue: searchParams.get('maxRevenue') || undefined,
-    minEmployees: searchParams.get('minEmployees') || undefined,
-    maxEmployees: searchParams.get('maxEmployees') || undefined,
+  const requestedYear = searchParams.get("year");
+  const defaultYear = requestedYear && years.includes(requestedYear) ? requestedYear : initialSummary.year;
+  const [selectedYear, setSelectedYear] = React.useState<string>(defaultYear);
+  const [filters, setFilters] = React.useState<FiltersState>({
+    q: searchParams.get("q") || undefined,
+    minRevenue: searchParams.get("minRevenue") || undefined,
+    maxRevenue: searchParams.get("maxRevenue") || undefined,
+    minEmployees: searchParams.get("minEmployees") || undefined,
+    maxEmployees: searchParams.get("maxEmployees") || undefined,
+    sector: searchParams.get("sector") || undefined,
+    category: searchParams.get("category") || undefined,
+    municipality: searchParams.get("municipality") || undefined,
   });
-  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
-
-  const selectedYearDataRaw = data.find((d) => d.year === selectedYear);
-  const selectedYearData = React.useMemo(() => {
-    if (!selectedYearDataRaw) return undefined;
-
-    return {
-      ...selectedYearDataRaw,
-      companyList: selectedYearDataRaw.companyList.filter((c) => {
-      const rev = c.totalIncome ?? 0;
-      const emp = c.employeeCount ?? 0;
-      const minRev = filters.minRevenue ? Number(filters.minRevenue) : undefined;
-      const maxRev = filters.maxRevenue ? Number(filters.maxRevenue) : undefined;
-      const minEmp = filters.minEmployees ? Number(filters.minEmployees) : undefined;
-      const maxEmp = filters.maxEmployees ? Number(filters.maxEmployees) : undefined;
-      if (minRev !== undefined && rev < minRev) return false;
-      if (maxRev !== undefined && rev > maxRev) return false;
-      if (minEmp !== undefined && emp < minEmp) return false;
-      if (maxEmp !== undefined && emp > maxEmp) return false;
-      return true;
-      })
-    };
-  }, [
-    selectedYearDataRaw,
-    filters.minRevenue,
-    filters.maxRevenue,
-    filters.minEmployees,
-    filters.maxEmployees,
-  ]);
-  const previousYearData = data.find(
-    (d) => d.year === years[years.indexOf(selectedYear) + 1]
+  const [sortColumn, setSortColumn] = React.useState<CompanySortKey>(parseSort(searchParams.get("sort")));
+  const [sortDirection, setSortDirection] = React.useState<SortDirection>(parseDirection(searchParams.get("dir")));
+  const [page, setPage] = React.useState(() => {
+    const parsed = Number(searchParams.get("page"));
+    return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 1;
+  });
+  const [summary, setSummary] = React.useState(initialSummary);
+  const [companyPage, setCompanyPage] = React.useState(initialCompanies);
+  const [trendData, setTrendData] = React.useState<YearData[]>(initialTrends);
+  const [chartMetric, setChartMetric] = React.useState<ChartMetric>("revenue");
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
+  const [selectedCompanies, setSelectedCompanies] = React.useState<string[]>([]);
+  const [showFilters, setShowFilters] = React.useState(false);
+  const debouncedSearch = useDebouncedValue(filters.q ?? "", 250);
+  const effectiveFilters = React.useMemo<FiltersState>(
+    () => ({
+      minRevenue: filters.minRevenue,
+      maxRevenue: filters.maxRevenue,
+      minEmployees: filters.minEmployees,
+      maxEmployees: filters.maxEmployees,
+      sector: filters.sector,
+      category: filters.category,
+      municipality: filters.municipality,
+      q: debouncedSearch.trim() || undefined,
+    }),
+    [
+      debouncedSearch,
+      filters.minRevenue,
+      filters.maxRevenue,
+      filters.minEmployees,
+      filters.maxEmployees,
+      filters.sector,
+      filters.category,
+      filters.municipality,
+    ],
   );
 
-  const calculateMarketStats = (): {
-    totalRevenue: number;
-    revenueGrowth: number;
-    totalEmployees: number;
-    employeeGrowth: number;
-  } => {
-    if (!selectedYearData)
-      return { totalRevenue: 0, revenueGrowth: 0, totalEmployees: 0, employeeGrowth: 0 };
-    const currentTotal = selectedYearData.companyList.reduce(
-      (sum, company) => sum + (company.totalIncome ?? 0),
-      0
-    );
-    const currentEmployees = selectedYearData.companyList.reduce(
-      (sum, company) => sum + (company.employeeCount ?? 0),
-      0
-    );
-
-    if (!previousYearData) {
-      return {
-        totalRevenue: currentTotal,
-        revenueGrowth: 0,
-        totalEmployees: currentEmployees,
-        employeeGrowth: 0,
-      };
+  React.useEffect(() => {
+    const params = buildCompanyParams({
+      year: selectedYear,
+      page,
+      pageSize: PAGE_SIZE,
+      sort: sortColumn,
+      dir: sortDirection,
+      filters: effectiveFilters,
+    });
+    const nextHref = `/?${params.toString()}`;
+    const current = `${window.location.pathname}${window.location.search}`;
+    if (nextHref !== current) {
+      router.replace(nextHref, { scroll: false });
     }
+  }, [selectedYear, page, sortColumn, sortDirection, effectiveFilters, router]);
 
-    const previousTotal = previousYearData.companyList.reduce(
-      (sum, company) => sum + (company.totalIncome ?? 0),
-      0
-    );
-    const previousEmployees = previousYearData.companyList.reduce(
-      (sum, company) => sum + (company.employeeCount ?? 0),
-      0
-    );
+  React.useEffect(() => {
+    let cancelled = false;
+    const companyParams = buildCompanyParams({
+      year: selectedYear,
+      page,
+      pageSize: PAGE_SIZE,
+      sort: sortColumn,
+      dir: sortDirection,
+      filters: effectiveFilters,
+    });
+    const summaryParams = buildCompanyParams({
+      year: selectedYear,
+      sort: sortColumn,
+      dir: sortDirection,
+      filters: effectiveFilters,
+    });
+    const trendParams = buildCompanyParams({
+      year: selectedYear,
+      sort: chartMetricToSort(chartMetric),
+      dir: "desc",
+      filters: effectiveFilters,
+    });
+    trendParams.set("metric", chartMetricToSort(chartMetric));
 
-    return {
-      totalRevenue: currentTotal,
-      revenueGrowth: previousTotal === 0
-        ? (currentTotal === 0 ? 0 : Infinity)
-        : ((currentTotal - previousTotal) / previousTotal) * 100,
-      totalEmployees: currentEmployees,
-      employeeGrowth: previousEmployees === 0
-        ? (currentEmployees === 0 ? 0 : Infinity)
-        : ((currentEmployees - previousEmployees) / previousEmployees) * 100,
+    window.queueMicrotask(() => {
+      if (cancelled) return;
+      setIsLoading(true);
+      setLoadError(null);
+    });
+
+    Promise.all([
+      fetchApi<SummaryResponse>("/summary", summaryParams),
+      fetchApi<CompaniesResponse>("/companies", companyParams),
+      fetchApi<TrendResponse>("/trends", trendParams),
+    ])
+      .then(([nextSummary, nextCompanyPage, nextTrendData]) => {
+        if (cancelled) return;
+        setSummary(nextSummary);
+        setCompanyPage(nextCompanyPage);
+        setTrendData(nextTrendData);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error("Failed to load dashboard query:", error);
+        setLoadError("Could not load the selected company data.");
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
     };
+  }, [selectedYear, page, sortColumn, sortDirection, effectiveFilters, chartMetric]);
+
+  const filterOptions = React.useMemo(
+    () => ({
+      sectors: summary.filterOptions.sectors.map((item) => item.value),
+      categories: summary.filterOptions.categories.map((item) => item.value),
+      municipalities: summary.filterOptions.municipalities.map((item) => item.value),
+    }),
+    [summary.filterOptions],
+  );
+
+  const selectedYearData = React.useMemo(
+    () => ({
+      year: companyPage.year,
+      companyList: companyPage.companies,
+    }),
+    [companyPage],
+  );
+
+  const handleYearChange = (year: string) => {
+    setSelectedYear(year);
+    setPage(1);
   };
 
-  const marketStats = calculateMarketStats();
-  const tableFilterOptions = React.useMemo(() => {
-    const companies = selectedYearDataRaw?.companyList ?? [];
-    const municipalities = new Set(
-      companies
-        .map((company) => company.municipality?.trim())
-        .filter((municipality): municipality is string => Boolean(municipality))
-    );
-    const activities = new Set(
-      companies
-        .map((company) => company.activityName?.trim())
-        .filter((activity): activity is string => Boolean(activity))
-    );
+  const handleFiltersChange = (nextFilters: FiltersState) => {
+    setFilters(nextFilters);
+    setPage(1);
+  };
 
-    return {
-      hasMunicipalities: municipalities.size > 1,
-      hasActivities: activities.size > 1,
-    };
-  }, [selectedYearDataRaw]);
+  const handleSort = (column: CompanySortKey) => {
+    setPage(1);
+    if (sortColumn === column) {
+      setSortDirection((current) => (current === "asc" ? "desc" : "asc"));
+      return;
+    }
+    setSortColumn(column);
+    setSortDirection(column === "name" ? "asc" : "desc");
+  };
 
-  const topCompanies = selectedYearData
-    ? [...selectedYearData.companyList]
-        .sort((a, b) => (b.totalIncome ?? -Infinity) - (a.totalIncome ?? -Infinity))
-        .slice(0, 5)
-    : [];
-
-  const handleCompanySelect = (companyName: string) => {
-    router.push(`/company/${encodeURIComponent(companyName)}`);
+  const handleCompanySelect = (company: CompanyData) => {
+    if (!company.pib) return;
+    router.push(`/company/${company.pib}`);
   };
 
   const handleToggleCompany = (companyName: string) => {
     setSelectedCompanies((prev) => prev.includes(companyName)
-      ? prev.filter((n) => n !== companyName)
+      ? prev.filter((name) => name !== companyName)
       : [...prev, companyName]
     );
   };
 
-  // Sync state to URL (client-only guard + no-op if unchanged)
-  React.useEffect(() => {
-    try {
-      const params = new URLSearchParams();
-      params.set('year', selectedYear);
-      if (filters.minRevenue) params.set('minRevenue', filters.minRevenue);
-      if (filters.maxRevenue) params.set('maxRevenue', filters.maxRevenue);
-      if (filters.minEmployees) params.set('minEmployees', filters.minEmployees);
-      if (filters.maxEmployees) params.set('maxEmployees', filters.maxEmployees);
-    // removed profitOnly
-      const nextHref = `/?${params.toString()}`;
-      const current = `${window.location.pathname}${window.location.search}`;
-      if (nextHref !== current) {
-        nextRouter.replace(nextHref);
-      }
-    } catch (e) {
-      // noop
-    }
-  }, [selectedYear, filters, nextRouter]);
-
-  // Compute per-company quality metrics for current year (percentiles & margin)
-  const qualityMetrics = React.useMemo(() => {
-    if (!selectedYearData?.companyList?.length) return { rpePercentile: new Map<string, number>(), profitMargin: new Map<string, number>() };
-    const list = selectedYearData.companyList;
-    const revenuePerEmployee: Array<{ name: string; value: number }> = list.map((c) => ({
-      name: c.name,
-      value: typeof c.incomePerEmployee === 'string' ? Number(c.incomePerEmployee) || 0 : (c.incomePerEmployee ?? 0)
-    }));
-    const sorted = [...revenuePerEmployee].sort((a, b) => a.value - b.value);
-    const rpePercentile = new Map<string, number>();
-    const profitMargin = new Map<string, number>();
-    const n = sorted.length;
-    const indexByName = new Map(sorted.map((item, idx) => [item.name, idx] as const));
-    list.forEach((c) => {
-      const idx = indexByName.get(c.name) ?? 0;
-      const pct = Math.round(((idx + 1) / n) * 100);
-      rpePercentile.set(c.name, pct);
-      const margin = (c.totalIncome && c.totalIncome !== 0) ? (c.profit ?? 0) / c.totalIncome : 0;
-      profitMargin.set(c.name, margin);
-    });
-    return { rpePercentile, profitMargin };
-  }, [selectedYearData]);
-
-  // Export CSV of filtered companies
   const exportCsv = React.useCallback(() => {
-    if (!selectedYearData?.companyList) return;
-    const headers = [
-      'Company', 'Total Income', 'Profit', 'Employees', 'Avg Pay', 'Income/Employee', 'RPE Percentile', 'Profit Margin'
-    ];
-    const rows = selectedYearData.companyList.map((c) => [
-      c.name,
-      c.totalIncome ?? 0,
-      c.profit ?? 0,
-      c.employeeCount ?? 0,
-      c.averagePay ?? 0,
-      typeof c.incomePerEmployee === 'string' ? Number(c.incomePerEmployee) || 0 : (c.incomePerEmployee ?? 0),
-      qualityMetrics.rpePercentile.get(c.name) ?? 0,
-      (qualityMetrics.profitMargin.get(c.name) ?? 0).toFixed(4),
-    ]);
-    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `companies_${selectedYear}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-  }, [selectedYearData, selectedYear, qualityMetrics]);
+    window.location.href = buildExportUrl({
+      year: selectedYear,
+      page: 1,
+      pageSize: PAGE_SIZE,
+      sort: sortColumn,
+      dir: sortDirection,
+      filters: effectiveFilters,
+    });
+  }, [selectedYear, sortColumn, sortDirection, effectiveFilters]);
 
-  const [showFilters, setShowFilters] = React.useState(false);
-  const hasActiveFilters = filters.minRevenue || filters.maxRevenue || filters.minEmployees || filters.maxEmployees;
-  const filteredCompanyCount = selectedYearData?.companyList.length ?? 0;
-  const averageRevenue = filteredCompanyCount
-    ? marketStats.totalRevenue / filteredCompanyCount
-    : 0;
-  const averageTeamSize = filteredCompanyCount
-    ? marketStats.totalEmployees / filteredCompanyCount
-    : 0;
+  const hasActiveFilters = Boolean(
+    effectiveFilters.q ||
+      effectiveFilters.minRevenue ||
+      effectiveFilters.maxRevenue ||
+      effectiveFilters.minEmployees ||
+      effectiveFilters.maxEmployees ||
+      effectiveFilters.sector ||
+      effectiveFilters.category ||
+      effectiveFilters.municipality,
+  );
+  const filteredCompanyCount = companyPage.total;
+  const averageRevenue = summary.companyCount ? summary.totalRevenue / summary.companyCount : 0;
+  const averageTeamSize = summary.companyCount ? summary.totalEmployees / summary.companyCount : 0;
+  const revenueGrowth = growth(summary.totalRevenue, summary.previousYear?.totalRevenue);
+  const employeeGrowth = growth(summary.totalEmployees, summary.previousYear?.totalEmployees);
   const formatGrowth = (value: number) =>
     isFinite(value) ? `${value >= 0 ? "+" : ""}${value.toFixed(1)}%` : "N/A";
   const overviewStats = [
     {
       label: "Market revenue",
-      value: `${numeral(marketStats.totalRevenue).format("0,0")}€`,
-      detail: `${formatGrowth(marketStats.revenueGrowth)} YoY`,
-      trend: marketStats.revenueGrowth,
+      value: `${numeral(summary.totalRevenue).format("0,0")}€`,
+      detail: `${formatGrowth(revenueGrowth)} YoY`,
+      trend: revenueGrowth,
     },
     {
       label: "Total employees",
-      value: numeral(marketStats.totalEmployees).format("0,0"),
-      detail: `${formatGrowth(marketStats.employeeGrowth)} YoY`,
-      trend: marketStats.employeeGrowth,
+      value: numeral(summary.totalEmployees).format("0,0"),
+      detail: `${formatGrowth(employeeGrowth)} YoY`,
+      trend: employeeGrowth,
     },
     {
       label: "Average revenue",
@@ -279,8 +299,18 @@ export function Dashboard({
       trend: undefined,
     },
   ];
+  const profitMargin = React.useMemo(() => {
+    const map = new Map<string, number>();
+    for (const company of companyPage.companies) {
+      const revenue = company.totalIncome ?? 0;
+      map.set(company.name, revenue ? (company.profit ?? 0) / revenue : 0);
+    }
+    return map;
+  }, [companyPage.companies]);
+
   const resetFilters = () => {
     setFilters({});
+    setPage(1);
     setShowFilters(false);
   };
 
@@ -293,7 +323,7 @@ export function Dashboard({
         <section className="control-shell sticky top-3 z-30 mb-4 flex flex-col gap-0 overflow-hidden sm:flex-row sm:items-stretch sm:justify-between">
           <Tabs
             value={selectedYear}
-            onValueChange={setSelectedYear}
+            onValueChange={handleYearChange}
             className="hidden min-w-0 flex-1 md:block"
           >
             <div className="flex h-full items-center">
@@ -315,7 +345,7 @@ export function Dashboard({
           </Tabs>
 
           <div className="block w-full p-2 md:hidden">
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <Select value={selectedYear} onValueChange={handleYearChange}>
               <SelectTrigger className="w-full rounded-md border-border/80 bg-background/80">
                 <SelectValue placeholder="Select year" />
               </SelectTrigger>
@@ -338,39 +368,38 @@ export function Dashboard({
               <span>{filteredCompanyCount} companies in view</span>
               <AdjustmentsHorizontalIcon className="h-4 w-4 text-muted-foreground" />
             </button>
-            {tableFilterOptions.hasMunicipalities && (
+            {filterOptions.sectors.length > 1 && (
               <div className="hidden h-12 min-w-44 items-center justify-between gap-4 px-4 text-sm text-foreground xl:flex">
-                <span>All municipalities</span>
-                <span className="text-muted-foreground">v</span>
+                <span>{filters.sector ?? "All sectors"}</span>
+                <span className="text-muted-foreground">{filterOptions.sectors.length}</span>
               </div>
             )}
-            {tableFilterOptions.hasActivities && (
+            {filterOptions.categories.length > 1 && (
               <div className="hidden h-12 min-w-44 items-center justify-between gap-4 px-4 text-sm text-foreground xl:flex">
-                <span>All activities (IT)</span>
-                <span className="text-muted-foreground">v</span>
+                <span className="max-w-40 truncate">{filters.category ?? "All categories"}</span>
+                <span className="text-muted-foreground">{filterOptions.categories.length}</span>
               </div>
             )}
-            {selectedYearDataRaw && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={resetFilters}
-                className="h-12 justify-center rounded-none px-4 text-xs"
-              >
-                Reset filters
-                {hasActiveFilters && (
-                  <span className="h-2 w-2 rounded-full bg-primary" />
-                )}
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetFilters}
+              className="h-12 justify-center rounded-none px-4 text-xs"
+            >
+              Reset filters
+              {hasActiveFilters && (
+                <span className="h-2 w-2 rounded-full bg-primary" />
+              )}
+            </Button>
           </div>
         </section>
 
-        {selectedYearDataRaw && showFilters && (
+        {showFilters && (
           <div className="mb-4 animate-slide-down">
             <Filters
               value={filters}
-              onChange={setFilters}
+              options={filterOptions}
+              onChange={handleFiltersChange}
               onClear={resetFilters}
             />
           </div>
@@ -437,9 +466,11 @@ export function Dashboard({
           <Card className="analytics-panel border-border/80 bg-card/90">
             <CardContent className="p-4 sm:p-6 lg:p-7">
               <TrendLineChart
-                data={data}
+                data={trendData}
                 selectedYear={selectedYear}
                 selectedCompanies={selectedCompanies}
+                metricType={chartMetric}
+                onMetricTypeChange={setChartMetric}
               />
             </CardContent>
           </Card>
@@ -472,7 +503,7 @@ export function Dashboard({
                     </tr>
                   </thead>
                   <tbody>
-                    {topCompanies.map((company, index) => {
+                    {summary.topCompanies.map((company, index) => {
                       const revenue = company.totalIncome ?? 0;
                       const profit = company.profit ?? 0;
                       const margin = revenue ? profit / revenue : 0;
@@ -480,7 +511,7 @@ export function Dashboard({
                       return (
                         <tr
                           key={company.pib || company.name}
-                          onClick={() => handleCompanySelect(company.name)}
+                          onClick={() => handleCompanySelect(company)}
                           className="cursor-pointer border-b border-border/55 transition-colors hover:bg-primary/10"
                         >
                           <td className="px-3 py-2">
@@ -538,6 +569,12 @@ export function Dashboard({
                   <span className="text-xs text-muted-foreground">
                     Compare companies by official filing metrics
                   </span>
+                  {isLoading && (
+                    <span className="font-mono text-xs text-muted-foreground">Loading...</span>
+                  )}
+                  {loadError && (
+                    <span className="font-mono text-xs text-destructive">{loadError}</span>
+                  )}
                 </div>
                 <Button
                   variant="outline"
@@ -556,7 +593,15 @@ export function Dashboard({
                 onCompanySelect={handleCompanySelect}
                 selectedCompanies={selectedCompanies}
                 onToggleCompany={handleToggleCompany}
-                profitMarginByName={qualityMetrics.profitMargin}
+                profitMarginByName={profitMargin}
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                page={companyPage.page}
+                pageSize={companyPage.pageSize}
+                total={companyPage.total}
+                onPageChange={setPage}
+                isLoading={isLoading}
               />
             </CardContent>
           </Card>

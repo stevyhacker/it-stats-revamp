@@ -5,7 +5,6 @@ import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Building2, TrendingUp, Users, Wallet, ArrowUpRight, ArrowDownRight, ChevronUp, ChevronDown, ArrowLeft } from "lucide-react";
 import numeral from "numeral";
-import { companyData } from "@/lib/company-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
@@ -26,37 +25,40 @@ interface SortConfig {
   direction: "ascending" | "descending";
 }
 
-export function CompanyPage({ companyName }: { companyName: string }) {
+export function CompanyPage({
+  companyPib,
+  initialHistory,
+}: {
+  companyPib: string;
+  initialHistory: CompanyData[];
+}) {
   const companyHistoricalData: CompanyYearData[] = useMemo(
     () =>
-      companyData
-        .flatMap((yearData) => {
-          const foundCompany = yearData.companyList.find((company) => company.name === companyName);
-          if (!foundCompany) {
-            return [];
-          }
-
-          const company = foundCompany as CompanyData;
+      initialHistory
+        .map((company) => {
           const totalIncome = company.totalIncome != null ? Number(company.totalIncome) : undefined;
           const profit = company.profit != null ? Number(company.profit) : undefined;
           const employeeCount = company.employeeCount != null ? Number(company.employeeCount) : undefined;
           const averagePay = company.averagePay != null ? Number(company.averagePay) : undefined;
-          const incomePerEmployee = employeeCount && employeeCount !== 0 && totalIncome ? totalIncome / employeeCount : undefined;
+          const incomePerEmployee = company.incomePerEmployee != null
+            ? Number(company.incomePerEmployee)
+            : employeeCount && employeeCount !== 0 && totalIncome
+              ? totalIncome / employeeCount
+              : undefined;
 
-          return [
-            {
-              year: yearData.year,
-              name: company.name,
-              totalIncome,
-              profit,
-              employeeCount,
-              averagePay,
-              incomePerEmployee,
-            },
-          ];
+          return {
+            year: String(company.yearValue ?? company.year ?? ""),
+            name: company.name,
+            totalIncome,
+            profit,
+            employeeCount,
+            averagePay,
+            incomePerEmployee,
+          };
         })
+        .filter((row) => row.year)
         .sort((a, b) => parseInt(a.year, 10) - parseInt(b.year, 10)),
-    [companyName],
+    [initialHistory],
   );
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: "year", direction: "ascending" });
@@ -135,7 +137,7 @@ export function CompanyPage({ companyName }: { companyName: string }) {
             <ArrowLeft className="h-5 w-5" />
           </Link>
         </Button>
-        <p>No data available for {companyName}.</p>
+        <p>No data available for company PIB {companyPib}.</p>
       </div>
     );
   }
@@ -150,7 +152,7 @@ export function CompanyPage({ companyName }: { companyName: string }) {
         </Button>
 
         <div className="text-center mb-12 pt-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">{companyName}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">{latestYearData.name}</h1>
           <p className="text-muted-foreground">Historical Performance Analysis</p>
         </div>
 
@@ -220,7 +222,7 @@ export function CompanyPage({ companyName }: { companyName: string }) {
             <CardTitle>Financial Trends</CardTitle>
           </CardHeader>
           <CardContent className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
               <LineChart data={companyHistoricalData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="year" />

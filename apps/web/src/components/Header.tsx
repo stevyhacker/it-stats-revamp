@@ -48,7 +48,7 @@ export const Header = ({
                 ITSTATS.me
               </span>
               <span className="mt-0.5 hidden text-xs leading-none text-muted-foreground sm:block">
-                Montenegro IT company statistics
+                Montenegro company statistics
               </span>
             </span>
           </a>
@@ -79,7 +79,7 @@ export const Header = ({
         <div className="grid gap-8 py-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(420px,0.95fr)] lg:items-start lg:py-8">
           <div className="pt-1">
             <h1 className="max-w-4xl font-display text-[2.9rem] font-bold leading-[0.95] text-foreground sm:text-[3.65rem] lg:text-[3.95rem]">
-              <span className="block">Montenegro IT sector.</span>
+              <span className="block">Montenegro companies.</span>
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
               Explore official company financials, employment and salary data from

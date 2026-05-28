@@ -5,6 +5,7 @@
   "scripts": {
     "setup": "bun run setup-db.ts",
     "import": "bun run import-data.ts",
+    "import:irms": "bun run import-irms-processed.ts",
     "full-import": "bun run setup && bun run import"
   },
   "dependencies": {

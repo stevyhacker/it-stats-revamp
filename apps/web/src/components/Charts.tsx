@@ -13,7 +13,7 @@ export const Charts = ({ growthData }: ChartsProps) => {
       <div className="p-6 rounded-lg glass-card shadow-soft border">
         <h2 className="text-xl font-semibold mb-4">Top 10 Companies by Growth Rate</h2>
         <div className="h-[400px]">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <BarChart data={topGrowth}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} stroke="#9CA3AF" />

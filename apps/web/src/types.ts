@@ -1,13 +1,23 @@
 export interface CompanyData {
+  id?: number;
   name: string;
-  totalIncome: number;
-  profit: number;
-  employeeCount: number;
-  municipality?: string | null;
+  pib?: string;
+  reportId?: string | null;
+  activityCode?: string | null;
   activityName?: string | null;
-  netPayCosts?: number;
-  averagePay?: number | string;
-  incomePerEmployee: number | string;
+  legalStatus?: string | null;
+  sector?: string | null;
+  parseStatus?: string | null;
+  totalIncome: number | null;
+  profit: number | null;
+  employeeCount: number | null;
+  municipality?: string | null;
+  netPayCosts?: number | null;
+  averagePay?: number | string | null;
+  incomePerEmployee: number | string | null;
+  yearId?: number;
+  yearValue?: number;
+  year?: string;
 }
 
 export interface YearData {

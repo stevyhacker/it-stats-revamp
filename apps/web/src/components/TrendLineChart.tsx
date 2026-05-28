@@ -16,10 +16,23 @@ interface TrendLineChartProps {
   data: YearData[];
   selectedCompanies?: string[];
   selectedYear: string;
+  metricType?: 'revenue' | 'employees' | 'profit';
+  onMetricTypeChange?: (metricType: 'revenue' | 'employees' | 'profit') => void;
 }
 
-export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: TrendLineChartProps) => {
-  const [metricType, setMetricType] = useState<'revenue' | 'employees' | 'profit'>('revenue');
+export const TrendLineChart = ({
+  data,
+  selectedCompanies = [],
+  selectedYear,
+  metricType: controlledMetricType,
+  onMetricTypeChange,
+}: TrendLineChartProps) => {
+  const [internalMetricType, setInternalMetricType] = useState<'revenue' | 'employees' | 'profit'>('revenue');
+  const metricType = controlledMetricType ?? internalMetricType;
+  const setMetricType = (nextMetricType: 'revenue' | 'employees' | 'profit') => {
+    setInternalMetricType(nextMetricType);
+    onMetricTypeChange?.(nextMetricType);
+  };
   
   // Filter data up to the selected year
   const filteredData = useMemo(() => {
@@ -48,14 +61,14 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: T
       let valueB = 0;
 
       if (metricType === 'revenue') {
-        valueA = a.totalIncome;
-        valueB = b.totalIncome;
+        valueA = a.totalIncome ?? 0;
+        valueB = b.totalIncome ?? 0;
       } else if (metricType === 'employees') {
-        valueA = a.employeeCount;
-        valueB = b.employeeCount;
+        valueA = a.employeeCount ?? 0;
+        valueB = b.employeeCount ?? 0;
       } else { // profit
-        valueA = a.profit;
-        valueB = b.profit;
+        valueA = a.profit ?? 0;
+        valueB = b.profit ?? 0;
       }
       return valueB - valueA; // Descending order
     });
@@ -75,11 +88,11 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: T
           const company = yearData.companyList.find(c => c.name === companyName);
           if (company) {
             if (metricType === 'revenue') {
-              result[companyName] = company.totalIncome;
+              result[companyName] = company.totalIncome ?? 0;
             } else if (metricType === 'employees') {
-              result[companyName] = company.employeeCount;
+              result[companyName] = company.employeeCount ?? 0;
             } else {
-              result[companyName] = company.profit;
+              result[companyName] = company.profit ?? 0;
             }
           } else {
             result[companyName] = 0;
@@ -171,7 +184,7 @@ export const TrendLineChart = ({ data, selectedCompanies = [], selectedYear }: T
       </div>
       
       <div className="h-[20rem] w-full rounded-md border border-border/70 bg-background/35 p-2 sm:h-[22rem] sm:p-3">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <LineChart data={chartData} margin={{ top: 12, right: 18, left: 0, bottom: 54 }}>
             <CartesianGrid strokeDasharray="1 5" stroke={`hsl(var(--border))`} />
             <XAxis 

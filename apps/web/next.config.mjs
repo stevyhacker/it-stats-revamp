@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'export',
   trailingSlash: true,
   // If you need to transpile packages from the monorepo
   // transpilePackages: ['ui'], // Example: if you had a shared 'ui' package
