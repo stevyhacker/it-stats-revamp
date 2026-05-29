@@ -45,7 +45,7 @@ export const Header = ({
             </span>
             <span className="min-w-0">
               <span className="block truncate font-display text-2xl font-bold leading-none text-foreground">
-                ITSTATS.me
+                MNEStats.me
               </span>
               <span className="mt-0.5 hidden text-xs leading-none text-muted-foreground sm:block">
                 Montenegro company statistics

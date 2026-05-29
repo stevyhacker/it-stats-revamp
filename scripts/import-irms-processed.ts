@@ -116,6 +116,18 @@ function extractYear(record: RawCompanyInput, parentYear?: string | number) {
   );
 }
 
+function normalizeLegalFormText(value: string | null) {
+  if (!value) return value;
+
+  return value
+    .replace(/(?:DR)?DRU[ŠS]TVO\s+SA\s+OGRANI[ČC]ENOM\s+ODGOVORNO[ŠS][ĆC]U/giu, 'D.O.O.')
+    .replace(/(?:DR)?DRU[ŠS]TVO\s+SA\s+OGRANI[ČC]ENOM\s+ODG\.?\b/giu, 'D.O.O.')
+    .replace(/\bD\.?\s*O\.?\s*O\.?/giu, 'D.O.O.')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([,;:])/g, '$1')
+    .trim();
+}
+
 function normalizeRecord(
   record: RawCompanyInput,
   options: ImportOptions,
@@ -124,7 +136,7 @@ function normalizeRecord(
   const year = extractYear(record, parentYear);
   if (!year || year > options.maxYear) return null;
 
-  const legalStatus = firstString(record.legalStatus, record.legal_status, record.status);
+  const legalStatus = normalizeLegalFormText(firstString(record.legalStatus, record.legal_status, record.status));
   if (!options.includePreduzetnik && /preduzetnik/i.test(legalStatus ?? '')) return null;
 
   const averagePay = firstNumber(record.averagePay, record.average_pay, record.avgPay, record.avg_pay);
@@ -145,8 +157,15 @@ function normalizeRecord(
     record.nace_name,
     parsedActivity.activityName,
   );
-  const pib = firstString(record.pib, record.PIB, record.taxpayerPib, record.taxpayer_pib);
-  const name = firstString(record.name, record.companyName, record.company_name, record.taxpayerName);
+  const pib = firstString(
+    record.pib,
+    record.PIB,
+    record.taxpayerPib,
+    record.taxpayer_pib,
+    record.identificationNumber,
+    record.identification_number,
+  );
+  const name = normalizeLegalFormText(firstString(record.name, record.companyName, record.company_name, record.taxpayerName));
 
   if (!pib || !name) return null;
 
@@ -169,7 +188,7 @@ function normalizeRecord(
     profit: firstNumber(record.profit, record.netProfit, record.net_profit),
     employeeCount,
     netPayCosts: firstNumber(record.netPayCosts, record.net_pay_costs),
-    averagePay,
+    averagePay: averagePay == null ? null : Math.round(averagePay),
     incomePerEmployee,
     parseStatus: firstString(record.parseStatus, record.parse_status),
   };

@@ -4,6 +4,7 @@ import {
   deriveSector,
   filterCompanies,
   getCompanyFilterOptions,
+  normalizeCompanyName,
 } from "./company-filters";
 
 const companies = [
@@ -120,5 +121,19 @@ describe("company filters", () => {
         ],
       },
     ]);
+  });
+
+  test("normalizes duplicated D.O.O. legal-form prefixes without removing the actual legal form", () => {
+    expect(normalizeCompanyName('D.O.O. "VOLI TRADE" D.O.O. ZA PROMET I USLUGE EXPORT- IMPORT - PODGORICA')).toBe(
+      '"VOLI TRADE" D.O.O. ZA PROMET I USLUGE EXPORT- IMPORT - PODGORICA',
+    );
+    expect(normalizeCompanyName('D.O.O. "PM 4.1" D.O.O. TIVAT')).toBe('"PM 4.1" D.O.O. TIVAT');
+    expect(normalizeCompanyName('"HARD DISCOUNT LAKOVIĆ" D.O.O. - PODGORICA')).toBe(
+      '"HARD DISCOUNT LAKOVIĆ" D.O.O. - PODGORICA',
+    );
+    expect(normalizeCompanyName('"MINMEDIA" DRUŠTVO ZA MARKETING I POSLOVNE USLUGE,D.O.O. D.O.O. - BUDVA')).toBe(
+      '"MINMEDIA" DRUŠTVO ZA MARKETING I POSLOVNE USLUGE,D.O.O. - BUDVA',
+    );
+    expect(normalizeCompanyName('"AC & SONS" D.O.O. D.O.O., PODGORICA')).toBe('"AC & SONS" D.O.O., PODGORICA');
   });
 });

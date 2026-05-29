@@ -132,6 +132,14 @@ function isPreduzetnik(company: RawCompanyForCleanSubset): boolean {
   return /preduzetnik/i.test(company.legalStatus ?? "");
 }
 
+export function normalizeCompanyName(name: string): string {
+  return name
+    .trim()
+    .replace(/\s+/g, " ")
+    .replace(/^D\.O\.O\.\s+(?=\"[^\"]+\"\s+D\.O\.O\.)/i, "")
+    .replace(/(^|[\s,;:-])(D\.O\.O\.)\s+(?=D\.O\.O\.(?:[\s,;:-]|$))/gi, "$1");
+}
+
 function toCleanCompanyRecord(company: RawCompanyForCleanSubset): CleanCompanyRecord {
   const parsedActivity = parseActivity(company.activity);
   const activityCode = company.activityCode ?? parsedActivity.activityCode;
@@ -141,7 +149,7 @@ function toCleanCompanyRecord(company: RawCompanyForCleanSubset): CleanCompanyRe
     id: Number(company.id ?? 0),
     pib: company.pib ?? "",
     maticniBroj: company.maticniBroj ?? null,
-    name: company.name,
+    name: normalizeCompanyName(company.name),
     address: company.address ?? null,
     municipality: company.municipality ?? null,
     activityCode,

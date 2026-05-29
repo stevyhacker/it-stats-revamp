@@ -41,6 +41,8 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   // Reading the class (not localStorage) keeps React state in sync without a flash.
   useEffect(() => {
     const initial: Theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    // Intentional hydration sync with ThemeScript's pre-paint <html> class.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(initial);
   }, []);
 
