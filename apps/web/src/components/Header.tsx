@@ -1,11 +1,6 @@
 import React from "react";
-import {
-  ArrowPathIcon,
-  BuildingOffice2Icon,
-  CircleStackIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
-import { ThemeToggle } from "./ThemeToggle";
+import { ArrowPathIcon, BuildingOffice2Icon } from "@heroicons/react/24/outline";
+import { SiteNav } from "./SiteNav";
 
 interface HeaderProps {
   year: string;
@@ -38,43 +33,7 @@ export const Header = ({
       <div className="grain-overlay absolute inset-0 opacity-55" />
 
       <div className="relative mx-auto max-w-[1440px] px-4 pb-3 pt-4 sm:px-6 lg:px-8">
-        <nav className="control-shell flex min-h-14 items-center justify-between overflow-hidden">
-          <a href="#dashboard" className="flex min-w-0 items-center gap-3 px-3 py-2 sm:px-4">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border/80 bg-card text-primary shadow-sm">
-              <span className="font-display text-xl font-bold leading-none">M</span>
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate font-display text-2xl font-bold leading-none text-foreground">
-                MNEStats.me
-              </span>
-              <span className="mt-0.5 hidden text-xs leading-none text-muted-foreground sm:block">
-                Montenegro company statistics
-              </span>
-            </span>
-          </a>
-
-          <div className="hidden h-14 flex-1 items-center justify-end divide-x divide-border/80 lg:flex">
-            <div className="flex items-center gap-2 px-5 text-xs text-muted-foreground">
-              <CircleStackIcon className="h-4 w-4 text-primary" />
-              <span>Data source: Central Register of Business Entities (CRPS)</span>
-              <InformationCircleIcon className="h-4 w-4" />
-            </div>
-            <div className="status-indicator px-5 text-xs font-semibold text-success">
-              Live dataset
-            </div>
-            <div className="px-5 text-xs text-muted-foreground">
-              Updated: May 14, 2025
-            </div>
-            <div className="px-3">
-              <ThemeToggle className="h-10 w-10 rounded-md border-border/80 bg-background/45" />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 px-2 lg:hidden">
-            <span className="status-indicator text-xs text-success" />
-            <ThemeToggle className="h-10 w-10 rounded-md border-border/80 bg-background/45" />
-          </div>
-        </nav>
+        <SiteNav />
 
         <div className="grid gap-8 py-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(420px,0.95fr)] lg:items-start lg:py-8">
           <div className="pt-1">
