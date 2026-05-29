@@ -1,5 +1,6 @@
 "use client";
 
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -35,15 +36,18 @@ export function Filters({ value, options, onChange, onClear }: FiltersProps) {
           <label className="font-mono text-xs text-muted-foreground">
             Search
           </label>
-          <input
-            type="search"
-            placeholder="Name, PIB, activity"
-            value={value.q ?? ""}
-            onChange={(event) =>
-              onChange({ ...value, q: event.target.value })
-            }
-            className={inputClass}
-          />
+          <div className="relative">
+            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="search"
+              placeholder="Name, PIB, activity"
+              value={value.q ?? ""}
+              onChange={(event) =>
+                onChange({ ...value, q: event.target.value })
+              }
+              className={`${inputClass} pl-9`}
+            />
+          </div>
         </div>
 
         <div className="space-y-2">

@@ -381,16 +381,24 @@ export function Dashboard({
               <AdjustmentsHorizontalIcon className="h-4 w-4 text-muted-foreground" />
             </button>
             {filterOptions.sectors.length > 1 && (
-              <div className="hidden h-12 min-w-44 items-center justify-between gap-4 px-4 text-sm text-foreground xl:flex">
+              <button
+                type="button"
+                onClick={() => setShowFilters(!showFilters)}
+                className="hidden h-12 min-w-44 items-center justify-between gap-4 px-4 text-sm text-foreground transition-colors hover:bg-muted/50 xl:flex"
+              >
                 <span>{filters.sector ?? "All sectors"}</span>
                 <span className="text-muted-foreground">{filterOptions.sectors.length}</span>
-              </div>
+              </button>
             )}
             {filterOptions.categories.length > 1 && (
-              <div className="hidden h-12 min-w-44 items-center justify-between gap-4 px-4 text-sm text-foreground xl:flex">
+              <button
+                type="button"
+                onClick={() => setShowFilters(!showFilters)}
+                className="hidden h-12 min-w-44 items-center justify-between gap-4 px-4 text-sm text-foreground transition-colors hover:bg-muted/50 xl:flex"
+              >
                 <span className="max-w-40 truncate">{filters.category ?? "All categories"}</span>
                 <span className="text-muted-foreground">{filterOptions.categories.length}</span>
-              </div>
+              </button>
             )}
             <Button
               variant="ghost"
