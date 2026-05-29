@@ -8,7 +8,7 @@ import {
 import { ThemeToggle } from "./ThemeToggle";
 
 interface HeaderProps {
-  latestYear: string;
+  year: string;
   companyCount: number;
   totalRevenue: number;
   totalEmployees: number;
@@ -26,7 +26,7 @@ const compactNumber = new Intl.NumberFormat("en-US", {
 });
 
 export const Header = ({
-  latestYear,
+  year,
   companyCount,
   totalRevenue,
   totalEmployees,
@@ -93,8 +93,8 @@ export const Header = ({
                 Market intelligence
               </h2>
               <div className="flex items-baseline gap-2">
-                <span className="text-xs text-muted-foreground">Latest year</span>
-                <span className="font-display text-2xl font-bold">{latestYear}</span>
+                <span className="text-xs text-muted-foreground">Selected year</span>
+                <span className="font-display text-2xl font-bold">{year}</span>
               </div>
             </div>
 
@@ -155,7 +155,7 @@ export const Header = ({
 
         <div className="mb-2 inline-flex items-center gap-2 rounded-md border border-border/80 bg-card/80 px-3 py-2 font-mono text-xs text-muted-foreground lg:hidden">
           <BuildingOffice2Icon className="h-4 w-4 text-primary" />
-          {companyCount} companies tracked through {latestYear}
+          {companyCount} companies in {year}
           <ArrowPathIcon className="h-4 w-4" />
         </div>
       </div>

@@ -1,11 +1,12 @@
 "use client";
 
 import React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Header } from "./Header";
 import { TrendLineChart } from "./TrendLineChart";
 import {
   AdjustmentsHorizontalIcon,
-  ArrowDownTrayIcon,
   ArrowTrendingUpIcon,
 } from "@heroicons/react/24/outline";
 import numeral from "numeral";
@@ -18,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import type { CompanyData, YearData } from "@/types";
 import {
   buildCompanyParams,
-  buildExportUrl,
   fetchApi,
   type CompaniesResponse,
   type CompanySortKey,
@@ -29,6 +29,21 @@ import {
 
 const PAGE_SIZE = 50;
 type ChartMetric = "revenue" | "employees" | "profit";
+
+export type DashboardInitialParams = {
+  year?: string;
+  q?: string;
+  minRevenue?: string;
+  maxRevenue?: string;
+  minEmployees?: string;
+  maxEmployees?: string;
+  sector?: string;
+  category?: string;
+  municipality?: string;
+  sort?: string;
+  dir?: string;
+  page?: string;
+};
 
 function useDebouncedValue<T>(value: T, delayMs: number) {
   const [debounced, setDebounced] = React.useState(value);
@@ -63,34 +78,35 @@ function growth(current: number, previous?: number) {
 
 export function Dashboard({
   years,
+  initialParams,
   initialSummary,
   initialCompanies,
   initialTrends,
 }: {
   years: string[];
+  initialParams: DashboardInitialParams;
   initialSummary: SummaryResponse;
   initialCompanies: CompaniesResponse;
   initialTrends: TrendResponse;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const requestedYear = searchParams.get("year");
+  const requestedYear = initialParams.year;
   const defaultYear = requestedYear && years.includes(requestedYear) ? requestedYear : initialSummary.year;
   const [selectedYear, setSelectedYear] = React.useState<string>(defaultYear);
   const [filters, setFilters] = React.useState<FiltersState>({
-    q: searchParams.get("q") || undefined,
-    minRevenue: searchParams.get("minRevenue") || undefined,
-    maxRevenue: searchParams.get("maxRevenue") || undefined,
-    minEmployees: searchParams.get("minEmployees") || undefined,
-    maxEmployees: searchParams.get("maxEmployees") || undefined,
-    sector: searchParams.get("sector") || undefined,
-    category: searchParams.get("category") || undefined,
-    municipality: searchParams.get("municipality") || undefined,
+    q: initialParams.q || undefined,
+    minRevenue: initialParams.minRevenue || undefined,
+    maxRevenue: initialParams.maxRevenue || undefined,
+    minEmployees: initialParams.minEmployees || undefined,
+    maxEmployees: initialParams.maxEmployees || undefined,
+    sector: initialParams.sector || undefined,
+    category: initialParams.category || undefined,
+    municipality: initialParams.municipality || undefined,
   });
-  const [sortColumn, setSortColumn] = React.useState<CompanySortKey>(parseSort(searchParams.get("sort")));
-  const [sortDirection, setSortDirection] = React.useState<SortDirection>(parseDirection(searchParams.get("dir")));
+  const [sortColumn, setSortColumn] = React.useState<CompanySortKey>(parseSort(initialParams.sort ?? null));
+  const [sortDirection, setSortDirection] = React.useState<SortDirection>(parseDirection(initialParams.dir ?? null));
   const [page, setPage] = React.useState(() => {
-    const parsed = Number(searchParams.get("page"));
+    const parsed = Number(initialParams.page);
     return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 1;
   });
   const [summary, setSummary] = React.useState(initialSummary);
@@ -245,17 +261,6 @@ export function Dashboard({
     );
   };
 
-  const exportCsv = React.useCallback(() => {
-    window.location.href = buildExportUrl({
-      year: selectedYear,
-      page: 1,
-      pageSize: PAGE_SIZE,
-      sort: sortColumn,
-      dir: sortDirection,
-      filters: effectiveFilters,
-    });
-  }, [selectedYear, sortColumn, sortDirection, effectiveFilters]);
-
   const hasActiveFilters = Boolean(
     effectiveFilters.q ||
       effectiveFilters.minRevenue ||
@@ -316,6 +321,13 @@ export function Dashboard({
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      <Header
+        year={summary.year}
+        companyCount={summary.companyCount}
+        totalRevenue={summary.totalRevenue}
+        totalEmployees={summary.totalEmployees}
+        concentrationStats={summary.concentrationStats}
+      />
       <main
         id="dashboard"
         className="relative mx-auto w-full max-w-[1440px] overflow-x-hidden px-4 pb-14 pt-2 sm:px-6 lg:px-8"
@@ -520,7 +532,17 @@ export function Dashboard({
                             </span>
                           </td>
                           <td className="max-w-44 truncate px-3 py-2 font-semibold text-foreground">
-                            {company.name}
+                            {company.pib ? (
+                              <Link
+                                href={`/company/${company.pib}/`}
+                                onClick={(event) => event.stopPropagation()}
+                                className="block truncate underline-offset-4 hover:text-primary hover:underline"
+                              >
+                                {company.name}
+                              </Link>
+                            ) : (
+                              company.name
+                            )}
                           </td>
                           <td className="px-3 py-2 text-right font-mono tabular-nums">
                             {numeral(revenue).format("0,0")}€
@@ -576,15 +598,6 @@ export function Dashboard({
                     <span className="font-mono text-xs text-destructive">{loadError}</span>
                   )}
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={exportCsv}
-                  className="w-full rounded-md border-border/80 bg-background/70 text-xs sm:w-auto"
-                >
-                  <ArrowDownTrayIcon className="h-4 w-4" />
-                  Export CSV
-                </Button>
               </div>
             </CardHeader>
             <CardContent className="p-0">

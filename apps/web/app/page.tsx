@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { Header } from "../src/components/Header";
 import { Dashboard } from "../src/components/Dashboard";
 import {
   buildCompanyParams,
@@ -11,13 +10,25 @@ import {
 
 export const dynamic = "force-dynamic";
 
-async function loadInitialDashboard() {
-  const summary = await fetchApi<SummaryResponse>(
+async function loadInitialDashboard(requestedYear?: string) {
+  const base = await fetchApi<SummaryResponse>(
     "/summary",
     undefined,
     { next: { revalidate: 300 } },
   );
-  const initialYear = summary.year;
+  const initialYear =
+    requestedYear && base.availableYears.includes(requestedYear)
+      ? requestedYear
+      : base.year;
+  const summary =
+    initialYear === base.year
+      ? base
+      : await fetchApi<SummaryResponse>(
+          "/summary",
+          buildCompanyParams({ year: initialYear, sort: "totalIncome", dir: "desc" }),
+          { next: { revalidate: 300 } },
+        );
+
   const [companies, trends] = await Promise.all([
     fetchApi<CompaniesResponse>(
       "/companies",
@@ -44,11 +55,18 @@ async function loadInitialDashboard() {
   return { summary, companies, trends };
 }
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const sp = await searchParams;
+  const requestedYear = typeof sp.year === "string" ? sp.year : undefined;
+
   let initialData: Awaited<ReturnType<typeof loadInitialDashboard>>;
 
   try {
-    initialData = await loadInitialDashboard();
+    initialData = await loadInitialDashboard(requestedYear);
   } catch (error) {
     console.error("Failed to load dashboard data:", error);
     return (
@@ -59,26 +77,31 @@ export default async function HomePage() {
   }
 
   const { summary } = initialData;
+  const str = (key: string) => (typeof sp[key] === "string" ? (sp[key] as string) : undefined);
+  const initialParams = {
+    year: summary.year,
+    q: str("q"),
+    minRevenue: str("minRevenue"),
+    maxRevenue: str("maxRevenue"),
+    minEmployees: str("minEmployees"),
+    maxEmployees: str("maxEmployees"),
+    sector: str("sector"),
+    category: str("category"),
+    municipality: str("municipality"),
+    sort: str("sort"),
+    dir: str("dir"),
+    page: str("page"),
+  };
 
   return (
-    <>
-      <Header
-        latestYear={summary.year}
-        companyCount={summary.companyCount}
-        totalRevenue={summary.totalRevenue}
-        totalEmployees={summary.totalEmployees}
-        concentrationStats={summary.concentrationStats}
+    <Suspense fallback={<div className="p-4">Loading dashboard...</div>}>
+      <Dashboard
+        years={summary.availableYears}
+        initialParams={initialParams}
+        initialSummary={summary}
+        initialCompanies={initialData.companies}
+        initialTrends={initialData.trends}
       />
-      <main>
-        <Suspense fallback={<div className="p-4">Loading dashboard...</div>}>
-          <Dashboard
-            years={summary.availableYears}
-            initialSummary={summary}
-            initialCompanies={initialData.companies}
-            initialTrends={initialData.trends}
-          />
-        </Suspense>
-      </main>
-    </>
+    </Suspense>
   );
 }

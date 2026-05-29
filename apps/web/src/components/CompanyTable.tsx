@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import numeral from 'numeral';
 import { CompanyData, YearData } from '../types';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
@@ -70,7 +71,7 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
 
   return (
     <div className="w-full">
-      <div className="w-full overflow-x-auto">
+      <div className="hidden w-full overflow-x-auto md:block">
         <Table className="data-table min-w-[1072px] table-fixed whitespace-nowrap">
           <colgroup>
             <col className="w-[52px]" />
@@ -155,8 +156,18 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
                     <TableCell className="text-right font-mono tabular-nums text-muted-foreground">
                       {(page - 1) * pageSize + index + 1}
                     </TableCell>
-                    <TableCell className="min-w-0 truncate font-semibold text-left group-hover:text-primary">
-                      {company.name}
+                    <TableCell className="min-w-0 truncate text-left">
+                      {company.pib ? (
+                        <Link
+                          href={`/company/${company.pib}/`}
+                          onClick={(event) => event.stopPropagation()}
+                          className="block truncate font-semibold text-foreground underline-offset-4 hover:text-primary hover:underline group-hover:text-primary"
+                        >
+                          {company.name}
+                        </Link>
+                      ) : (
+                        <span className="font-semibold">{company.name}</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-right font-mono tabular-nums">
                       {company.employeeCount ?? 0}
@@ -191,6 +202,86 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
           </TableBody>
         </Table>
       </div>
+
+      {/* Mobile: stacked cards keep every metric visible without horizontal scrolling. */}
+      <div className="md:hidden">
+        {selectedYearData.companyList.length === 0 ? (
+          <div className="px-4 py-10 text-center text-muted-foreground">
+            {isLoading ? 'Loading companies...' : 'No companies match this query.'}
+          </div>
+        ) : (
+          selectedYearData.companyList.map((company: CompanyData, index: number) => {
+            const rank = (page - 1) * pageSize + index + 1;
+            const revenueValue = company.totalIncome ?? 0;
+            const profitValue = company.profit ?? 0;
+            const margin =
+              profitMarginByName?.get(company.name) ??
+              (revenueValue ? profitValue / revenueValue : 0);
+
+            const content = (
+              <>
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 font-mono text-[0.7rem] tabular-nums text-muted-foreground">
+                    {rank}
+                  </span>
+                  <span className="min-w-0 flex-1 break-words font-semibold text-foreground">
+                    {company.name}
+                  </span>
+                </div>
+                <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-muted-foreground">Revenue</dt>
+                    <dd className="font-mono tabular-nums">{numeral(revenueValue).format('0,0')}€</dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-muted-foreground">Profit</dt>
+                    <dd className={`font-mono tabular-nums ${profitValue >= 0 ? 'text-success' : 'text-destructive'}`}>
+                      {numeral(profitValue).format('0,0')}€
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-muted-foreground">Employees</dt>
+                    <dd className="font-mono tabular-nums">{company.employeeCount ?? 0}</dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-muted-foreground">Margin</dt>
+                    <dd className={`font-mono tabular-nums ${margin >= 0 ? 'text-success' : 'text-destructive'}`}>
+                      {numeral(margin).format('0.0%')}
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-muted-foreground">Avg net salary</dt>
+                    <dd className="font-mono tabular-nums">{numeral(company.averagePay ?? 0).format('0,0')}€</dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-muted-foreground">Rev/employee</dt>
+                    <dd className="font-mono tabular-nums">{numeral(company.incomePerEmployee ?? 0).format('0,0')}€</dd>
+                  </div>
+                </dl>
+              </>
+            );
+
+            return company.pib ? (
+              <Link
+                key={company.pib}
+                href={`/company/${company.pib}/`}
+                className="block border-b border-border/60 px-4 py-4 transition-colors hover:bg-primary/10"
+              >
+                {content}
+              </Link>
+            ) : (
+              <div
+                key={company.name}
+                onClick={() => onCompanySelect(company)}
+                className="block cursor-pointer border-b border-border/60 px-4 py-4 transition-colors hover:bg-primary/10"
+              >
+                {content}
+              </div>
+            );
+          })
+        )}
+      </div>
+
       <div className="flex flex-col gap-3 border-t border-border/70 px-4 py-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <span className="font-mono">
           Showing {pageStart}-{pageEnd} of {numeral(total).format('0,0')}

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useSyncExternalStore, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -11,9 +11,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-const subscribeToClient = () => () => {};
-const getClientSnapshot = () => true;
-const getServerSnapshot = () => false;
+
 const getSystemTheme = (): Theme =>
   window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 
@@ -35,45 +33,40 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === 'undefined') {
-      return 'light'; // SSR fallback
-    }
+  // Start at 'light' so server and first client render match (no hydration mismatch
+  // and, critically, the provider always renders its children so the app is server-rendered).
+  const [theme, setTheme] = useState<Theme>('light');
 
-    return getStoredTheme() ?? getSystemTheme();
-  });
-
-  const mounted = useSyncExternalStore(
-    subscribeToClient,
-    getClientSnapshot,
-    getServerSnapshot
-  );
-
+  // After hydration, adopt the theme that ThemeScript already applied to <html> pre-paint.
+  // Reading the class (not localStorage) keeps React state in sync without a flash.
   useEffect(() => {
-    if (!mounted) return;
+    const initial: Theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    setTheme(initial);
+  }, []);
+
+  // Apply theme changes to <html>. Skip the first run so we don't clobber the
+  // correct class ThemeScript set with the initial 'light' default.
+  const isFirstRun = useRef(true);
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
 
     const root = document.documentElement;
-    
-    // Remove both classes first
     root.classList.remove('light', 'dark');
-    
-    // Add the current theme class
     root.classList.add(theme);
-    
-    // Update meta theme-color for mobile browsers
+
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', theme === 'dark' ? '#2d3748' : '#ffffff');
+      metaThemeColor.setAttribute('content', theme === 'dark' ? '#11171c' : '#ffffff');
     }
-  }, [theme, mounted]);
+  }, [theme]);
 
-  // Listen for system theme changes
+  // Follow OS theme changes only when the user has not chosen a preference.
   useEffect(() => {
-    if (!mounted) return;
-
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      // Only auto-switch if user hasn't manually set a preference
       if (!getStoredTheme()) {
         setTheme(e.matches ? 'dark' : 'light');
       }
@@ -81,7 +74,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [mounted]);
+  }, []);
 
   const toggleTheme = () => {
     setTheme((prevTheme) => {
@@ -90,11 +83,6 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
       return nextTheme;
     });
   };
-
-  // Prevent hydration mismatch by not rendering until mounted
-  if (!mounted) {
-    return null;
-  }
 
   const value: ThemeContextType = {
     theme,

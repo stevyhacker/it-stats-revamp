@@ -160,6 +160,20 @@
       0 22px 52px -36px hsl(174 45% 40% / 0.36);
   }
 
+  /* Aligned with .professional-card so the company detail page matches the dashboard. */
+  .glass-card {
+    @apply border border-border/80 bg-card/90 shadow-sm backdrop-blur-sm;
+    box-shadow:
+      0 1px 0 hsl(var(--card-foreground) / 0.04) inset,
+      0 18px 45px -34px hsl(178 50% 18% / 0.45);
+  }
+
+  .dark .glass-card {
+    box-shadow:
+      0 1px 0 hsl(var(--card-foreground) / 0.08) inset,
+      0 22px 52px -36px hsl(174 45% 40% / 0.36);
+  }
+
   .analytics-panel {
     @apply rounded-md border border-border/80 bg-card/90 shadow-sm backdrop-blur-xl;
     box-shadow:

@@ -224,19 +224,41 @@ export function CompanyPage({
           <CardContent className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
               <LineChart data={companyHistoricalData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
-                <YAxis yAxisId="left" tickFormatter={(value) => numeral(value).format("0a")} />
-                <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => numeral(value).format("0,0")} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis
+                  dataKey="year"
+                  stroke="hsl(var(--muted-foreground))"
+                  tick={{ fontSize: 11, fontFamily: "var(--font-mono)" }}
+                />
+                <YAxis
+                  yAxisId="left"
+                  stroke="hsl(var(--muted-foreground))"
+                  tick={{ fontSize: 11, fontFamily: "var(--font-mono)" }}
+                  tickFormatter={(value) => numeral(value).format("0a")}
+                />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  stroke="hsl(var(--muted-foreground))"
+                  tick={{ fontSize: 11, fontFamily: "var(--font-mono)" }}
+                  tickFormatter={(value) => numeral(value).format("0,0")}
+                />
                 <Tooltip
                   formatter={(value: number, name) => [
                     name === "Employees" ? numeral(value).format("0,0") : `${numeral(value).format("0,0")}€`,
                     name,
                   ]}
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--popover))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "8px",
+                    color: "hsl(var(--popover-foreground))",
+                  }}
+                  labelStyle={{ color: "hsl(var(--muted-foreground))" }}
                 />
-                <Line yAxisId="left" type="monotone" dataKey="totalIncome" stroke="#8884d8" strokeWidth={2} name="Total Income" dot={false} />
-                <Line yAxisId="left" type="monotone" dataKey="profit" stroke="#82ca9d" strokeWidth={2} name="Profit" dot={false} />
-                <Line yAxisId="right" type="monotone" dataKey="employeeCount" stroke="#ffc658" strokeWidth={2} name="Employees" dot={false} />
+                <Line yAxisId="left" type="monotone" dataKey="totalIncome" stroke="hsl(var(--chart-1))" strokeWidth={2.5} name="Total Income" dot={false} />
+                <Line yAxisId="left" type="monotone" dataKey="profit" stroke="hsl(var(--chart-4))" strokeWidth={2.5} name="Profit" dot={false} />
+                <Line yAxisId="right" type="monotone" dataKey="employeeCount" stroke="hsl(var(--chart-2))" strokeWidth={2.5} name="Employees" dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
