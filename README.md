@@ -117,7 +117,7 @@ The frontend no longer imports the full company dataset or statically generates 
 - `GET /trends?year=2024&metric=totalIncome&companyPibs=...`: year series for selected companies, or top companies when none are provided.
 - `GET /regions?year=2024`: per-municipality aggregates (revenue, profit, employees, employee-weighted average pay, revenue/employee) plus national totals.
 - `GET /regions/sectors?year=2024&limit=8`: sector revenue split within the top-N municipalities.
-- `GET /regions/trends?metric=totalIncome&limit=6`: year series for the top-N municipalities.
+- `GET /regions/trends?metric=revenue|companies|employees|avgPay&limit=6`: year series for the top-N municipalities.
 - `GET /export.csv?...`: CSV export for every row matching the same filters and sort as `/companies`.
 - `GET /years`: available reporting years.
 

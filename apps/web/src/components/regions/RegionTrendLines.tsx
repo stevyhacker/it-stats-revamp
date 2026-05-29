@@ -22,9 +22,49 @@ const COLORS = [
   "hsl(var(--primary))",
 ];
 
+type TrendMetric = "revenue" | "companies" | "employees" | "avgPay" | "profit";
+
+function normalizeTrendMetric(metric: string): TrendMetric {
+  switch (metric) {
+    case "companies":
+      return "companies";
+    case "employees":
+    case "employeeCount":
+      return "employees";
+    case "avgPay":
+    case "averagePay":
+      return "avgPay";
+    case "profit":
+      return "profit";
+    default:
+      return "revenue";
+  }
+}
+
+function compact(value: number) {
+  const abs = Math.abs(value);
+  if (abs >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1)}B`;
+  if (abs >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `${(value / 1_000).toFixed(abs >= 10_000 ? 0 : 1)}k`;
+  return numeral(value).format("0");
+}
+
+function formatTrendValue(value: number, metric: TrendMetric, compactAxis = false) {
+  if (metric === "companies" || metric === "employees") {
+    return compactAxis ? compact(value) : numeral(value).format("0,0");
+  }
+
+  if (metric === "avgPay") {
+    return compactAxis ? `${compact(value)}€` : `${numeral(value).format("0,0")}€`;
+  }
+
+  return compactAxis ? `${compact(value)}€` : `${numeral(value).format("0,0")}€`;
+}
+
 export function RegionTrendLines({ data }: { data: RegionTrendsResponse }) {
   const chart = data.series.map((s) => ({ year: Number(s.year), ...s.values }));
   const names = data.municipalities.slice(0, 6);
+  const metric = normalizeTrendMetric(data.metric);
 
   return (
     <div className="h-[22rem] w-full">
@@ -37,10 +77,10 @@ export function RegionTrendLines({ data }: { data: RegionTrendsResponse }) {
           />
           <YAxis
             tick={{ fontSize: 10, fontFamily: "var(--font-mono)", fill: "hsl(var(--muted-foreground))" }}
-            tickFormatter={(v) => (v >= 1e6 ? (v / 1e6).toFixed(1) + "M" : (v / 1e3).toFixed(0) + "k")}
+            tickFormatter={(v) => formatTrendValue(Number(v), metric, true)}
           />
           <Tooltip
-            formatter={(v: number, n: string) => [numeral(v).format("0,0"), n]}
+            formatter={(v: number, n: string) => [formatTrendValue(Number(v), metric), n]}
             contentStyle={{
               backgroundColor: "hsl(var(--popover))",
               border: "1px solid hsl(var(--border))",

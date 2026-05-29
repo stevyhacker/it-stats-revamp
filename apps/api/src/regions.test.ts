@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { weightedAvgPay, revenuePerEmployee, accumulateRegion } from './regions';
+import { weightedAvgPay, revenuePerEmployee, accumulateRegion, parseRegionTrendMetric } from './regions';
 
 describe('region aggregation math', () => {
   test('weightedAvgPay weights by employees', () => {
@@ -31,5 +31,18 @@ describe('region aggregation math', () => {
     expect(r.companyCount).toBe(3);
     expect(r.avgPay).toBe(300); // (200*5 + 400*5)/10
     expect(r.revenuePerEmployee).toBe(15); // 150/10
+  });
+
+  test('parseRegionTrendMetric accepts region metrics and old company-sort aliases', () => {
+    expect(parseRegionTrendMetric('companies')).toBe('companies');
+    expect(parseRegionTrendMetric('employees')).toBe('employees');
+    expect(parseRegionTrendMetric('employeeCount')).toBe('employees');
+    expect(parseRegionTrendMetric('avgPay')).toBe('avgPay');
+    expect(parseRegionTrendMetric('averagePay')).toBe('avgPay');
+    expect(parseRegionTrendMetric('profit')).toBe('profit');
+    expect(parseRegionTrendMetric('revenue')).toBe('revenue');
+    expect(parseRegionTrendMetric('totalIncome')).toBe('revenue');
+    expect(parseRegionTrendMetric('unknown')).toBe('revenue');
+    expect(parseRegionTrendMetric(null)).toBe('revenue');
   });
 });

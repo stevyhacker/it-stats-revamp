@@ -175,23 +175,10 @@ export function regionMetricValue(row: RegionRow, metric: RegionMetric): number 
   }
 }
 
-// Map a RegionMetric to the API SortKey used by /regions/trends. The companies
-// count is not a sortable column, so the trend falls back to revenue.
-export function regionMetricToSort(metric: RegionMetric): CompanySortKey {
-  switch (metric) {
-    case "employees":
-      return "employeeCount";
-    case "avgPay":
-      return "averagePay";
-    default:
-      return "totalIncome";
-  }
-}
-
 export function buildRegionParams(opts: { year?: string; metric?: RegionMetric; limit?: number }) {
   const params = new URLSearchParams();
   appendDefined(params, "year", opts.year);
-  if (opts.metric) appendDefined(params, "metric", regionMetricToSort(opts.metric));
+  appendDefined(params, "metric", opts.metric);
   appendDefined(params, "limit", opts.limit);
   return params;
 }

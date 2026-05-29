@@ -19,7 +19,7 @@ import {
   sql,
   years,
 } from 'db';
-import { revenuePerEmployee, weightedAvgPay } from './regions';
+import { parseRegionTrendMetric, revenuePerEmployee, weightedAvgPay } from './regions';
 
 const runningInBun = typeof Bun !== 'undefined' && typeof Bun.serve === 'function';
 const historicalCache = 'public, s-maxage=86400, stale-while-revalidate=604800';
@@ -555,22 +555,23 @@ app.get('/regions/sectors', async (c) => {
 app.get('/regions/trends', async (c) => {
   try {
     const searchParams = new URL(c.req.url).searchParams;
-    const metric = parseSort(searchParams.get('metric'));
+    const metric = parseRegionTrendMetric(searchParams.get('metric'));
     const limit = parsePositiveInt(searchParams.get('limit'), 6, 12);
     const allYears = await availableYears();
     const latest = allYears[0];
-    const metricCol =
-      metric === 'employeeCount' ? companies.employeeCount
-      : metric === 'profit' ? companies.profit
-      : metric === 'averagePay' ? companies.averagePay
-      : companies.totalIncome;
 
-    // Average pay must be employee-weighted, not summed across companies; every
-    // other metric is a straight sum.
+    // Average pay is employee-weighted. Companies is a row count; every other
+    // metric is a straight sum over the municipality/year bucket.
     const valueExpr =
-      metric === 'averagePay'
-        ? sql<string>`coalesce(sum(${companies.averagePay} * coalesce(${companies.employeeCount}, 0)) / nullif(sum(${companies.employeeCount}), 0), 0)`
-        : sql<string>`coalesce(sum(${metricCol}), 0)`;
+      metric === 'companies'
+        ? sql<string>`count(*)::int`
+        : metric === 'employees'
+          ? sql<string>`coalesce(sum(${companies.employeeCount}), 0)`
+          : metric === 'profit'
+            ? sql<string>`coalesce(sum(${companies.profit}), 0)`
+            : metric === 'avgPay'
+              ? sql<string>`coalesce(round(sum(coalesce(${companies.averagePay}, 0)::numeric * coalesce(${companies.employeeCount}, 0)) / nullif(sum(coalesce(${companies.employeeCount}, 0)), 0)), 0)`
+              : sql<string>`coalesce(sum(${companies.totalIncome}), 0)`;
 
     const topRows = await db
       .select({

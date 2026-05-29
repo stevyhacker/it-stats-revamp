@@ -6,6 +6,27 @@ export function revenuePerEmployee(revenue: number, employees: number): number {
   return employees > 0 ? Math.round(revenue / employees) : 0;
 }
 
+export type RegionTrendMetric = 'revenue' | 'companies' | 'employees' | 'avgPay' | 'profit';
+
+export function parseRegionTrendMetric(value: string | null): RegionTrendMetric {
+  switch (value) {
+    case 'companies':
+      return 'companies';
+    case 'employees':
+    case 'employeeCount':
+      return 'employees';
+    case 'avgPay':
+    case 'averagePay':
+      return 'avgPay';
+    case 'profit':
+      return 'profit';
+    case 'revenue':
+    case 'totalIncome':
+    default:
+      return 'revenue';
+  }
+}
+
 type CompanyAgg = {
   totalIncome: number | null;
   profit: number | null;
