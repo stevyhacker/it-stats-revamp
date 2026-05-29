@@ -182,3 +182,88 @@ export function buildRegionParams(opts: { year?: string; metric?: RegionMetric; 
   appendDefined(params, "limit", opts.limit);
   return params;
 }
+
+export type SectorMetric = "revenue" | "employees" | "avgPay" | "margin";
+
+export const SECTOR_METRICS: { key: SectorMetric; label: string }[] = [
+  { key: "revenue", label: "Revenue" },
+  { key: "employees", label: "Employees" },
+  { key: "avgPay", label: "Avg pay" },
+  { key: "margin", label: "Margin" },
+];
+
+export interface SectorRow {
+  sector: string;
+  companyCount: number;
+  totalRevenue: number;
+  totalProfit: number;
+  totalEmployees: number;
+  avgPay: number;
+  revenuePerEmployee: number;
+  profitMargin: number;
+}
+
+export interface SectorsResponse {
+  year: string;
+  national: {
+    companyCount: number;
+    totalRevenue: number;
+    totalProfit: number;
+    totalEmployees: number;
+    avgPay: number;
+    profitMargin: number;
+    sectorCount: number;
+  };
+  sectors: SectorRow[];
+}
+
+export interface SectorActivityRow {
+  activityName: string;
+  activityCode: string;
+  companyCount: number;
+  totalRevenue: number;
+  totalProfit: number;
+  totalEmployees: number;
+  avgPay: number;
+  profitMargin: number;
+}
+
+export interface SectorActivitiesResponse {
+  year: string;
+  sector: string;
+  rows: SectorActivityRow[];
+}
+
+export interface SectorTrendsResponse {
+  metric: string;
+  sectors: string[];
+  series: { year: string; values: Record<string, number> }[];
+}
+
+// Map a SectorMetric to the numeric field on SectorRow.
+export function sectorMetricValue(row: SectorRow, metric: SectorMetric): number {
+  switch (metric) {
+    case "employees":
+      return row.totalEmployees;
+    case "avgPay":
+      return row.avgPay;
+    case "margin":
+      return row.profitMargin;
+    default:
+      return row.totalRevenue;
+  }
+}
+
+export function buildSectorParams(opts: {
+  year?: string;
+  metric?: SectorMetric;
+  sector?: string;
+  limit?: number;
+}) {
+  const params = new URLSearchParams();
+  appendDefined(params, "year", opts.year);
+  appendDefined(params, "metric", opts.metric);
+  appendDefined(params, "sector", opts.sector);
+  appendDefined(params, "limit", opts.limit);
+  return params;
+}

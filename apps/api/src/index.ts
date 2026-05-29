@@ -20,6 +20,7 @@ import {
   years,
 } from 'db';
 import { parseRegionTrendMetric, revenuePerEmployee, weightedAvgPay } from './regions';
+import { parseSectorMetric, profitMargin } from './sectors';
 
 const runningInBun = typeof Bun !== 'undefined' && typeof Bun.serve === 'function';
 const historicalCache = 'public, s-maxage=86400, stale-while-revalidate=604800';
@@ -625,6 +626,225 @@ app.get('/regions/trends', async (c) => {
   }
 });
 
+// Per-sector aggregates for a year (revenue, profit, employees, weighted avg
+// pay, revenue/employee, profit margin) plus national totals. `sector` is a
+// non-null column defaulting to 'Other'; null/empty values coalesce to 'Other'.
+const sectorExpr = sql<string>`coalesce(nullif(trim(${companies.sector}), ''), 'Other')`;
+
+app.get('/sectors', async (c) => {
+  try {
+    const searchParams = new URL(c.req.url).searchParams;
+    const yearValue = await resolveYear(searchParams.get('year'));
+    const rows = await db
+      .select({
+        sector: sectorExpr,
+        companyCount: sql<number>`count(*)::int`,
+        totalRevenue: sql<string>`coalesce(sum(${companies.totalIncome}),0)`,
+        totalProfit: sql<string>`coalesce(sum(${companies.profit}),0)`,
+        totalEmployees: sql<string>`coalesce(sum(${companies.employeeCount}),0)`,
+        payWeight: sql<string>`coalesce(sum(${companies.averagePay}::bigint * coalesce(${companies.employeeCount},0)),0)`,
+      })
+      .from(companies)
+      .innerJoin(years, eq(companies.yearId, years.id))
+      .where(eq(years.yearValue, yearValue))
+      .groupBy(sectorExpr)
+      .orderBy(sql`coalesce(sum(${companies.totalIncome}),0) desc`);
+
+    const sectors = rows.map((r) => {
+      const totalRevenue = toNumber(r.totalRevenue);
+      const totalProfit = toNumber(r.totalProfit);
+      const totalEmployees = toNumber(r.totalEmployees);
+      const payWeight = toNumber(r.payWeight);
+      return {
+        sector: r.sector,
+        companyCount: Number(r.companyCount),
+        totalRevenue,
+        totalProfit,
+        totalEmployees,
+        avgPay: weightedAvgPay(payWeight, totalEmployees),
+        revenuePerEmployee: revenuePerEmployee(totalRevenue, totalEmployees),
+        profitMargin: profitMargin(totalProfit, totalRevenue),
+      };
+    });
+
+    const national = sectors.reduce(
+      (acc, s) => {
+        acc.companyCount += s.companyCount;
+        acc.totalRevenue += s.totalRevenue;
+        acc.totalProfit += s.totalProfit;
+        acc.totalEmployees += s.totalEmployees;
+        acc.payWeight += s.avgPay * s.totalEmployees;
+        return acc;
+      },
+      { companyCount: 0, totalRevenue: 0, totalProfit: 0, totalEmployees: 0, payWeight: 0 },
+    );
+
+    setHistoricalCache(c);
+    return c.json({
+      year: String(yearValue),
+      national: {
+        companyCount: national.companyCount,
+        totalRevenue: national.totalRevenue,
+        totalProfit: national.totalProfit,
+        totalEmployees: national.totalEmployees,
+        avgPay: weightedAvgPay(national.payWeight, national.totalEmployees),
+        profitMargin: profitMargin(national.totalProfit, national.totalRevenue),
+        sectorCount: sectors.length,
+      },
+      sectors,
+    });
+  } catch (error) {
+    console.error('Error fetching sectors:', error);
+    return c.json({ error: 'Failed to fetch sectors' }, 500);
+  }
+});
+
+// Activity (NACE) breakdown within a single sector for a year. Returns the
+// top-N activities by revenue with the remainder folded into an 'Other' row.
+app.get('/sectors/activities', async (c) => {
+  try {
+    const searchParams = new URL(c.req.url).searchParams;
+    const yearValue = await resolveYear(searchParams.get('year'));
+    const sector = searchParams.get('sector')?.trim();
+    const limit = parsePositiveInt(searchParams.get('limit'), 12, 25);
+    if (!sector) {
+      setHistoricalCache(c);
+      return c.json({ year: String(yearValue), sector: '', rows: [] });
+    }
+
+    const activityExpr = sql<string>`coalesce(nullif(trim(${companies.activityName}), ''), 'Unspecified')`;
+    const rows = await db
+      .select({
+        activityName: activityExpr,
+        activityCode: sql<string>`coalesce(max(${companies.activityCode}), '')`,
+        companyCount: sql<number>`count(*)::int`,
+        totalRevenue: sql<string>`coalesce(sum(${companies.totalIncome}),0)`,
+        totalProfit: sql<string>`coalesce(sum(${companies.profit}),0)`,
+        totalEmployees: sql<string>`coalesce(sum(${companies.employeeCount}),0)`,
+        payWeight: sql<string>`coalesce(sum(${companies.averagePay}::bigint * coalesce(${companies.employeeCount},0)),0)`,
+      })
+      .from(companies)
+      .innerJoin(years, eq(companies.yearId, years.id))
+      .where(and(eq(years.yearValue, yearValue), eq(sectorExpr, sector)))
+      .groupBy(activityExpr)
+      .orderBy(sql`coalesce(sum(${companies.totalIncome}),0) desc`);
+
+    const mapped = rows.map((r) => {
+      const totalRevenue = toNumber(r.totalRevenue);
+      const totalProfit = toNumber(r.totalProfit);
+      const totalEmployees = toNumber(r.totalEmployees);
+      const payWeight = toNumber(r.payWeight);
+      return {
+        activityName: r.activityName,
+        activityCode: r.activityCode ?? '',
+        companyCount: Number(r.companyCount),
+        totalRevenue,
+        totalProfit,
+        totalEmployees,
+        avgPay: weightedAvgPay(payWeight, totalEmployees),
+        profitMargin: profitMargin(totalProfit, totalRevenue),
+      };
+    });
+
+    const top = mapped.slice(0, limit);
+    const rest = mapped.slice(limit);
+    if (rest.length > 0) {
+      const agg = rest.reduce(
+        (acc, r) => {
+          acc.companyCount += r.companyCount;
+          acc.totalRevenue += r.totalRevenue;
+          acc.totalProfit += r.totalProfit;
+          acc.totalEmployees += r.totalEmployees;
+          acc.payWeight += r.avgPay * r.totalEmployees;
+          return acc;
+        },
+        { companyCount: 0, totalRevenue: 0, totalProfit: 0, totalEmployees: 0, payWeight: 0 },
+      );
+      top.push({
+        activityName: 'Other',
+        activityCode: '',
+        companyCount: agg.companyCount,
+        totalRevenue: agg.totalRevenue,
+        totalProfit: agg.totalProfit,
+        totalEmployees: agg.totalEmployees,
+        avgPay: weightedAvgPay(agg.payWeight, agg.totalEmployees),
+        profitMargin: profitMargin(agg.totalProfit, agg.totalRevenue),
+      });
+    }
+
+    setHistoricalCache(c);
+    return c.json({ year: String(yearValue), sector, rows: top });
+  } catch (error) {
+    console.error('Error fetching sector activities:', error);
+    return c.json({ error: 'Failed to fetch sector activities' }, 500);
+  }
+});
+
+// Multi-year metric series for the top-N sectors (ranked by the latest year).
+app.get('/sectors/trends', async (c) => {
+  try {
+    const searchParams = new URL(c.req.url).searchParams;
+    const metric = parseSectorMetric(searchParams.get('metric'));
+    const limit = parsePositiveInt(searchParams.get('limit'), 6, 12);
+    const allYears = await availableYears();
+    const latest = allYears[0];
+
+    // Employees is a straight sum; avg pay is employee-weighted; margin is a
+    // ratio (sum profit / sum revenue); revenue is the default sum.
+    const valueExpr =
+      metric === 'employees'
+        ? sql<string>`coalesce(sum(${companies.employeeCount}), 0)`
+        : metric === 'avgPay'
+          ? sql<string>`coalesce(round(sum(coalesce(${companies.averagePay}, 0)::numeric * coalesce(${companies.employeeCount}, 0)) / nullif(sum(coalesce(${companies.employeeCount}, 0)), 0)), 0)`
+          : metric === 'margin'
+            ? sql<string>`coalesce(sum(${companies.profit})::numeric / nullif(sum(${companies.totalIncome}), 0), 0)`
+            : sql<string>`coalesce(sum(${companies.totalIncome}), 0)`;
+
+    const topRows = await db
+      .select({ sector: sectorExpr, v: valueExpr })
+      .from(companies)
+      .innerJoin(years, eq(companies.yearId, years.id))
+      .where(eq(years.yearValue, latest))
+      .groupBy(sectorExpr)
+      .orderBy(sql`${valueExpr} desc`)
+      .limit(limit);
+
+    const topNames = topRows.map((r) => r.sector).filter(Boolean);
+    if (topNames.length === 0) {
+      setHistoricalCache(c);
+      return c.json({ metric, sectors: [], series: [] });
+    }
+
+    const rows = await db
+      .select({ year: years.yearValue, sector: sectorExpr, v: valueExpr })
+      .from(companies)
+      .innerJoin(years, eq(companies.yearId, years.id))
+      .groupBy(years.yearValue, sectorExpr)
+      .orderBy(asc(years.yearValue));
+
+    const byYear = new Map<string, Record<string, number>>();
+    for (const r of rows) {
+      if (!topNames.includes(r.sector)) continue;
+      const y = String(r.year);
+      const bucket = byYear.get(y) ?? {};
+      bucket[r.sector] = toNumber(r.v);
+      byYear.set(y, bucket);
+    }
+
+    setHistoricalCache(c);
+    return c.json({
+      metric,
+      sectors: topNames,
+      series: Array.from(byYear.entries())
+        .sort((a, b) => Number(a[0]) - Number(b[0]))
+        .map(([year, values]) => ({ year, values })),
+    });
+  } catch (error) {
+    console.error('Error fetching sector trends:', error);
+    return c.json({ error: 'Failed to fetch sector trends' }, 500);
+  }
+});
+
 app.get('/export.csv', async (c) => {
   try {
     const result = await fetchCompaniesForExport(new URL(c.req.url).searchParams);
@@ -694,6 +914,9 @@ app.get('/', (c) => {
       '/regions',
       '/regions/sectors',
       '/regions/trends',
+      '/sectors',
+      '/sectors/activities',
+      '/sectors/trends',
       '/export.csv',
       '/years',
     ],
