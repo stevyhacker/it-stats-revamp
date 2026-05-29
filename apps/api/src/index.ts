@@ -565,16 +565,23 @@ app.get('/regions/trends', async (c) => {
       : metric === 'averagePay' ? companies.averagePay
       : companies.totalIncome;
 
+    // Average pay must be employee-weighted, not summed across companies; every
+    // other metric is a straight sum.
+    const valueExpr =
+      metric === 'averagePay'
+        ? sql<string>`coalesce(sum(${companies.averagePay} * coalesce(${companies.employeeCount}, 0)) / nullif(sum(${companies.employeeCount}), 0), 0)`
+        : sql<string>`coalesce(sum(${metricCol}), 0)`;
+
     const topRows = await db
       .select({
         municipality: companies.municipality,
-        v: sql<string>`coalesce(sum(${metricCol}),0)`,
+        v: valueExpr,
       })
       .from(companies)
       .innerJoin(years, eq(companies.yearId, years.id))
       .where(and(eq(years.yearValue, latest), isNotNull(companies.municipality)))
       .groupBy(companies.municipality)
-      .orderBy(sql`coalesce(sum(${metricCol}),0) desc`)
+      .orderBy(sql`${valueExpr} desc`)
       .limit(limit);
 
     const topNames = topRows.map((r) => r.municipality!).filter(Boolean);
@@ -587,7 +594,7 @@ app.get('/regions/trends', async (c) => {
       .select({
         year: years.yearValue,
         municipality: companies.municipality,
-        v: sql<string>`coalesce(sum(${metricCol}),0)`,
+        v: valueExpr,
       })
       .from(companies)
       .innerJoin(years, eq(companies.yearId, years.id))
