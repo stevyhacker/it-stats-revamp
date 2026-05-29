@@ -12,6 +12,7 @@ All data presented in this application is collected from a public source: [Tax A
 - Year-over-year financial and employment tracking
 - Company-specific historical profile pages by PIB
 - Market overview with revenue, employee, concentration, and filter metrics
+- Regions page: Montenegro choropleth map plus per-municipality breakdowns (ranking, market share, average pay, scale-vs-pay, sector mix, and year-over-year trends)
 - Server-side CSV export for filtered company views
 - Growth and efficiency comparisons
 - Dark mode support
@@ -22,7 +23,7 @@ All data presented in this application is collected from a public source: [Tax A
 The app is a Bun/Turborepo monorepo with a Hono API, a Next.js frontend, and a shared Drizzle/Postgres package.
 
 - `apps/api` exposes the database-backed JSON and CSV endpoints.
-- `apps/web` renders the dashboard and profile pages, then fetches paginated data from the API.
+- `apps/web` renders the dashboard, regions, and profile pages, then fetches paginated data from the API.
 - `packages/db` owns the Drizzle schema, migrations, and database connection.
 - `scripts/import-irms-processed.ts` imports processed IRMS/CRPS-style company data into Postgres.
 
@@ -114,6 +115,9 @@ The frontend no longer imports the full company dataset or statically generates 
 - `GET /companies?year=2024&page=1&pageSize=50&sort=totalIncome&dir=desc&q=...`: paginated company rows plus the total matching count.
 - `GET /companies/:pib`: all historical rows for a single company PIB.
 - `GET /trends?year=2024&metric=totalIncome&companyPibs=...`: year series for selected companies, or top companies when none are provided.
+- `GET /regions?year=2024`: per-municipality aggregates (revenue, profit, employees, employee-weighted average pay, revenue/employee) plus national totals.
+- `GET /regions/sectors?year=2024&limit=8`: sector revenue split within the top-N municipalities.
+- `GET /regions/trends?metric=totalIncome&limit=6`: year series for the top-N municipalities.
 - `GET /export.csv?...`: CSV export for every row matching the same filters and sort as `/companies`.
 - `GET /years`: available reporting years.
 

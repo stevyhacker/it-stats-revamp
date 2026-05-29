@@ -17,7 +17,7 @@ ITStats.me is a comprehensive dashboard for analyzing Montenegrin tech companies
 - **Runtime**: Bun (API server) + Node.js (Next.js)
 - **Frontend**: React 19 RC, Next.js 15, Tailwind CSS, Radix UI components
 - **Backend**: Hono web framework with Clerk authentication middleware
-- **Database**: PostgreSQL with Drizzle ORM, hosted on Supabase
+- **Database**: PostgreSQL with Drizzle ORM
 - **Visualization**: Recharts for charts and data presentation
 - **Build System**: Turborepo with Bun workspaces
 
@@ -59,19 +59,39 @@ ITStats.me is a comprehensive dashboard for analyzing Montenegrin tech companies
 
 ## API Endpoints
 
-- `GET /companies` - Returns all companies grouped by year
+- `GET /summary` - Year aggregates (totals, YoY, concentration, filter options, top companies)
+- `GET /companies` - Paginated, filterable, sortable companies for a year
 - `GET /companies/:pib` - Returns specific company data across all years
+- `GET /trends` - Multi-year metric series for the top (or selected) companies
+- `GET /regions` - Per-municipality aggregates for a year (revenue, profit, employees, employee-weighted avg pay, revenue/employee) plus national totals
+- `GET /regions/sectors` - Sector revenue split within the top-N municipalities (stacked-bar data)
+- `GET /regions/trends` - Multi-year metric series for the top-N municipalities
+- `GET /export.csv` - CSV export of the filtered company set
 - `GET /years` - Returns available years in descending order
 - `GET /api/protected` - Example protected route requiring Clerk authentication
 
+Region aggregation math (employee-weighted average pay, revenue-per-employee) lives in `apps/api/src/regions.ts` and is unit-tested in `apps/api/src/regions.test.ts`.
+
 ## Frontend Components
 
+### Pages (App Router, `apps/web/app/`)
+- **/** (`page.tsx`): Main dashboard with year selector, filters, and company table
+- **/regions** (`regions/page.tsx`): Geographic analytics — Montenegro choropleth map plus six municipality breakdowns; URL-driven `year` + `metric` (`revenue` | `companies` | `employees` | `avgPay`)
+- **/company/[companyName]**: Per-company detail across years
+
 ### Core Components
+- **SiteNav.tsx**: Shared top navigation (logo + Dashboard/Regions links + theme toggle), used by the dashboard `Header` and the Regions page
 - **Dashboard.tsx**: Main dashboard with year selector and company table
 - **CompanyTable.tsx**: Data table with sorting and filtering
 - **Charts.tsx**: Various chart components for data visualization
 - **MarketShareTreemap.tsx**: Treemap visualization for market share
 - **TrendLineChart.tsx**: Line charts for trending data
+
+### Regions Components (`apps/web/src/components/regions/`)
+- **RegionsView.tsx**: Client orchestrator owning URL-driven year/metric state and data fetching
+- **MontenegroChoropleth.tsx**: `d3-geo` + SVG choropleth (no map framework); boundary GeoJSON at `apps/web/public/montenegro-municipalities.json`
+- **RegionKpiStrip / RegionRankBars / RegionTreemap / RegionAvgPayChart / RegionBubbleChart / RegionSectorMix / RegionTrendLines**: the KPI strip and six Recharts visualizations
+- Municipality name-matching (data values → GeoJSON `shapeName`) lives in `apps/web/src/lib/regions-geo.ts` (tested in `regions-geo.test.ts`); add to its `OVERRIDES` map for spelling mismatches
 
 ### UI Components (Radix-based)
 - Located in `apps/web/src/components/ui/`
