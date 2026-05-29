@@ -13,11 +13,13 @@ import {
   gte,
   ilike,
   inArray,
+  isNotNull,
   lte,
   or,
   sql,
   years,
 } from 'db';
+import { revenuePerEmployee, weightedAvgPay } from './regions';
 
 const runningInBun = typeof Bun !== 'undefined' && typeof Bun.serve === 'function';
 const historicalCache = 'public, s-maxage=86400, stale-while-revalidate=604800';
@@ -422,6 +424,196 @@ app.get('/trends', async (c) => {
   } catch (error) {
     console.error('Error fetching trends:', error);
     return c.json({ error: 'Failed to fetch trends' }, 500);
+  }
+});
+
+app.get('/regions', async (c) => {
+  try {
+    const searchParams = new URL(c.req.url).searchParams;
+    const yearValue = await resolveYear(searchParams.get('year'));
+    const rows = await db
+      .select({
+        municipality: companies.municipality,
+        companyCount: sql<number>`count(*)::int`,
+        totalRevenue: sql<string>`coalesce(sum(${companies.totalIncome}),0)`,
+        totalProfit: sql<string>`coalesce(sum(${companies.profit}),0)`,
+        totalEmployees: sql<string>`coalesce(sum(${companies.employeeCount}),0)`,
+        payWeight: sql<string>`coalesce(sum(${companies.averagePay}::bigint * coalesce(${companies.employeeCount},0)),0)`,
+      })
+      .from(companies)
+      .innerJoin(years, eq(companies.yearId, years.id))
+      .where(and(eq(years.yearValue, yearValue), isNotNull(companies.municipality)))
+      .groupBy(companies.municipality)
+      .orderBy(sql`coalesce(sum(${companies.totalIncome}),0) desc`);
+
+    const municipalities = rows
+      .filter((r) => r.municipality && r.municipality.trim())
+      .map((r) => {
+        const totalRevenue = toNumber(r.totalRevenue);
+        const totalEmployees = toNumber(r.totalEmployees);
+        const payWeight = toNumber(r.payWeight);
+        return {
+          municipality: r.municipality!.trim(),
+          companyCount: Number(r.companyCount),
+          totalRevenue,
+          totalProfit: toNumber(r.totalProfit),
+          totalEmployees,
+          avgPay: weightedAvgPay(payWeight, totalEmployees),
+          revenuePerEmployee: revenuePerEmployee(totalRevenue, totalEmployees),
+        };
+      });
+
+    const national = municipalities.reduce(
+      (acc, m) => {
+        acc.companyCount += m.companyCount;
+        acc.totalRevenue += m.totalRevenue;
+        acc.totalProfit += m.totalProfit;
+        acc.totalEmployees += m.totalEmployees;
+        acc.payWeight += m.avgPay * m.totalEmployees;
+        return acc;
+      },
+      { companyCount: 0, totalRevenue: 0, totalProfit: 0, totalEmployees: 0, payWeight: 0 },
+    );
+
+    setHistoricalCache(c);
+    return c.json({
+      year: String(yearValue),
+      national: {
+        companyCount: national.companyCount,
+        totalRevenue: national.totalRevenue,
+        totalProfit: national.totalProfit,
+        totalEmployees: national.totalEmployees,
+        avgPay: weightedAvgPay(national.payWeight, national.totalEmployees),
+        regionCount: municipalities.length,
+      },
+      municipalities,
+    });
+  } catch (error) {
+    console.error('Error fetching regions:', error);
+    return c.json({ error: 'Failed to fetch regions' }, 500);
+  }
+});
+
+app.get('/regions/sectors', async (c) => {
+  try {
+    const searchParams = new URL(c.req.url).searchParams;
+    const yearValue = await resolveYear(searchParams.get('year'));
+    const limit = parsePositiveInt(searchParams.get('limit'), 8, 25);
+
+    const topRows = await db
+      .select({
+        municipality: companies.municipality,
+        rev: sql<string>`coalesce(sum(${companies.totalIncome}),0)`,
+      })
+      .from(companies)
+      .innerJoin(years, eq(companies.yearId, years.id))
+      .where(and(eq(years.yearValue, yearValue), isNotNull(companies.municipality)))
+      .groupBy(companies.municipality)
+      .orderBy(sql`coalesce(sum(${companies.totalIncome}),0) desc`)
+      .limit(limit);
+
+    const topNames = topRows.map((r) => r.municipality!).filter(Boolean);
+    if (topNames.length === 0) {
+      setHistoricalCache(c);
+      return c.json({ year: String(yearValue), sectors: [], rows: [] });
+    }
+
+    const sectorRows = await db
+      .select({
+        municipality: companies.municipality,
+        sector: companies.sector,
+        rev: sql<string>`coalesce(sum(${companies.totalIncome}),0)`,
+      })
+      .from(companies)
+      .innerJoin(years, eq(companies.yearId, years.id))
+      .where(and(eq(years.yearValue, yearValue), inArray(companies.municipality, topNames)))
+      .groupBy(companies.municipality, companies.sector);
+
+    const sectorSet = new Set<string>();
+    const byMun = new Map<string, Record<string, number>>();
+    for (const r of sectorRows) {
+      const mun = r.municipality!.trim();
+      const sector = (r.sector ?? 'Other').trim() || 'Other';
+      sectorSet.add(sector);
+      const bucket = byMun.get(mun) ?? {};
+      bucket[sector] = (bucket[sector] ?? 0) + toNumber(r.rev);
+      byMun.set(mun, bucket);
+    }
+
+    setHistoricalCache(c);
+    return c.json({
+      year: String(yearValue),
+      sectors: Array.from(sectorSet).sort(),
+      rows: topNames.map((mun) => ({ municipality: mun.trim(), bySector: byMun.get(mun.trim()) ?? {} })),
+    });
+  } catch (error) {
+    console.error('Error fetching region sectors:', error);
+    return c.json({ error: 'Failed to fetch region sectors' }, 500);
+  }
+});
+
+app.get('/regions/trends', async (c) => {
+  try {
+    const searchParams = new URL(c.req.url).searchParams;
+    const metric = parseSort(searchParams.get('metric'));
+    const limit = parsePositiveInt(searchParams.get('limit'), 6, 12);
+    const allYears = await availableYears();
+    const latest = allYears[0];
+    const metricCol =
+      metric === 'employeeCount' ? companies.employeeCount
+      : metric === 'profit' ? companies.profit
+      : metric === 'averagePay' ? companies.averagePay
+      : companies.totalIncome;
+
+    const topRows = await db
+      .select({
+        municipality: companies.municipality,
+        v: sql<string>`coalesce(sum(${metricCol}),0)`,
+      })
+      .from(companies)
+      .innerJoin(years, eq(companies.yearId, years.id))
+      .where(and(eq(years.yearValue, latest), isNotNull(companies.municipality)))
+      .groupBy(companies.municipality)
+      .orderBy(sql`coalesce(sum(${metricCol}),0) desc`)
+      .limit(limit);
+
+    const topNames = topRows.map((r) => r.municipality!).filter(Boolean);
+    if (topNames.length === 0) {
+      setHistoricalCache(c);
+      return c.json({ metric, municipalities: [], series: [] });
+    }
+
+    const rows = await db
+      .select({
+        year: years.yearValue,
+        municipality: companies.municipality,
+        v: sql<string>`coalesce(sum(${metricCol}),0)`,
+      })
+      .from(companies)
+      .innerJoin(years, eq(companies.yearId, years.id))
+      .where(inArray(companies.municipality, topNames))
+      .groupBy(years.yearValue, companies.municipality)
+      .orderBy(asc(years.yearValue));
+
+    const byYear = new Map<string, Record<string, number>>();
+    for (const r of rows) {
+      const y = String(r.year);
+      const bucket = byYear.get(y) ?? {};
+      bucket[r.municipality!.trim()] = toNumber(r.v);
+      byYear.set(y, bucket);
+    }
+
+    setHistoricalCache(c);
+    return c.json({
+      metric,
+      municipalities: topNames.map((n) => n.trim()),
+      series: Array.from(byYear.entries())
+        .sort((a, b) => Number(a[0]) - Number(b[0]))
+        .map(([year, values]) => ({ year, values })),
+    });
+  } catch (error) {
+    console.error('Error fetching region trends:', error);
+    return c.json({ error: 'Failed to fetch region trends' }, 500);
   }
 });
 

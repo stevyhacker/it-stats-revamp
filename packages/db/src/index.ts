@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
-import { and, asc, desc, eq, gte, ilike, inArray, lte, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, ilike, inArray, isNotNull, lte, or, sql } from 'drizzle-orm';
 import postgres from 'postgres';
 import * as schema from './schema';
 import 'dotenv/config';
@@ -19,4 +19,4 @@ export const db = drizzle(queryClient, { schema });
 export * from './schema';
 
 // Export common Drizzle functions as well
-export { and, asc, desc, eq, gte, ilike, inArray, lte, or, sql };
+export { and, asc, desc, eq, gte, ilike, inArray, isNotNull, lte, or, sql };
