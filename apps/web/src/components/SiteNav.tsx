@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/", label: "Dashboard" },
   { href: "/sectors", label: "Sectors" },
   { href: "/regions", label: "Regions" },
+  { href: "/movers", label: "Movers" },
 ];
 
 export function SiteNav({ showMeta = true }: { showMeta?: boolean }) {

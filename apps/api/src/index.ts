@@ -21,6 +21,7 @@ import {
 } from 'db';
 import { parseRegionTrendMetric, revenuePerEmployee, weightedAvgPay } from './regions';
 import { parseSectorMetric, profitMargin } from './sectors';
+import { CAGR_REVENUE_FLOOR, cagr, parseMoverMetric, pctChange, qualifiesYoY } from './movers';
 
 const runningInBun = typeof Bun !== 'undefined' && typeof Bun.serve === 'function';
 const historicalCache = 'public, s-maxage=86400, stale-while-revalidate=604800';
@@ -845,6 +846,167 @@ app.get('/sectors/trends', async (c) => {
   }
 });
 
+const MOVER_LIMIT = 12;
+
+// Year-over-year gainers and losers, matched by PIB across the selected year
+// and the year before it. Only companies that clear the base-year size floors
+// qualify (keeps micro-companies with huge % swings off the boards).
+app.get('/movers', async (c) => {
+  try {
+    const searchParams = new URL(c.req.url).searchParams;
+    const metric = parseMoverMetric(searchParams.get('metric'));
+    const yearValue = await resolveYear(searchParams.get('year'));
+    const allYears = await availableYears();
+    const prevYear = allYears.find((y) => y < yearValue) ?? null;
+
+    const selectCols = {
+      pib: companies.pib,
+      name: companies.name,
+      totalIncome: companies.totalIncome,
+      profit: companies.profit,
+      employeeCount: companies.employeeCount,
+      averagePay: companies.averagePay,
+    };
+    const rowsForYear = (yv: number) =>
+      db
+        .select(selectCols)
+        .from(companies)
+        .innerJoin(years, eq(companies.yearId, years.id))
+        .where(eq(years.yearValue, yv));
+
+    if (prevYear == null) {
+      setHistoricalCache(c);
+      return c.json({ metric, year: String(yearValue), prevYear: null, tracked: 0, gainers: [], losers: [] });
+    }
+
+    const [curRows, prevRows] = await Promise.all([rowsForYear(yearValue), rowsForYear(prevYear)]);
+    const prevByPib = new Map(prevRows.map((r) => [r.pib, r]));
+
+    type Row = (typeof curRows)[number];
+    const metricValue = (r: Row) =>
+      metric === 'profit'
+        ? toNumber(r.profit)
+        : metric === 'employees'
+          ? toNumber(r.employeeCount)
+          : metric === 'pay'
+            ? toNumber(r.averagePay)
+            : toNumber(r.totalIncome);
+
+    let tracked = 0;
+    const movers: {
+      pib: string;
+      name: string;
+      current: number;
+      previous: number;
+      delta: number;
+      pctChange: number | null;
+    }[] = [];
+    for (const cur of curRows) {
+      const prev = prevByPib.get(cur.pib);
+      if (!prev) continue;
+      tracked += 1;
+      if (!qualifiesYoY(toNumber(prev.totalIncome), toNumber(prev.employeeCount))) continue;
+      const current = metricValue(cur);
+      const previous = metricValue(prev);
+      movers.push({
+        pib: cur.pib,
+        name: cur.name,
+        current,
+        previous,
+        delta: current - previous,
+        pctChange: pctChange(current, previous),
+      });
+    }
+
+    const gainers = movers
+      .filter((m) => m.delta > 0)
+      .sort((a, b) => b.delta - a.delta)
+      .slice(0, MOVER_LIMIT);
+    const losers = movers
+      .filter((m) => m.delta < 0)
+      .sort((a, b) => a.delta - b.delta)
+      .slice(0, MOVER_LIMIT);
+
+    setHistoricalCache(c);
+    return c.json({ metric, year: String(yearValue), prevYear: String(prevYear), tracked, gainers, losers });
+  } catch (error) {
+    console.error('Error fetching movers:', error);
+    return c.json({ error: 'Failed to fetch movers' }, 500);
+  }
+});
+
+// Fastest-growing companies by revenue CAGR over their full observed span
+// (first year they appear -> latest). Revenue only, since CAGR needs positive
+// endpoints; gated by a first-year revenue floor and a >= 2-year span.
+app.get('/movers/cagr', async (c) => {
+  try {
+    const searchParams = new URL(c.req.url).searchParams;
+    const limit = parsePositiveInt(searchParams.get('limit'), 15, 50);
+    const allYears = await availableYears();
+    const latestYear = allYears[0];
+
+    const rows = await db
+      .select({
+        pib: companies.pib,
+        name: companies.name,
+        year: years.yearValue,
+        totalIncome: companies.totalIncome,
+      })
+      .from(companies)
+      .innerJoin(years, eq(companies.yearId, years.id))
+      .orderBy(asc(years.yearValue));
+
+    type Obs = { year: number; revenue: number; name: string };
+    const byPib = new Map<string, Obs[]>();
+    for (const r of rows) {
+      const revenue = toNumber(r.totalIncome);
+      if (revenue <= 0) continue;
+      const arr = byPib.get(r.pib) ?? [];
+      arr.push({ year: r.year, revenue, name: r.name });
+      byPib.set(r.pib, arr);
+    }
+
+    const out: {
+      pib: string;
+      name: string;
+      firstYear: number;
+      latestYear: number;
+      span: number;
+      first: number;
+      latest: number;
+      cagr: number;
+    }[] = [];
+    for (const [pib, obs] of byPib) {
+      if (obs.length < 2) continue;
+      obs.sort((a, b) => a.year - b.year);
+      const firstObs = obs[0];
+      const lastObs = obs[obs.length - 1];
+      const span = lastObs.year - firstObs.year;
+      if (span < 2) continue;
+      if (firstObs.revenue < CAGR_REVENUE_FLOOR) continue;
+      const growth = cagr(firstObs.revenue, lastObs.revenue, span);
+      if (growth == null) continue;
+      out.push({
+        pib,
+        name: lastObs.name,
+        firstYear: firstObs.year,
+        latestYear: lastObs.year,
+        span,
+        first: firstObs.revenue,
+        latest: lastObs.revenue,
+        cagr: growth,
+      });
+    }
+    out.sort((a, b) => b.cagr - a.cagr);
+
+    setHistoricalCache(c);
+    return c.json({ latestYear: String(latestYear), rows: out.slice(0, limit) });
+  } catch (error) {
+    console.error('Error fetching movers CAGR:', error);
+    return c.json({ error: 'Failed to fetch movers CAGR' }, 500);
+  }
+});
+
 app.get('/export.csv', async (c) => {
   try {
     const result = await fetchCompaniesForExport(new URL(c.req.url).searchParams);
@@ -917,6 +1079,8 @@ app.get('/', (c) => {
       '/sectors',
       '/sectors/activities',
       '/sectors/trends',
+      '/movers',
+      '/movers/cagr',
       '/export.csv',
       '/years',
     ],

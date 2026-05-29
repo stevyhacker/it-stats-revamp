@@ -267,3 +267,54 @@ export function buildSectorParams(opts: {
   appendDefined(params, "limit", opts.limit);
   return params;
 }
+
+export type MoverMetric = "revenue" | "profit" | "employees" | "pay";
+
+export const MOVER_METRICS: { key: MoverMetric; label: string }[] = [
+  { key: "revenue", label: "Revenue" },
+  { key: "profit", label: "Profit" },
+  { key: "employees", label: "Employees" },
+  { key: "pay", label: "Avg pay" },
+];
+
+export interface MoverRow {
+  pib: string;
+  name: string;
+  current: number;
+  previous: number;
+  delta: number;
+  pctChange: number | null;
+}
+
+export interface MoversResponse {
+  metric: MoverMetric;
+  year: string;
+  prevYear: string | null;
+  tracked: number;
+  gainers: MoverRow[];
+  losers: MoverRow[];
+}
+
+export interface CagrRow {
+  pib: string;
+  name: string;
+  firstYear: number;
+  latestYear: number;
+  span: number;
+  first: number;
+  latest: number;
+  cagr: number;
+}
+
+export interface CagrResponse {
+  latestYear: string;
+  rows: CagrRow[];
+}
+
+export function buildMoverParams(opts: { year?: string; metric?: MoverMetric; limit?: number }) {
+  const params = new URLSearchParams();
+  appendDefined(params, "year", opts.year);
+  appendDefined(params, "metric", opts.metric);
+  appendDefined(params, "limit", opts.limit);
+  return params;
+}
