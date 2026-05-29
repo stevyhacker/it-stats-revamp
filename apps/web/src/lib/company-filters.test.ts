@@ -135,5 +135,15 @@ describe("company filters", () => {
       '"MINMEDIA" DRUŠTVO ZA MARKETING I POSLOVNE USLUGE,D.O.O. - BUDVA',
     );
     expect(normalizeCompanyName('"AC & SONS" D.O.O. D.O.O., PODGORICA')).toBe('"AC & SONS" D.O.O., PODGORICA');
+    expect(normalizeCompanyName('"AGROLIFE" DRUŠTVO OGRANIČENE ODGOVORNOSTI PODGORICA')).toBe(
+      '"AGROLIFE" D.O.O. PODGORICA',
+    );
+    expect(normalizeCompanyName('D.O.O. "REMONTNI CENTAR HN" D.O.O. HERCEG NOVI')).toBe(
+      '"REMONTNI CENTAR HN" D.O.O. HERCEG NOVI',
+    );
+    expect(normalizeCompanyName('D.O.O. OVORNUŠĆU "GAMA-KOM" PLJEVLJA')).toBe('D.O.O. "GAMA-KOM" PLJEVLJA');
+    expect(normalizeCompanyName('"ALTEC"DRUŠTVO ZA PROIZVODNJU, TRGOVINU I USLUGE D.O.O.NIKŠIĆ')).toBe(
+      '"ALTEC"DRUŠTVO ZA PROIZVODNJU, TRGOVINU I USLUGE D.O.O. NIKŠIĆ',
+    );
   });
 });

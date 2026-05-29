@@ -122,7 +122,12 @@ function normalizeLegalFormText(value: string | null) {
   return value
     .replace(/(?:DR)?DRU[ŠS]TVO\s+SA\s+OGRANI[ČC]ENOM\s+ODGOVORNO[ŠS][ĆC]U/giu, 'D.O.O.')
     .replace(/(?:DR)?DRU[ŠS]TVO\s+SA\s+OGRANI[ČC]ENOM\s+ODG\.?\b/giu, 'D.O.O.')
+    .replace(/DRU[ŠS]TVO\s+OGRANI[ČC]ENE\s+ODGOVORNOSTI/giu, 'D.O.O.')
+    .replace(/\bD\.?\s*O\.?\s*O\.?\s*OVORN\S*/giu, 'D.O.O.')
     .replace(/\bD\.?\s*O\.?\s*O\.?/giu, 'D.O.O.')
+    .replace(/D\.O\.O\.([A-ZŠĐČĆŽ])/g, 'D.O.O. $1')
+    .replace(/^D\.O\.O\.\s+(?="[^"]+"\s+D\.O\.O\.)/i, '')
+    .replace(/(^|[\s,;:-])(D\.O\.O\.)\s+(?=D\.O\.O\.(?:[\s,;:-]|$))/gi, '$1')
     .replace(/\s{2,}/g, ' ')
     .replace(/\s+([,;:])/g, '$1')
     .trim();
