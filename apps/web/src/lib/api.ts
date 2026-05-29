@@ -116,3 +116,82 @@ export function buildExportUrl(query: CompanyQuery) {
 }
 
 export type TrendResponse = YearData[];
+
+export type RegionMetric = "revenue" | "companies" | "employees" | "avgPay";
+
+export const REGION_METRICS: { key: RegionMetric; label: string }[] = [
+  { key: "revenue", label: "Revenue" },
+  { key: "companies", label: "Companies" },
+  { key: "employees", label: "Employees" },
+  { key: "avgPay", label: "Avg pay" },
+];
+
+export interface RegionRow {
+  municipality: string;
+  companyCount: number;
+  totalRevenue: number;
+  totalProfit: number;
+  totalEmployees: number;
+  avgPay: number;
+  revenuePerEmployee: number;
+}
+
+export interface RegionsResponse {
+  year: string;
+  national: {
+    companyCount: number;
+    totalRevenue: number;
+    totalProfit: number;
+    totalEmployees: number;
+    avgPay: number;
+    regionCount: number;
+  };
+  municipalities: RegionRow[];
+}
+
+export interface RegionSectorsResponse {
+  year: string;
+  sectors: string[];
+  rows: { municipality: string; bySector: Record<string, number> }[];
+}
+
+export interface RegionTrendsResponse {
+  metric: string;
+  municipalities: string[];
+  series: { year: string; values: Record<string, number> }[];
+}
+
+// Map a RegionMetric to the numeric field on RegionRow.
+export function regionMetricValue(row: RegionRow, metric: RegionMetric): number {
+  switch (metric) {
+    case "companies":
+      return row.companyCount;
+    case "employees":
+      return row.totalEmployees;
+    case "avgPay":
+      return row.avgPay;
+    default:
+      return row.totalRevenue;
+  }
+}
+
+// Map a RegionMetric to the API SortKey used by /regions/trends. The companies
+// count is not a sortable column, so the trend falls back to revenue.
+export function regionMetricToSort(metric: RegionMetric): CompanySortKey {
+  switch (metric) {
+    case "employees":
+      return "employeeCount";
+    case "avgPay":
+      return "averagePay";
+    default:
+      return "totalIncome";
+  }
+}
+
+export function buildRegionParams(opts: { year?: string; metric?: RegionMetric; limit?: number }) {
+  const params = new URLSearchParams();
+  appendDefined(params, "year", opts.year);
+  if (opts.metric) appendDefined(params, "metric", regionMetricToSort(opts.metric));
+  appendDefined(params, "limit", opts.limit);
+  return params;
+}
