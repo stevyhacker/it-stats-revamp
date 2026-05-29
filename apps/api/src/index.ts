@@ -677,7 +677,19 @@ app.get('/years', async (c) => {
 });
 
 app.get('/', (c) => {
-  return c.json({ message: 'IT Stats API', endpoints: ['/summary', '/companies', '/trends'] });
+  return c.json({
+    message: 'IT Stats API',
+    endpoints: [
+      '/summary',
+      '/companies',
+      '/trends',
+      '/regions',
+      '/regions/sectors',
+      '/regions/trends',
+      '/export.csv',
+      '/years',
+    ],
+  });
 });
 
 const appRoutes = app.basePath('/api');

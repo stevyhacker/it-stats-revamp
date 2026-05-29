@@ -18,6 +18,7 @@ COPY . .
 # Ensure dependencies are available in the package directory
 WORKDIR /app/packages/db
 RUN rm -f tsconfig.tsbuildinfo \
+    && sed -i 's/"ignoreDeprecations": "5.0"/"ignoreDeprecations": "6.0"/' tsconfig.json \
     && bun install \
     && bun run build \
     && ls -la dist
@@ -35,8 +36,6 @@ COPY --from=builder /app/packages/db/package.json ./packages/db/
 
 # Copy the node_modules from the builder stage
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
-COPY --from=builder /app/packages/db/node_modules ./packages/db/node_modules
 
 # Copy source code for API and built DB outputs
 COPY --from=builder /app/apps/api/src ./apps/api/src
