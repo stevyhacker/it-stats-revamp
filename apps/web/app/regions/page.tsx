@@ -1,7 +1,9 @@
 import { Suspense } from "react";
 import { promises as fs } from "fs";
 import path from "path";
+import { geoMercator, geoPath } from "d3-geo";
 import { RegionsView } from "@/components/regions/RegionsView";
+import type { MontenegroMapFeature } from "@/components/regions/MontenegroChoropleth";
 import {
   buildCompanyParams,
   buildRegionParams,
@@ -16,6 +18,29 @@ import {
 export const dynamic = "force-dynamic";
 
 const METRICS: RegionMetric[] = ["revenue", "companies", "employees", "avgPay"];
+const MAP_WIDTH = 640;
+const MAP_HEIGHT = 420;
+const NAME_PROP_CANDIDATES = ["shapeName", "NAME_1", "name"];
+
+type GeoJson = { type: "FeatureCollection"; features: any[] };
+
+const featureName = (feature: any): string => {
+  for (const key of NAME_PROP_CANDIDATES) {
+    if (feature.properties?.[key]) return String(feature.properties[key]);
+  }
+  return "";
+};
+
+function buildMapFeatures(geo: GeoJson): MontenegroMapFeature[] {
+  const projection = geoMercator().fitSize([MAP_WIDTH, MAP_HEIGHT], geo as never);
+  const pathForFeature = geoPath(projection);
+  return geo.features
+    .map((feature) => ({
+      name: featureName(feature),
+      path: pathForFeature(feature) ?? "",
+    }))
+    .filter((feature) => feature.name && feature.path);
+}
 
 export default async function RegionsPage({
   searchParams,
@@ -33,7 +58,7 @@ export default async function RegionsPage({
     path.join(process.cwd(), "public", "montenegro-municipalities.json"),
     "utf8",
   );
-  const geo = JSON.parse(geoRaw);
+  const mapFeatures = buildMapFeatures(JSON.parse(geoRaw));
 
   let initialData: {
     summary: SummaryResponse;
@@ -87,7 +112,7 @@ export default async function RegionsPage({
       <RegionsView
         years={initialData.summary.availableYears}
         summary={initialData.summary}
-        geo={geo}
+        mapFeatures={mapFeatures}
         initial={{
           year: initialData.year,
           metric,

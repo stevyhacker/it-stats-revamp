@@ -58,6 +58,7 @@ export function MoversView({
   const [movers, setMovers] = React.useState(initial.movers);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const didLoadInitialMovers = React.useRef(false);
   // CAGR spans the full dataset, so it never changes with year/metric.
   const cagr = initial.cagr;
 
@@ -87,6 +88,10 @@ export function MoversView({
   }, [year, summary.year]);
 
   React.useEffect(() => {
+    if (!didLoadInitialMovers.current) {
+      didLoadInitialMovers.current = true;
+      return;
+    }
     let cancelled = false;
     window.queueMicrotask(() => {
       if (cancelled) return;

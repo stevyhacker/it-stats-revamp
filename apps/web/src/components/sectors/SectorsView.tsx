@@ -74,6 +74,9 @@ export function SectorsView({
   const [loading, setLoading] = React.useState(false);
   const [activitiesLoading, setActivitiesLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const didLoadInitialSectors = React.useRef(false);
+  const didLoadInitialTrends = React.useRef(false);
+  const didLoadInitialActivities = React.useRef(false);
 
   React.useEffect(() => {
     const params = new URLSearchParams({ year, metric });
@@ -102,20 +105,19 @@ export function SectorsView({
   }, [year, summary.year]);
 
   React.useEffect(() => {
+    if (!didLoadInitialSectors.current) {
+      didLoadInitialSectors.current = true;
+      return;
+    }
     let cancelled = false;
     window.queueMicrotask(() => {
       if (cancelled) return;
       setLoading(true);
       setError(null);
     });
-    Promise.all([
-      fetchApi<SectorsResponse>("/sectors", buildSectorParams({ year })),
-      fetchApi<SectorTrendsResponse>("/sectors/trends", buildSectorParams({ metric, limit: 6 })),
-    ])
-      .then(([s, t]) => {
-        if (cancelled) return;
-        setSectors(s);
-        setTrends(t);
+    fetchApi<SectorsResponse>("/sectors", buildSectorParams({ year }))
+      .then((s) => {
+        if (!cancelled) setSectors(s);
       })
       .catch((e) => {
         if (cancelled) return;
@@ -128,11 +130,32 @@ export function SectorsView({
     return () => {
       cancelled = true;
     };
-  }, [year, metric]);
+  }, [year]);
 
   React.useEffect(() => {
+    if (!didLoadInitialTrends.current) {
+      didLoadInitialTrends.current = true;
+      return;
+    }
+    let cancelled = false;
+    fetchApi<SectorTrendsResponse>("/sectors/trends", buildSectorParams({ metric, limit: 6 }))
+      .then((t) => {
+        if (!cancelled) setTrends(t);
+      })
+      .catch((e) => {
+        if (!cancelled) console.error(e);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [metric]);
+
+  React.useEffect(() => {
+    if (!didLoadInitialActivities.current) {
+      didLoadInitialActivities.current = true;
+      return;
+    }
     if (!sector) {
-      setActivities(null);
       return;
     }
     let cancelled = false;
@@ -156,6 +179,8 @@ export function SectorsView({
   }, [year, sector]);
 
   const toggleSector = (s: string) => setSector((cur) => (cur === s ? null : s));
+  const activeActivities =
+    sector && activities?.sector === sector && activities.year === year ? activities : null;
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
@@ -228,7 +253,12 @@ export function SectorsView({
 
         <div className="mb-3">
           <Panel title="Activity drilldown">
-            <SectorActivityPanel data={activities} metric={metric} sector={sector} loading={activitiesLoading} />
+            <SectorActivityPanel
+              data={activeActivities}
+              metric={metric}
+              sector={sector}
+              loading={Boolean(sector && activitiesLoading)}
+            />
           </Panel>
         </div>
 

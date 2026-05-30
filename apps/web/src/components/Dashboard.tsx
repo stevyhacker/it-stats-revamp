@@ -118,6 +118,9 @@ export function Dashboard({
   const [selectedCompanies, setSelectedCompanies] = React.useState<string[]>([]);
   const [showFilters, setShowFilters] = React.useState(false);
   const debouncedSearch = useDebouncedValue(filters.q ?? "", 250);
+  const didLoadInitialSummary = React.useRef(false);
+  const didLoadInitialCompanies = React.useRef(false);
+  const didLoadInitialTrends = React.useRef(false);
   const effectiveFilters = React.useMemo<FiltersState>(
     () => ({
       minRevenue: filters.minRevenue,
@@ -158,6 +161,36 @@ export function Dashboard({
   }, [selectedYear, page, sortColumn, sortDirection, effectiveFilters, router]);
 
   React.useEffect(() => {
+    if (!didLoadInitialSummary.current) {
+      didLoadInitialSummary.current = true;
+      return;
+    }
+    let cancelled = false;
+    const summaryParams = buildCompanyParams({
+      year: selectedYear,
+      filters: effectiveFilters,
+    });
+
+    fetchApi<SummaryResponse>("/summary", summaryParams)
+      .then((nextSummary) => {
+        if (!cancelled) setSummary(nextSummary);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error("Failed to load dashboard summary:", error);
+        setLoadError("Could not load the selected market summary.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedYear, effectiveFilters]);
+
+  React.useEffect(() => {
+    if (!didLoadInitialCompanies.current) {
+      didLoadInitialCompanies.current = true;
+      return;
+    }
     let cancelled = false;
     const companyParams = buildCompanyParams({
       year: selectedYear,
@@ -167,19 +200,6 @@ export function Dashboard({
       dir: sortDirection,
       filters: effectiveFilters,
     });
-    const summaryParams = buildCompanyParams({
-      year: selectedYear,
-      sort: sortColumn,
-      dir: sortDirection,
-      filters: effectiveFilters,
-    });
-    const trendParams = buildCompanyParams({
-      year: selectedYear,
-      sort: chartMetricToSort(chartMetric),
-      dir: "desc",
-      filters: effectiveFilters,
-    });
-    trendParams.set("metric", chartMetricToSort(chartMetric));
 
     window.queueMicrotask(() => {
       if (cancelled) return;
@@ -187,20 +207,13 @@ export function Dashboard({
       setLoadError(null);
     });
 
-    Promise.all([
-      fetchApi<SummaryResponse>("/summary", summaryParams),
-      fetchApi<CompaniesResponse>("/companies", companyParams),
-      fetchApi<TrendResponse>("/trends", trendParams),
-    ])
-      .then(([nextSummary, nextCompanyPage, nextTrendData]) => {
-        if (cancelled) return;
-        setSummary(nextSummary);
-        setCompanyPage(nextCompanyPage);
-        setTrendData(nextTrendData);
+    fetchApi<CompaniesResponse>("/companies", companyParams)
+      .then((nextCompanyPage) => {
+        if (!cancelled) setCompanyPage(nextCompanyPage);
       })
       .catch((error) => {
         if (cancelled) return;
-        console.error("Failed to load dashboard query:", error);
+        console.error("Failed to load dashboard companies:", error);
         setLoadError("Could not load the selected company data.");
       })
       .finally(() => {
@@ -210,7 +223,36 @@ export function Dashboard({
     return () => {
       cancelled = true;
     };
-  }, [selectedYear, page, sortColumn, sortDirection, effectiveFilters, chartMetric]);
+  }, [selectedYear, page, sortColumn, sortDirection, effectiveFilters]);
+
+  React.useEffect(() => {
+    if (!didLoadInitialTrends.current) {
+      didLoadInitialTrends.current = true;
+      return;
+    }
+    let cancelled = false;
+    const trendParams = buildCompanyParams({
+      year: selectedYear,
+      sort: chartMetricToSort(chartMetric),
+      dir: "desc",
+      filters: effectiveFilters,
+    });
+    trendParams.set("metric", chartMetricToSort(chartMetric));
+
+    fetchApi<TrendResponse>("/trends", trendParams)
+      .then((nextTrendData) => {
+        if (!cancelled) setTrendData(nextTrendData);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error("Failed to load dashboard trends:", error);
+        setLoadError("Could not load the selected trend data.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedYear, effectiveFilters, chartMetric]);
 
   const filterOptions = React.useMemo(
     () => ({

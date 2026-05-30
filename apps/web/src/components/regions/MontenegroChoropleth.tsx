@@ -1,48 +1,44 @@
 "use client";
 
 import React from "react";
-import { geoMercator, geoPath } from "d3-geo";
 import numeral from "numeral";
 import { matchRegionName, prettyRegionName } from "@/lib/regions-geo";
 import { regionMetricValue, type RegionMetric, type RegionRow } from "@/lib/api";
 
-type GeoJson = { type: "FeatureCollection"; features: any[] };
-
-const NAME_PROP_CANDIDATES = ["shapeName", "NAME_1", "name"];
-const featureName = (f: any): string => {
-  for (const k of NAME_PROP_CANDIDATES) if (f.properties?.[k]) return String(f.properties[k]);
-  return "";
-};
+export type MontenegroMapFeature = { name: string; path: string };
 
 const isCurrency = (m: RegionMetric) => m === "revenue" || m === "avgPay";
 
 export function MontenegroChoropleth({
   rows,
   metric,
-  geo,
+  features,
 }: {
   rows: RegionRow[];
   metric: RegionMetric;
-  geo: GeoJson;
+  features: MontenegroMapFeature[];
 }) {
   const [hover, setHover] = React.useState<{ name: string; value: number; x: number; y: number } | null>(null);
   const W = 640;
   const H = 420;
 
-  const geoNames = geo.features.map(featureName);
-  const valueByGeoName = new Map<string, number>();
-  let matched = 0;
-  for (const r of rows) {
-    const gn = matchRegionName(r.municipality, geoNames);
-    if (gn) {
-      valueByGeoName.set(gn, regionMetricValue(r, metric));
-      matched++;
+  const geoNames = React.useMemo(() => features.map((feature) => feature.name), [features]);
+  const { valueByGeoName, matched, max } = React.useMemo(() => {
+    const values = new Map<string, number>();
+    let matchedRows = 0;
+    for (const row of rows) {
+      const geoName = matchRegionName(row.municipality, geoNames);
+      if (geoName) {
+        values.set(geoName, regionMetricValue(row, metric));
+        matchedRows++;
+      }
     }
-  }
-  const max = Math.max(1, ...Array.from(valueByGeoName.values()));
-
-  const projection = geoMercator().fitSize([W, H], geo as never);
-  const path = geoPath(projection);
+    return {
+      valueByGeoName: values,
+      matched: matchedRows,
+      max: Math.max(1, ...Array.from(values.values())),
+    };
+  }, [geoNames, metric, rows]);
   const opacity = (v: number) => 0.12 + 0.83 * Math.sqrt(v / max);
   const notOnMap = rows.length - matched;
 
@@ -54,14 +50,13 @@ export function MontenegroChoropleth({
         role="img"
         aria-label="Map of Montenegro shaded by the selected metric"
       >
-        {geo.features.map((f, i) => {
-          const name = featureName(f);
+        {features.map((feature) => {
+          const name = feature.name;
           const v = valueByGeoName.get(name) ?? 0;
-          const d = path(f) ?? undefined;
           return (
             <path
-              key={i}
-              d={d}
+              key={name}
+              d={feature.path}
               fill={v > 0 ? `hsl(var(--primary) / ${opacity(v)})` : "hsl(var(--muted))"}
               stroke="hsl(var(--card))"
               strokeWidth={0.8}

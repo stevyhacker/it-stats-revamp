@@ -21,7 +21,12 @@ import {
 } from 'db';
 import { parseRegionTrendMetric, revenuePerEmployee, weightedAvgPay } from './regions';
 import { parseSectorMetric, profitMargin } from './sectors';
-import { CAGR_REVENUE_FLOOR, cagr, parseMoverMetric, pctChange, qualifiesYoY } from './movers';
+import {
+  CAGR_REVENUE_FLOOR,
+  YOY_EMPLOYEE_FLOOR,
+  YOY_REVENUE_FLOOR,
+  parseMoverMetric,
+} from './movers';
 
 const runningInBun = typeof Bun !== 'undefined' && typeof Bun.serve === 'function';
 const historicalCache = 'public, s-maxage=86400, stale-while-revalidate=604800';
@@ -106,13 +111,16 @@ async function availableYears() {
   return rows.map((row) => row.yearValue);
 }
 
-async function resolveYear(requestedYear: string | null) {
-  const allYears = await availableYears();
+function resolveYearFromYears(requestedYear: string | null, allYears: number[]) {
   if (requestedYear) {
     const parsed = Number(requestedYear);
     if (Number.isFinite(parsed) && allYears.includes(parsed)) return parsed;
   }
   return allYears[0];
+}
+
+async function resolveYear(requestedYear: string | null) {
+  return resolveYearFromYears(requestedYear, await availableYears());
 }
 
 function buildFilterConditions(searchParams: URLSearchParams, yearValue: number) {
@@ -297,7 +305,7 @@ app.get('/summary', async (c) => {
   try {
     const searchParams = new URL(c.req.url).searchParams;
     const allYears = await availableYears();
-    const yearValue = await resolveYear(searchParams.get('year'));
+    const yearValue = resolveYearFromYears(searchParams.get('year'), allYears);
     const currentSummary = await aggregateForYear(searchParams, yearValue);
     const previousYearValue = allYears.find((availableYear) => availableYear < yearValue);
     const previousYear = previousYearValue
@@ -855,77 +863,104 @@ app.get('/movers', async (c) => {
   try {
     const searchParams = new URL(c.req.url).searchParams;
     const metric = parseMoverMetric(searchParams.get('metric'));
-    const yearValue = await resolveYear(searchParams.get('year'));
+    const limit = parsePositiveInt(searchParams.get('limit'), MOVER_LIMIT, 50);
     const allYears = await availableYears();
+    const yearValue = resolveYearFromYears(searchParams.get('year'), allYears);
     const prevYear = allYears.find((y) => y < yearValue) ?? null;
-
-    const selectCols = {
-      pib: companies.pib,
-      name: companies.name,
-      totalIncome: companies.totalIncome,
-      profit: companies.profit,
-      employeeCount: companies.employeeCount,
-      averagePay: companies.averagePay,
-    };
-    const rowsForYear = (yv: number) =>
-      db
-        .select(selectCols)
-        .from(companies)
-        .innerJoin(years, eq(companies.yearId, years.id))
-        .where(eq(years.yearValue, yv));
 
     if (prevYear == null) {
       setHistoricalCache(c);
       return c.json({ metric, year: String(yearValue), prevYear: null, tracked: 0, gainers: [], losers: [] });
     }
 
-    const [curRows, prevRows] = await Promise.all([rowsForYear(yearValue), rowsForYear(prevYear)]);
-    const prevByPib = new Map(prevRows.map((r) => [r.pib, r]));
+    const matchedSql = sql`
+      from companies cur
+      inner join years cur_year on cur.year_id = cur_year.id
+      inner join companies prev on prev.pib = cur.pib
+      inner join years prev_year on prev.year_id = prev_year.id
+      where cur_year.year_value = ${yearValue}
+        and prev_year.year_value = ${prevYear}
+    `;
+    const currentMetric = sql`
+      case ${metric}
+        when 'profit' then coalesce(cur.profit, 0)::numeric
+        when 'employees' then coalesce(cur.employee_count, 0)::numeric
+        when 'pay' then coalesce(cur.average_pay, 0)::numeric
+        else coalesce(cur.total_income, 0)::numeric
+      end
+    `;
+    const previousMetric = sql`
+      case ${metric}
+        when 'profit' then coalesce(prev.profit, 0)::numeric
+        when 'employees' then coalesce(prev.employee_count, 0)::numeric
+        when 'pay' then coalesce(prev.average_pay, 0)::numeric
+        else coalesce(prev.total_income, 0)::numeric
+      end
+    `;
 
-    type Row = (typeof curRows)[number];
-    const metricValue = (r: Row) =>
-      metric === 'profit'
-        ? toNumber(r.profit)
-        : metric === 'employees'
-          ? toNumber(r.employeeCount)
-          : metric === 'pay'
-            ? toNumber(r.averagePay)
-            : toNumber(r.totalIncome);
+    const [trackedRows, moverRows] = await Promise.all([
+      db.execute(sql`select count(*)::int as tracked ${matchedSql}`),
+      db.execute(sql`
+        with matched as (
+          select
+            cur.pib,
+            cur.name,
+            ${currentMetric} as current,
+            ${previousMetric} as previous,
+            coalesce(prev.total_income, 0)::numeric as previous_revenue,
+            coalesce(prev.employee_count, 0)::numeric as previous_employees
+          ${matchedSql}
+        ),
+        qualified as (
+          select
+            pib,
+            name,
+            current,
+            previous,
+            current - previous as delta,
+            case
+              when previous = 0 then null
+              else (current - previous) / abs(previous)
+            end as pct_change,
+            case
+              when current - previous > 0 then 'gain'
+              when current - previous < 0 then 'loss'
+              else null
+            end as side
+          from matched
+          where previous_revenue >= ${YOY_REVENUE_FLOOR}
+            and previous_employees >= ${YOY_EMPLOYEE_FLOOR}
+        ),
+        ranked as (
+          select
+            *,
+            row_number() over (
+              partition by side
+              order by
+                case when side = 'gain' then delta end desc nulls last,
+                case when side = 'loss' then delta end asc nulls last
+            ) as rank
+          from qualified
+          where side is not null
+        )
+        select pib, name, current, previous, delta, pct_change, side
+        from ranked
+        where rank <= ${limit}
+        order by side, rank
+      `),
+    ]);
 
-    let tracked = 0;
-    const movers: {
-      pib: string;
-      name: string;
-      current: number;
-      previous: number;
-      delta: number;
-      pctChange: number | null;
-    }[] = [];
-    for (const cur of curRows) {
-      const prev = prevByPib.get(cur.pib);
-      if (!prev) continue;
-      tracked += 1;
-      if (!qualifiesYoY(toNumber(prev.totalIncome), toNumber(prev.employeeCount))) continue;
-      const current = metricValue(cur);
-      const previous = metricValue(prev);
-      movers.push({
-        pib: cur.pib,
-        name: cur.name,
-        current,
-        previous,
-        delta: current - previous,
-        pctChange: pctChange(current, previous),
-      });
-    }
-
-    const gainers = movers
-      .filter((m) => m.delta > 0)
-      .sort((a, b) => b.delta - a.delta)
-      .slice(0, MOVER_LIMIT);
-    const losers = movers
-      .filter((m) => m.delta < 0)
-      .sort((a, b) => a.delta - b.delta)
-      .slice(0, MOVER_LIMIT);
+    const tracked = Number((trackedRows as any[])[0]?.tracked ?? 0);
+    const toMover = (row: any) => ({
+      pib: String(row.pib),
+      name: String(row.name),
+      current: toNumber(row.current),
+      previous: toNumber(row.previous),
+      delta: toNumber(row.delta),
+      pctChange: row.pct_change == null ? null : toNumber(row.pct_change),
+    });
+    const gainers = (moverRows as any[]).filter((row) => row.side === 'gain').map(toMover);
+    const losers = (moverRows as any[]).filter((row) => row.side === 'loss').map(toMover);
 
     setHistoricalCache(c);
     return c.json({ metric, year: String(yearValue), prevYear: String(prevYear), tracked, gainers, losers });
@@ -945,62 +980,54 @@ app.get('/movers/cagr', async (c) => {
     const allYears = await availableYears();
     const latestYear = allYears[0];
 
-    const rows = await db
-      .select({
-        pib: companies.pib,
-        name: companies.name,
-        year: years.yearValue,
-        totalIncome: companies.totalIncome,
-      })
-      .from(companies)
-      .innerJoin(years, eq(companies.yearId, years.id))
-      .orderBy(asc(years.yearValue));
+    const rows = await db.execute(sql`
+      with endpoint_years as (
+        select
+          c.pib,
+          min(y.year_value) as first_year,
+          max(y.year_value) as latest_year
+        from companies c
+        inner join years y on y.id = c.year_id
+        where c.total_income > 0
+        group by c.pib
+      )
+      select
+        latest.pib,
+        latest.name,
+        endpoint_years.first_year,
+        endpoint_years.latest_year,
+        endpoint_years.latest_year - endpoint_years.first_year as span,
+        first.total_income::numeric as first,
+        latest.total_income::numeric as latest,
+        power(latest.total_income::numeric / first.total_income::numeric, 1.0 / (endpoint_years.latest_year - endpoint_years.first_year)) - 1 as cagr
+      from endpoint_years
+      inner join years first_year on first_year.year_value = endpoint_years.first_year
+      inner join years latest_year on latest_year.year_value = endpoint_years.latest_year
+      inner join companies first
+        on first.pib = endpoint_years.pib
+        and first.year_id = first_year.id
+      inner join companies latest
+        on latest.pib = endpoint_years.pib
+        and latest.year_id = latest_year.id
+      where endpoint_years.latest_year - endpoint_years.first_year >= 2
+        and first.total_income >= ${CAGR_REVENUE_FLOOR}
+      order by cagr desc
+      limit ${limit}
+    `);
 
-    type Obs = { year: number; revenue: number; name: string };
-    const byPib = new Map<string, Obs[]>();
-    for (const r of rows) {
-      const revenue = toNumber(r.totalIncome);
-      if (revenue <= 0) continue;
-      const arr = byPib.get(r.pib) ?? [];
-      arr.push({ year: r.year, revenue, name: r.name });
-      byPib.set(r.pib, arr);
-    }
-
-    const out: {
-      pib: string;
-      name: string;
-      firstYear: number;
-      latestYear: number;
-      span: number;
-      first: number;
-      latest: number;
-      cagr: number;
-    }[] = [];
-    for (const [pib, obs] of byPib) {
-      if (obs.length < 2) continue;
-      obs.sort((a, b) => a.year - b.year);
-      const firstObs = obs[0];
-      const lastObs = obs[obs.length - 1];
-      const span = lastObs.year - firstObs.year;
-      if (span < 2) continue;
-      if (firstObs.revenue < CAGR_REVENUE_FLOOR) continue;
-      const growth = cagr(firstObs.revenue, lastObs.revenue, span);
-      if (growth == null) continue;
-      out.push({
-        pib,
-        name: lastObs.name,
-        firstYear: firstObs.year,
-        latestYear: lastObs.year,
-        span,
-        first: firstObs.revenue,
-        latest: lastObs.revenue,
-        cagr: growth,
-      });
-    }
-    out.sort((a, b) => b.cagr - a.cagr);
+    const out = (rows as any[]).map((row) => ({
+      pib: String(row.pib),
+      name: String(row.name),
+      firstYear: toNumber(row.first_year),
+      latestYear: toNumber(row.latest_year),
+      span: toNumber(row.span),
+      first: toNumber(row.first),
+      latest: toNumber(row.latest),
+      cagr: toNumber(row.cagr),
+    }));
 
     setHistoricalCache(c);
-    return c.json({ latestYear: String(latestYear), rows: out.slice(0, limit) });
+    return c.json({ latestYear: String(latestYear), rows: out });
   } catch (error) {
     console.error('Error fetching movers CAGR:', error);
     return c.json({ error: 'Failed to fetch movers CAGR' }, 500);

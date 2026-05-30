@@ -29,7 +29,7 @@ import { RegionAvgPayChart } from "./RegionAvgPayChart";
 import { RegionBubbleChart } from "./RegionBubbleChart";
 import { RegionSectorMix } from "./RegionSectorMix";
 import { RegionTrendLines } from "./RegionTrendLines";
-import { MontenegroChoropleth } from "./MontenegroChoropleth";
+import { MontenegroChoropleth, type MontenegroMapFeature } from "./MontenegroChoropleth";
 
 const METRIC_LABEL: Record<RegionMetric, string> = {
   revenue: "Revenue",
@@ -52,12 +52,12 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 export function RegionsView({
   years,
   summary: initialSummary,
-  geo,
+  mapFeatures,
   initial,
 }: {
   years: string[];
   summary: SummaryResponse;
-  geo: { type: "FeatureCollection"; features: unknown[] };
+  mapFeatures: MontenegroMapFeature[];
   initial: {
     year: string;
     metric: RegionMetric;
@@ -75,6 +75,8 @@ export function RegionsView({
   const [trends, setTrends] = React.useState(initial.trends);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const didLoadInitialRegions = React.useRef(false);
+  const didLoadInitialTrends = React.useRef(false);
 
   React.useEffect(() => {
     const params = new URLSearchParams({ year, metric });
@@ -102,6 +104,10 @@ export function RegionsView({
   }, [year, summary.year]);
 
   React.useEffect(() => {
+    if (!didLoadInitialRegions.current) {
+      didLoadInitialRegions.current = true;
+      return;
+    }
     let cancelled = false;
     window.queueMicrotask(() => {
       if (cancelled) return;
@@ -111,13 +117,11 @@ export function RegionsView({
     Promise.all([
       fetchApi<RegionsResponse>("/regions", buildRegionParams({ year })),
       fetchApi<RegionSectorsResponse>("/regions/sectors", buildRegionParams({ year, limit: 8 })),
-      fetchApi<RegionTrendsResponse>("/regions/trends", buildRegionParams({ metric, limit: 6 })),
     ])
-      .then(([r, s, t]) => {
+      .then(([r, s]) => {
         if (cancelled) return;
         setRegions(r);
         setSectors(s);
-        setTrends(t);
       })
       .catch((e) => {
         if (cancelled) return;
@@ -130,7 +134,25 @@ export function RegionsView({
     return () => {
       cancelled = true;
     };
-  }, [year, metric]);
+  }, [year]);
+
+  React.useEffect(() => {
+    if (!didLoadInitialTrends.current) {
+      didLoadInitialTrends.current = true;
+      return;
+    }
+    let cancelled = false;
+    fetchApi<RegionTrendsResponse>("/regions/trends", buildRegionParams({ metric, limit: 6 }))
+      .then((t) => {
+        if (!cancelled) setTrends(t);
+      })
+      .catch((e) => {
+        if (!cancelled) console.error(e);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [metric]);
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
@@ -188,7 +210,7 @@ export function RegionsView({
 
         <div className="mb-3 grid gap-3 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           <Panel title={`Map · ${METRIC_LABEL[metric]}`}>
-            <MontenegroChoropleth rows={regions.municipalities} metric={metric} geo={geo} />
+            <MontenegroChoropleth rows={regions.municipalities} metric={metric} features={mapFeatures} />
           </Panel>
           <Panel title={`Top regions · ${METRIC_LABEL[metric]}`}>
             <RegionRankBars rows={regions.municipalities} metric={metric} />
