@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  buildCompanyParams,
   buildMoverParams,
   fetchApi,
   MOVER_METRICS,
@@ -38,7 +39,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 
 export function MoversView({
   years,
-  summary,
+  summary: initialSummary,
   initial,
 }: {
   years: string[];
@@ -53,6 +54,7 @@ export function MoversView({
   const router = useRouter();
   const [year, setYear] = React.useState(initial.year);
   const [metric, setMetric] = React.useState<MoverMetric>(initial.metric);
+  const [summary, setSummary] = React.useState(initialSummary);
   const [movers, setMovers] = React.useState(initial.movers);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -66,6 +68,23 @@ export function MoversView({
       router.replace(next, { scroll: false });
     }
   }, [year, metric, router]);
+
+  // Keep the header summary in sync with the selected year. The initial summary
+  // already matches initial.year, so this only fires once the year actually changes.
+  React.useEffect(() => {
+    if (summary.year === year) return;
+    let cancelled = false;
+    fetchApi<SummaryResponse>("/summary", buildCompanyParams({ year }))
+      .then((s) => {
+        if (!cancelled) setSummary(s);
+      })
+      .catch((e) => {
+        if (!cancelled) console.error(e);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [year, summary.year]);
 
   React.useEffect(() => {
     let cancelled = false;

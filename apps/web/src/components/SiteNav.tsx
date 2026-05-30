@@ -22,11 +22,11 @@ export function SiteNav({ showMeta = true }: { showMeta?: boolean }) {
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border/80 bg-card text-primary shadow-sm">
             <span className="font-display text-xl font-bold leading-none">M</span>
           </span>
-          <span className="block truncate font-display text-2xl font-bold leading-none text-foreground">
+          <span className="hidden truncate font-display text-2xl font-bold leading-none text-foreground sm:block">
             MNEStats.me
           </span>
         </Link>
-        <div className="ml-1 hidden items-center gap-1 sm:flex">
+        <div className="ml-1 flex min-w-0 items-center gap-1 overflow-x-auto">
           {LINKS.map((link) => {
             const active =
               link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
@@ -35,7 +35,7 @@ export function SiteNav({ showMeta = true }: { showMeta?: boolean }) {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                  "shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                   active
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",

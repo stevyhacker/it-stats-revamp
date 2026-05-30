@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  buildCompanyParams,
   buildRegionParams,
   fetchApi,
   REGION_METRICS,
@@ -50,7 +51,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 
 export function RegionsView({
   years,
-  summary,
+  summary: initialSummary,
   geo,
   initial,
 }: {
@@ -68,6 +69,7 @@ export function RegionsView({
   const router = useRouter();
   const [year, setYear] = React.useState(initial.year);
   const [metric, setMetric] = React.useState<RegionMetric>(initial.metric);
+  const [summary, setSummary] = React.useState(initialSummary);
   const [regions, setRegions] = React.useState(initial.regions);
   const [sectors, setSectors] = React.useState(initial.sectors);
   const [trends, setTrends] = React.useState(initial.trends);
@@ -81,6 +83,23 @@ export function RegionsView({
       router.replace(next, { scroll: false });
     }
   }, [year, metric, router]);
+
+  // Keep the header summary in sync with the selected year. The initial summary
+  // already matches initial.year, so this only fires once the year actually changes.
+  React.useEffect(() => {
+    if (summary.year === year) return;
+    let cancelled = false;
+    fetchApi<SummaryResponse>("/summary", buildCompanyParams({ year }))
+      .then((s) => {
+        if (!cancelled) setSummary(s);
+      })
+      .catch((e) => {
+        if (!cancelled) console.error(e);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [year, summary.year]);
 
   React.useEffect(() => {
     let cancelled = false;

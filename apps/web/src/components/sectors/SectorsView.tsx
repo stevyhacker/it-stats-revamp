@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  buildCompanyParams,
   buildSectorParams,
   fetchApi,
   SECTOR_METRICS,
@@ -48,7 +49,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 
 export function SectorsView({
   years,
-  summary,
+  summary: initialSummary,
   initial,
 }: {
   years: string[];
@@ -66,6 +67,7 @@ export function SectorsView({
   const [year, setYear] = React.useState(initial.year);
   const [metric, setMetric] = React.useState<SectorMetric>(initial.metric);
   const [sector, setSector] = React.useState<string | null>(initial.sector);
+  const [summary, setSummary] = React.useState(initialSummary);
   const [sectors, setSectors] = React.useState(initial.sectors);
   const [trends, setTrends] = React.useState(initial.trends);
   const [activities, setActivities] = React.useState(initial.activities);
@@ -81,6 +83,23 @@ export function SectorsView({
       router.replace(next, { scroll: false });
     }
   }, [year, metric, sector, router]);
+
+  // Keep the header summary in sync with the selected year. The initial summary
+  // already matches initial.year, so this only fires once the year actually changes.
+  React.useEffect(() => {
+    if (summary.year === year) return;
+    let cancelled = false;
+    fetchApi<SummaryResponse>("/summary", buildCompanyParams({ year }))
+      .then((s) => {
+        if (!cancelled) setSummary(s);
+      })
+      .catch((e) => {
+        if (!cancelled) console.error(e);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [year, summary.year]);
 
   React.useEffect(() => {
     let cancelled = false;
