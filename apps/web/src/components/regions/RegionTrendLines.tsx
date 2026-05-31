@@ -19,7 +19,7 @@ const COLORS = [
   "hsl(var(--chart-3))",
   "hsl(var(--chart-4))",
   "hsl(var(--chart-5))",
-  "hsl(var(--primary))",
+  "hsl(var(--chart-6))",
 ];
 
 type TrendMetric = "revenue" | "companies" | "employees" | "avgPay" | "profit";
