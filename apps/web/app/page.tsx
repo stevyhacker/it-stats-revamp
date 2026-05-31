@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { Dashboard } from "../src/components/Dashboard";
 import {
   buildCompanyParams,
-  fetchApi,
   type CompaniesResponse,
   type CompanySortKey,
   type SummaryResponse,
@@ -10,8 +9,7 @@ import {
   type TrendResponse,
 } from "@/lib/api";
 import type { CompanyFiltersState } from "@/lib/company-filters";
-
-export const dynamic = "force-dynamic";
+import { fetchCachedApi } from "@/lib/server-api";
 
 type DashboardSearchParams = { [key: string]: string | string[] | undefined };
 
@@ -58,11 +56,7 @@ function hasFilters(filters: CompanyFiltersState) {
 }
 
 async function loadInitialDashboard(searchParams: DashboardSearchParams) {
-  const base = await fetchApi<SummaryResponse>(
-    "/summary",
-    undefined,
-    { next: { revalidate: 300 } },
-  );
+  const base = await fetchCachedApi<SummaryResponse>("/summary");
   const requestedYear = str(searchParams, "year");
   const initialYear =
     requestedYear && base.availableYears.includes(requestedYear)
@@ -75,10 +69,9 @@ async function loadInitialDashboard(searchParams: DashboardSearchParams) {
   const summary =
     initialYear === base.year && !hasFilters(filters)
       ? base
-      : await fetchApi<SummaryResponse>(
+      : await fetchCachedApi<SummaryResponse>(
           "/summary",
           buildCompanyParams({ year: initialYear, filters }),
-          { next: { revalidate: 300 } },
         );
   const trendParams = buildCompanyParams({
     year: initialYear,
@@ -89,7 +82,7 @@ async function loadInitialDashboard(searchParams: DashboardSearchParams) {
   trendParams.set("metric", "totalIncome");
 
   const [companies, trends] = await Promise.all([
-    fetchApi<CompaniesResponse>(
+    fetchCachedApi<CompaniesResponse>(
       "/companies",
       buildCompanyParams({
         year: initialYear,
@@ -99,9 +92,8 @@ async function loadInitialDashboard(searchParams: DashboardSearchParams) {
         dir,
         filters,
       }),
-      { next: { revalidate: 300 } },
     ),
-    fetchApi<TrendResponse>("/trends", trendParams, { next: { revalidate: 300 } }),
+    fetchCachedApi<TrendResponse>("/trends", trendParams),
   ]);
 
   return { summary, companies, trends };

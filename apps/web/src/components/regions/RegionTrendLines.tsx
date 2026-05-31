@@ -63,7 +63,11 @@ function formatTrendValue(value: number, metric: TrendMetric, compactAxis = fals
 
 export function RegionTrendLines({ data }: { data: RegionTrendsResponse }) {
   const chart = data.series.map((s) => ({ year: Number(s.year), ...s.values }));
-  const names = data.municipalities.slice(0, 6);
+  const latestValues = data.series[data.series.length - 1]?.values ?? {};
+  const names = data.municipalities
+    .slice()
+    .sort((a, b) => (latestValues[b] ?? 0) - (latestValues[a] ?? 0))
+    .slice(0, 6);
   const metric = normalizeTrendMetric(data.metric);
 
   return (

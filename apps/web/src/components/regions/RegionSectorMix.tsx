@@ -14,7 +14,16 @@ const COLORS = [
 ];
 
 export function RegionSectorMix({ data }: { data: RegionSectorsResponse }) {
-  const sectors = data.sectors.slice(0, 6);
+  const sectorTotals = new Map(
+    data.sectors.map((sector) => [
+      sector,
+      data.rows.reduce((sum, row) => sum + (row.bySector[sector] ?? 0), 0),
+    ]),
+  );
+  const sectors = data.sectors
+    .slice()
+    .sort((a, b) => (sectorTotals.get(b) ?? 0) - (sectorTotals.get(a) ?? 0))
+    .slice(0, 6);
   const chart = data.rows.map((r) => ({
     name: r.municipality,
     ...Object.fromEntries(sectors.map((s) => [s, r.bySector[s] ?? 0])),

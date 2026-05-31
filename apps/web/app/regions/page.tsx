@@ -7,15 +7,13 @@ import type { MontenegroMapFeature } from "@/components/regions/MontenegroChorop
 import {
   buildCompanyParams,
   buildRegionParams,
-  fetchApi,
   type RegionMetric,
   type RegionsResponse,
   type RegionSectorsResponse,
   type RegionTrendsResponse,
   type SummaryResponse,
 } from "@/lib/api";
-
-export const dynamic = "force-dynamic";
+import { fetchCachedApi } from "@/lib/server-api";
 
 const METRICS: RegionMetric[] = ["revenue", "companies", "employees", "avgPay"];
 const MAP_WIDTH = 640;
@@ -69,9 +67,7 @@ export default async function RegionsPage({
   };
 
   try {
-    const summaryBase = await fetchApi<SummaryResponse>("/summary", undefined, {
-      next: { revalidate: 300 },
-    });
+    const summaryBase = await fetchCachedApi<SummaryResponse>("/summary");
     const year =
       requestedYear && summaryBase.availableYears.includes(requestedYear)
         ? requestedYear
@@ -79,22 +75,15 @@ export default async function RegionsPage({
     const summary =
       year === summaryBase.year
         ? summaryBase
-        : await fetchApi<SummaryResponse>(
+        : await fetchCachedApi<SummaryResponse>(
             "/summary",
             buildCompanyParams({ year, sort: "totalIncome", dir: "desc" }),
-            { next: { revalidate: 300 } },
           );
 
     const [regions, sectors, trends] = await Promise.all([
-      fetchApi<RegionsResponse>("/regions", buildRegionParams({ year }), {
-        next: { revalidate: 300 },
-      }),
-      fetchApi<RegionSectorsResponse>("/regions/sectors", buildRegionParams({ year, limit: 8 }), {
-        next: { revalidate: 300 },
-      }),
-      fetchApi<RegionTrendsResponse>("/regions/trends", buildRegionParams({ metric, limit: 6 }), {
-        next: { revalidate: 300 },
-      }),
+      fetchCachedApi<RegionsResponse>("/regions", buildRegionParams({ year })),
+      fetchCachedApi<RegionSectorsResponse>("/regions/sectors", buildRegionParams({ year, limit: 8 })),
+      fetchCachedApi<RegionTrendsResponse>("/regions/trends", buildRegionParams({ metric, limit: 6 })),
     ]);
 
     initialData = { summary, year, regions, sectors, trends };

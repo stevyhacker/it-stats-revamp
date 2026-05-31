@@ -1,8 +1,6 @@
 import { CompanyPage } from "@/components/CompanyPage";
-import { fetchApi } from "@/lib/api";
+import { fetchCachedApi } from "@/lib/server-api";
 import type { CompanyData } from "@/types";
-
-export const dynamic = "force-dynamic";
 
 export default async function Page({
   params,
@@ -11,10 +9,8 @@ export default async function Page({
 }) {
   const { companyName } = await params;
   const companyPib = decodeURIComponent(companyName);
-  const history = await fetchApi<CompanyData[]>(
+  const history = await fetchCachedApi<CompanyData[]>(
     `/companies/${encodeURIComponent(companyPib)}`,
-    undefined,
-    { next: { revalidate: 300 } },
   ).catch((error) => {
     console.error(`Failed to load company ${companyPib}:`, error);
     return [];

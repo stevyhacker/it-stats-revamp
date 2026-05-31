@@ -3,14 +3,12 @@ import { MoversView } from "@/components/movers/MoversView";
 import {
   buildCompanyParams,
   buildMoverParams,
-  fetchApi,
   type CagrResponse,
   type MoverMetric,
   type MoversResponse,
   type SummaryResponse,
 } from "@/lib/api";
-
-export const dynamic = "force-dynamic";
+import { fetchCachedApi } from "@/lib/server-api";
 
 const METRICS: MoverMetric[] = ["revenue", "profit", "employees", "pay"];
 
@@ -34,9 +32,7 @@ export default async function MoversPage({
   };
 
   try {
-    const summaryBase = await fetchApi<SummaryResponse>("/summary", undefined, {
-      next: { revalidate: 300 },
-    });
+    const summaryBase = await fetchCachedApi<SummaryResponse>("/summary");
     const year =
       requestedYear && summaryBase.availableYears.includes(requestedYear)
         ? requestedYear
@@ -44,19 +40,14 @@ export default async function MoversPage({
     const summary =
       year === summaryBase.year
         ? summaryBase
-        : await fetchApi<SummaryResponse>(
+        : await fetchCachedApi<SummaryResponse>(
             "/summary",
             buildCompanyParams({ year, sort: "totalIncome", dir: "desc" }),
-            { next: { revalidate: 300 } },
           );
 
     const [movers, cagr] = await Promise.all([
-      fetchApi<MoversResponse>("/movers", buildMoverParams({ year, metric }), {
-        next: { revalidate: 300 },
-      }),
-      fetchApi<CagrResponse>("/movers/cagr", buildMoverParams({ limit: 15 }), {
-        next: { revalidate: 300 },
-      }),
+      fetchCachedApi<MoversResponse>("/movers", buildMoverParams({ year, metric })),
+      fetchCachedApi<CagrResponse>("/movers/cagr", buildMoverParams({ limit: 15 })),
     ]);
 
     initialData = { summary, year, movers, cagr };

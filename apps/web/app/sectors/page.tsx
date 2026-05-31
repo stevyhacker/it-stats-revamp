@@ -3,15 +3,13 @@ import { SectorsView } from "@/components/sectors/SectorsView";
 import {
   buildCompanyParams,
   buildSectorParams,
-  fetchApi,
   type SectorActivitiesResponse,
   type SectorMetric,
   type SectorsResponse,
   type SectorTrendsResponse,
   type SummaryResponse,
 } from "@/lib/api";
-
-export const dynamic = "force-dynamic";
+import { fetchCachedApi } from "@/lib/server-api";
 
 const METRICS: SectorMetric[] = ["revenue", "employees", "avgPay", "margin"];
 
@@ -37,9 +35,7 @@ export default async function SectorsPage({
   };
 
   try {
-    const summaryBase = await fetchApi<SummaryResponse>("/summary", undefined, {
-      next: { revalidate: 300 },
-    });
+    const summaryBase = await fetchCachedApi<SummaryResponse>("/summary");
     const year =
       requestedYear && summaryBase.availableYears.includes(requestedYear)
         ? requestedYear
@@ -47,23 +43,16 @@ export default async function SectorsPage({
     const summary =
       year === summaryBase.year
         ? summaryBase
-        : await fetchApi<SummaryResponse>(
+        : await fetchCachedApi<SummaryResponse>(
             "/summary",
             buildCompanyParams({ year, sort: "totalIncome", dir: "desc" }),
-            { next: { revalidate: 300 } },
           );
 
     const [sectors, trends, activities] = await Promise.all([
-      fetchApi<SectorsResponse>("/sectors", buildSectorParams({ year }), {
-        next: { revalidate: 300 },
-      }),
-      fetchApi<SectorTrendsResponse>("/sectors/trends", buildSectorParams({ metric, limit: 6 }), {
-        next: { revalidate: 300 },
-      }),
+      fetchCachedApi<SectorsResponse>("/sectors", buildSectorParams({ year })),
+      fetchCachedApi<SectorTrendsResponse>("/sectors/trends", buildSectorParams({ metric, limit: 6 })),
       sector
-        ? fetchApi<SectorActivitiesResponse>("/sectors/activities", buildSectorParams({ year, sector }), {
-            next: { revalidate: 300 },
-          })
+        ? fetchCachedApi<SectorActivitiesResponse>("/sectors/activities", buildSectorParams({ year, sector }))
         : Promise.resolve(null),
     ]);
 
