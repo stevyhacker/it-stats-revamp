@@ -9,7 +9,7 @@
     "full-import": "bun run setup && bun run import"
   },
   "dependencies": {
-    "pg": "^8.11.3",
-    "@types/pg": "^8.10.7"
+    "@types/pg": "^8.20.0",
+    "pg": "^8.21.0"
   }
-} 
+}
