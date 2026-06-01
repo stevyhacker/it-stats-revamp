@@ -9,7 +9,6 @@
     "start": "NODE_ENV=production bun run src/index.ts",
     "start:dev": "bun run src/index.ts",
     "lint": "echo 'API linting not configured yet'",
-    "deploy:railway": "railway up --service it-stats-api"
   },
   "dependencies": {
     "@hono/node-server": "^2.0.0",

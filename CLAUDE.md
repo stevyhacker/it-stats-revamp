@@ -129,7 +129,7 @@ Aggregation math is split into per-domain modules, each unit-tested: region math
 - **packages/db/.env**: `DATABASE_URL` — used by Drizzle tooling/seed and by the db package when run from that directory
 - **apps/api/.env**: `DATABASE_URL` — loaded by Bun from the API's working directory at runtime, so this is the connection the running API server actually uses
 
-Both files point at a hosted PostgreSQL instance (e.g. Supabase/Railway); keep them in sync if you want the API and the migration tooling to target the same database.
+Both files point at a hosted PostgreSQL instance; keep them in sync if you want the API and the migration tooling to target the same database.
 
 ### Development Workflow
 1. Clone repository and run `bun install`

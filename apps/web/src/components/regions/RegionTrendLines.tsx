@@ -84,6 +84,7 @@ export function RegionTrendLines({ data }: { data: RegionTrendsResponse }) {
             tickFormatter={(v) => formatTrendValue(Number(v), metric, true)}
           />
           <Tooltip
+            itemSorter={(item) => -(Number(item.value) || 0)}
             formatter={(v: number, n: string) => [formatTrendValue(Number(v), metric), n]}
             contentStyle={{
               backgroundColor: "hsl(var(--popover))",
@@ -92,7 +93,10 @@ export function RegionTrendLines({ data }: { data: RegionTrendsResponse }) {
               color: "hsl(var(--popover-foreground))",
             }}
           />
-          <Legend wrapperStyle={{ fontSize: 10, fontFamily: "var(--font-mono)", paddingTop: 12 }} />
+          <Legend
+            wrapperStyle={{ fontSize: 10, fontFamily: "var(--font-mono)", paddingTop: 12 }}
+            itemSorter={(item) => names.indexOf(String(item.value))}
+          />
           {names.map((n, i) => (
             <Line
               key={n}
