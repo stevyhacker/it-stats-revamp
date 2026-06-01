@@ -9,14 +9,14 @@ ITStats.me is a comprehensive dashboard for analyzing Montenegrin tech companies
 ## Architecture
 
 ### Monorepo Structure
-- **apps/web/**: Next.js 15 frontend with TypeScript, Tailwind CSS, and Recharts for data visualization
-- **apps/api/**: Hono API server running on Bun with Clerk authentication
+- **apps/web/**: Next.js 16 frontend (App Router, Turbopack) with TypeScript, Tailwind CSS v4, and Recharts for data visualization
+- **apps/api/**: Hono API server running on Bun
 - **packages/db/**: Shared database layer using Drizzle ORM with PostgreSQL
 
 ### Key Technologies
 - **Runtime**: Bun (API server) + Node.js (Next.js)
-- **Frontend**: React 19 RC, Next.js 15, Tailwind CSS, Radix UI components
-- **Backend**: Hono web framework with Clerk authentication middleware
+- **Frontend**: React 19, Next.js 16, Tailwind CSS v4, Radix UI components
+- **Backend**: Hono web framework (no authentication is currently wired in; see note on `/api/protected` below)
 - **Database**: PostgreSQL with Drizzle ORM
 - **Visualization**: Recharts for charts and data presentation
 - **Build System**: Turborepo with Bun workspaces
@@ -49,8 +49,10 @@ ITStats.me is a comprehensive dashboard for analyzing Montenegrin tech companies
 - **companies**: Main company data with financial metrics
   - Links to years via `yearId` foreign key
   - Unique constraints: company name + year, PIB + year
-  - Fields: name, pib, totalIncome, profit, employeeCount, netPayCosts, averagePay, incomePerEmployee
-- **users**: Clerk authentication integration
+  - Financial fields: totalIncome, profit, employeeCount, netPayCosts, averagePay, incomePerEmployee
+  - Classification/geo fields: municipality, sector (defaults to `'Other'`), activityCode, activityName, legalStatus
+  - Identity/ingest fields: name, pib, reportId, parseStatus
+- **users**: Legacy table (with `clerkId`) retained in the schema from a previous Clerk integration; not used by the current API
 
 ### Key Relationships
 - Companies have a many-to-one relationship with years
@@ -66,21 +68,28 @@ ITStats.me is a comprehensive dashboard for analyzing Montenegrin tech companies
 - `GET /regions` - Per-municipality aggregates for a year (revenue, profit, employees, employee-weighted avg pay, revenue/employee) plus national totals
 - `GET /regions/sectors` - Sector revenue split within the top-N municipalities (stacked-bar data)
 - `GET /regions/trends` - Multi-year metric series for the top-N municipalities
+- `GET /sectors` - Per-sector aggregates for a year plus national totals
+- `GET /sectors/activities` - Activity (NACE) breakdown within a given sector
+- `GET /sectors/trends` - Multi-year metric series for the top-N sectors
+- `GET /movers` - Year-over-year movers leaderboard (biggest gainers/decliners by metric)
+- `GET /movers/cagr` - Multi-year CAGR leaderboard by metric
 - `GET /export.csv` - CSV export of the filtered company set
 - `GET /years` - Returns available years in descending order
-- `GET /api/protected` - Example protected route requiring Clerk authentication
+- `GET /api/protected` - Example route mounted under the `/api` base path; returns a static message and is **not** authenticated (left over from a removed Clerk integration)
 
-Region aggregation math (employee-weighted average pay, revenue-per-employee) lives in `apps/api/src/regions.ts` and is unit-tested in `apps/api/src/regions.test.ts`.
+Aggregation math is split into per-domain modules, each unit-tested: region math (employee-weighted average pay, revenue-per-employee) in `apps/api/src/regions.ts` (`regions.test.ts`), sector math in `apps/api/src/sectors.ts` (`sectors.test.ts`), and mover/CAGR math in `apps/api/src/movers.ts` (`movers.test.ts`).
 
 ## Frontend Components
 
 ### Pages (App Router, `apps/web/app/`)
 - **/** (`page.tsx`): Main dashboard with year selector, filters, and company table
+- **/sectors** (`sectors/page.tsx`): Sector analytics — KPI strip plus sector rank/treemap/margin/trend breakdowns and an activity (NACE) drill-down
 - **/regions** (`regions/page.tsx`): Geographic analytics — Montenegro choropleth map plus six municipality breakdowns; URL-driven `year` + `metric` (`revenue` | `companies` | `employees` | `avgPay`)
+- **/movers** (`movers/page.tsx`): Year-over-year and multi-year CAGR leaderboards of biggest gainers/decliners
 - **/company/[companyName]**: Per-company detail across years
 
 ### Core Components
-- **SiteNav.tsx**: Shared top navigation (logo + Dashboard/Regions links + theme toggle), used by the dashboard `Header` and the Regions page
+- **SiteNav.tsx**: Shared top navigation (logo + Dashboard/Sectors/Regions/Movers links + theme toggle), used by the dashboard `Header` and the Sectors/Regions/Movers pages
 - **Dashboard.tsx**: Main dashboard with year selector and company table
 - **CompanyTable.tsx**: Data table with sorting and filtering
 - **Charts.tsx**: Various chart components for data visualization
@@ -92,6 +101,14 @@ Region aggregation math (employee-weighted average pay, revenue-per-employee) li
 - **MontenegroChoropleth.tsx**: `d3-geo` + SVG choropleth (no map framework); boundary GeoJSON at `apps/web/public/montenegro-municipalities.json`
 - **RegionKpiStrip / RegionRankBars / RegionTreemap / RegionAvgPayChart / RegionBubbleChart / RegionSectorMix / RegionTrendLines**: the KPI strip and six Recharts visualizations
 - Municipality name-matching (data values → GeoJSON `shapeName`) lives in `apps/web/src/lib/regions-geo.ts` (tested in `regions-geo.test.ts`); add to its `OVERRIDES` map for spelling mismatches
+
+### Sectors Components (`apps/web/src/components/sectors/`)
+- **SectorsView.tsx**: Client orchestrator owning URL-driven year/metric state and data fetching
+- **SectorKpiStrip / SectorRankBars / SectorTreemap / SectorMarginChart / SectorTrendLines / SectorActivityPanel**: the KPI strip and Recharts visualizations (the activity panel drives the `/sectors/activities` drill-down)
+
+### Movers Components (`apps/web/src/components/movers/`)
+- **MoversView.tsx**: Client orchestrator for the year-over-year and CAGR leaderboards
+- **MoverKpiStrip / MoverLeaderboard / CagrLeaderboard**: KPI strip, the year-over-year gainer/decliner table, and the multi-year CAGR table
 
 ### UI Components (Radix-based)
 - Located in `apps/web/src/components/ui/`
@@ -109,7 +126,10 @@ Region aggregation math (employee-weighted average pay, revenue-per-employee) li
 ## Environment Setup
 
 ### Required Environment Variables
-- **packages/db/.env**: `DATABASE_URL` for PostgreSQL connection
+- **packages/db/.env**: `DATABASE_URL` — used by Drizzle tooling/seed and by the db package when run from that directory
+- **apps/api/.env**: `DATABASE_URL` — loaded by Bun from the API's working directory at runtime, so this is the connection the running API server actually uses
+
+Both files point at a hosted PostgreSQL instance (e.g. Supabase/Railway); keep them in sync if you want the API and the migration tooling to target the same database.
 
 ### Development Workflow
 1. Clone repository and run `bun install`
