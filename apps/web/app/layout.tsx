@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, IBM_Plex_Mono, Outfit } from "next/font/google";
+import { Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ThemeScript } from "@/components/ThemeScript";
 
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: '--font-sans',
-  display: 'swap',
-});
-
-const plexMono = IBM_Plex_Mono({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ['400', '500', '600'],
   variable: '--font-mono',
@@ -73,9 +67,15 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#ffffff" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
         <ThemeScript />
       </head>
-      <body className={`${outfit.variable} ${plexMono.variable} ${cormorant.variable} font-sans`}>
+      <body className={`${jetbrainsMono.variable} ${cormorant.variable} font-sans`}>
         <ThemeProvider>
           {children}
         </ThemeProvider>

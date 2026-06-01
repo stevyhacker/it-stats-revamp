@@ -10,9 +10,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-sans)', 'Outfit', 'system-ui', 'sans-serif'],
+        sans: ['Google Sans', 'system-ui', 'sans-serif'],
         display: ['var(--font-serif)', 'Cormorant Garamond', 'Georgia', 'serif'],
-        mono: ['var(--font-mono)', 'IBM Plex Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+        mono: ['var(--font-mono)', 'JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       borderRadius: {
         lg: 'var(--radius)',
