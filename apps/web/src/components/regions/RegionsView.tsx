@@ -30,12 +30,13 @@ import { RegionBubbleChart } from "./RegionBubbleChart";
 import { RegionSectorMix } from "./RegionSectorMix";
 import { RegionTrendLines } from "./RegionTrendLines";
 import { MontenegroChoropleth, type MontenegroMapFeature } from "./MontenegroChoropleth";
+import { AveragePayFootnote } from "@/components/AveragePayFootnote";
 
 const METRIC_LABEL: Record<RegionMetric, string> = {
   revenue: "Revenue",
   companies: "Companies",
   employees: "Employees",
-  avgPay: "Avg pay",
+  avgPay: "Avg pay*",
 };
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
@@ -203,6 +204,7 @@ export function RegionsView({
             </div>
           </div>
         </section>
+        <AveragePayFootnote className="mb-3" />
 
         <div className="mb-3">
           <RegionKpiStrip data={regions} />
@@ -221,13 +223,13 @@ export function RegionsView({
           <Panel title={`Market share · ${METRIC_LABEL[metric]}`}>
             <RegionTreemap rows={regions.municipalities} metric={metric} />
           </Panel>
-          <Panel title="Average pay by region">
+          <Panel title="Average pay by region*">
             <RegionAvgPayChart rows={regions.municipalities} nationalAvg={regions.national.avgPay} />
           </Panel>
         </div>
 
         <div className="mb-3 grid gap-3 xl:grid-cols-2">
-          <Panel title="Scale vs pay (bubble = revenue)">
+          <Panel title="Scale vs pay* (bubble = revenue)">
             <RegionBubbleChart rows={regions.municipalities} />
           </Panel>
           <Panel title="Sector mix in top regions">

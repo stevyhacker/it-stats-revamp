@@ -25,6 +25,7 @@ import { MoverKpiStrip } from "./MoverKpiStrip";
 import { MoverLeaderboard } from "./MoverLeaderboard";
 import { CagrLeaderboard } from "./CagrLeaderboard";
 import { MOVER_METRIC_LABEL } from "./format";
+import { AveragePayFootnote } from "@/components/AveragePayFootnote";
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -164,6 +165,7 @@ export function MoversView({
             </div>
           </div>
         </section>
+        <AveragePayFootnote className="mb-3" />
 
         <div className="mb-3">
           <MoverKpiStrip movers={movers} cagr={cagr} />

@@ -123,7 +123,7 @@ export const REGION_METRICS: { key: RegionMetric; label: string }[] = [
   { key: "revenue", label: "Revenue" },
   { key: "companies", label: "Companies" },
   { key: "employees", label: "Employees" },
-  { key: "avgPay", label: "Avg pay" },
+  { key: "avgPay", label: "Avg pay*" },
 ];
 
 export interface RegionRow {
@@ -188,7 +188,7 @@ export type SectorMetric = "revenue" | "employees" | "avgPay" | "margin";
 export const SECTOR_METRICS: { key: SectorMetric; label: string }[] = [
   { key: "revenue", label: "Revenue" },
   { key: "employees", label: "Employees" },
-  { key: "avgPay", label: "Avg pay" },
+  { key: "avgPay", label: "Avg pay*" },
   { key: "margin", label: "Margin" },
 ];
 
@@ -274,7 +274,7 @@ export const MOVER_METRICS: { key: MoverMetric; label: string }[] = [
   { key: "revenue", label: "Revenue" },
   { key: "profit", label: "Profit" },
   { key: "employees", label: "Employees" },
-  { key: "pay", label: "Avg pay" },
+  { key: "pay", label: "Avg pay*" },
 ];
 
 export interface MoverRow {

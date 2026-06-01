@@ -12,6 +12,7 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { AveragePayFootnote } from '@/components/AveragePayFootnote';
 import type { CompanySortKey, SortDirection } from '@/lib/api';
 
 interface CompanyTableProps {
@@ -119,7 +120,7 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
                 className={sortableHeaderClass}
                 onClick={() => onSort('averagePay')}
               >
-                <span className="block">Avg net salary</span>
+                <span className="block">Avg. Pay*</span>
                 {renderSortIcon('averagePay')}
               </TableHead>
               <TableHead
@@ -250,7 +251,7 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
                     </dd>
                   </div>
                   <div className="flex items-center justify-between gap-2">
-                    <dt className="text-muted-foreground">Avg net salary</dt>
+                    <dt className="text-muted-foreground">Avg. Pay*</dt>
                     <dd className="font-mono tabular-nums">{numeral(company.averagePay ?? 0).format('0,0')}€</dd>
                   </div>
                   <div className="flex items-center justify-between gap-2">
@@ -281,6 +282,8 @@ const CompanyTable: React.FC<CompanyTableProps> = ({
           })
         )}
       </div>
+
+      <AveragePayFootnote className="border-t border-border/70 px-4 py-3" />
 
       <div className="flex flex-col gap-3 border-t border-border/70 px-4 py-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <span className="font-mono">

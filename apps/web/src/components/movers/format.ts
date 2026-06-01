@@ -5,7 +5,7 @@ export const MOVER_METRIC_LABEL: Record<MoverMetric, string> = {
   revenue: "Revenue",
   profit: "Profit",
   employees: "Employees",
-  pay: "Avg pay",
+  pay: "Avg pay*",
 };
 
 export function fmtMoverValue(v: number, metric: MoverMetric): string {

@@ -8,6 +8,7 @@ import numeral from "numeral";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { AveragePayFootnote } from "@/components/AveragePayFootnote";
 import type { CompanyData } from "@/types";
 
 interface CompanyYearData {
@@ -125,7 +126,7 @@ export function CompanyPage({
     { key: "totalIncome", label: "Total Income", format: formatCurrency },
     { key: "profit", label: "Profit", format: formatCurrency },
     { key: "employeeCount", label: "Employees", format: formatNumber },
-    { key: "averagePay", label: "Avg. Pay", format: formatCurrency },
+    { key: "averagePay", label: "Avg. Pay*", format: formatCurrency },
     { key: "incomePerEmployee", label: "Income/Employee", format: formatCurrency },
   ];
 
@@ -303,6 +304,7 @@ export function CompanyPage({
                 ))}
               </TableBody>
             </Table>
+            <AveragePayFootnote className="mt-4" />
           </CardContent>
         </Card>
       </div>

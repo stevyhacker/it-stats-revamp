@@ -83,7 +83,7 @@ export const CompanyCard = ({
         <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4 font-mono text-xs text-muted-foreground">
           <span>{employeeCount ?? 0} employees</span>
           {averagePay !== null && averagePay !== undefined && (
-            <span>{numeral(averagePay).format("0a")}€ avg pay</span>
+            <span>{numeral(averagePay).format("0a")}€ avg pay*</span>
           )}
         </div>
       </CardContent>

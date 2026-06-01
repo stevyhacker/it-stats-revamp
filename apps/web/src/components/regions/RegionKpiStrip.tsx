@@ -16,7 +16,7 @@ export function RegionKpiStrip({ data }: { data: RegionsResponse }) {
     { label: "Regions covered", value: String(data.national.regionCount) },
     { label: "Top region · revenue", value: topRevenue?.municipality ?? "—" },
     { label: "Most companies", value: topCompanies?.municipality ?? "—" },
-    { label: "Highest avg pay", value: topPay?.municipality ?? "—" },
+    { label: "Highest avg pay*", value: topPay?.municipality ?? "—" },
   ];
 
   return (

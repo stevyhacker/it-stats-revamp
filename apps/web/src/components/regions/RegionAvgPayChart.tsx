@@ -39,7 +39,7 @@ export function RegionAvgPayChart({ rows, nationalAvg }: { rows: RegionRow[]; na
             tickFormatter={(v) => numeral(v).format("0,0")}
           />
           <Tooltip
-            formatter={(v: number) => [numeral(v).format("0,0") + "€", "Avg pay"]}
+            formatter={(v: number) => [numeral(v).format("0,0") + "€", "Avg pay*"]}
             contentStyle={{
               backgroundColor: "hsl(var(--popover))",
               border: "1px solid hsl(var(--border))",

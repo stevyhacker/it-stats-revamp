@@ -41,7 +41,7 @@ export function RegionBubbleChart({ rows }: { rows: RegionRow[] }) {
           <YAxis
             type="number"
             dataKey="y"
-            name="Avg pay"
+            name="Avg pay*"
             tick={{ fontSize: 10, fontFamily: "var(--font-mono)", fill: "hsl(var(--muted-foreground))" }}
             tickFormatter={(v) => numeral(v).format("0,0")}
           />
@@ -53,7 +53,7 @@ export function RegionBubbleChart({ rows }: { rows: RegionRow[] }) {
                 <div className="rounded-md border border-border bg-popover p-2 text-xs text-popover-foreground">
                   <div className="font-semibold">{payload[0].payload.name}</div>
                   <div>{payload[0].payload.x} companies</div>
-                  <div>{numeral(payload[0].payload.y).format("0,0")}€ avg pay</div>
+                  <div>{numeral(payload[0].payload.y).format("0,0")}€ avg pay*</div>
                   <div>{numeral(payload[0].payload.z).format("0,0")}€ revenue</div>
                 </div>
               ) : null

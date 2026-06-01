@@ -28,11 +28,12 @@ import { SectorTreemap } from "./SectorTreemap";
 import { SectorMarginChart } from "./SectorMarginChart";
 import { SectorTrendLines } from "./SectorTrendLines";
 import { SectorActivityPanel } from "./SectorActivityPanel";
+import { AveragePayFootnote } from "@/components/AveragePayFootnote";
 
 const METRIC_LABEL: Record<SectorMetric, string> = {
   revenue: "Revenue",
   employees: "Employees",
-  avgPay: "Avg pay",
+  avgPay: "Avg pay*",
   margin: "Profit margin",
 };
 
@@ -231,6 +232,7 @@ export function SectorsView({
             </div>
           </div>
         </section>
+        <AveragePayFootnote className="mb-3" />
 
         <div className="mb-3">
           <SectorKpiStrip data={sectors} />
